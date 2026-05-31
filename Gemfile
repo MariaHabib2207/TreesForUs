@@ -78,7 +78,13 @@ gem "sprockets-rails"
 gem 'mailjet'
 gem 'public_activity'
 gem 'kaminari'
-gem "pg"
+group :development, :test do
+  gem 'sqlite3', '~> 2.0'
+end
+
+group :production do
+  gem 'pg', '~> 1.5'
+end
 
 gem 'omniauth-google-oauth2'
 gem 'omniauth-rails_csrf_protection'

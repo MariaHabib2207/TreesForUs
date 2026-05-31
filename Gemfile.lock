@@ -473,6 +473,14 @@ GEM
       actionpack (>= 6.1)
       activesupport (>= 6.1)
       sprockets (>= 3.0.0)
+    sqlite3 (2.9.4-aarch64-linux-gnu)
+    sqlite3 (2.9.4-aarch64-linux-musl)
+    sqlite3 (2.9.4-arm-linux-gnu)
+    sqlite3 (2.9.4-arm-linux-musl)
+    sqlite3 (2.9.4-arm64-darwin)
+    sqlite3 (2.9.4-x86_64-darwin)
+    sqlite3 (2.9.4-x86_64-linux-gnu)
+    sqlite3 (2.9.4-x86_64-linux-musl)
     sshkit (1.25.0)
       base64
       logger
@@ -558,7 +566,7 @@ DEPENDENCIES
   mailjet
   omniauth-google-oauth2
   omniauth-rails_csrf_protection
-  pg
+  pg (~> 1.5)
   propshaft
   public_activity
   puma (>= 5.0)
@@ -571,6 +579,7 @@ DEPENDENCIES
   solid_cache
   solid_queue
   sprockets-rails
+  sqlite3 (~> 2.0)
   stimulus-rails
   tailwindcss-rails (~> 3.3)
   tailwindcss-ruby (~> 3.4)
