@@ -70,7 +70,7 @@ gem "tailwindcss-rails", "~> 3.3"
 gem "tailwindcss-ruby", "~> 3.4" 
 gem 'slim', '~> 3.0', '>= 3.0.6'
 
-
+gem "cssbundling-rails"
 gem "annotaterb"
 gem "activeadmin"
 gem "sassc-rails"
