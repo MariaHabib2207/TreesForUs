@@ -10,6 +10,7 @@ Rails.application.configure do
   config.eager_load = true
 
   # Full error reports are disabled.
+  
   config.consider_all_requests_local = false
 
   # Turn on fragment caching in view templates.
