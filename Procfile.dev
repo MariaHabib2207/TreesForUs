@@ -1,4 +1,2 @@
-web: env RUBY_DEBUG_OPEN=true bin/rails server
-css: yarn build:css --watch
-css: bin/rails tailwindcss:watch
-web: bin/rails server
+web: bundle exec rails db:migrate && bundle exec rails server -p ${PORT:-3000}
+css: bundle exec rails tailwindcss:watch
