@@ -1,7 +1,4 @@
 .body class="login-bg"
   .p-8
-  - if @family_tree.present?
     = render "family_tree", node: @family_tree, depth: 0
-  - else
-    p.no-tree No family data found.
-
+ 

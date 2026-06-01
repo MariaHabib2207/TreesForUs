@@ -55,7 +55,7 @@
           span.btn-add__label Child
 
         / --- INVITE ---
-        - if node_user.tree_member?
+        - if node_user.tree_member? && node_user != current_user
 
           - if node_user.invitation_sent_at.present?
             .btn-add.btn-add--invite.btn-add--dynamic.btn-add--invited
