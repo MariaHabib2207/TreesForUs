@@ -3,6 +3,9 @@ require "active_support/core_ext/integer/time"
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
+  # Secret key base for production - reads from environment variable
+  config.secret_key_base = ENV.fetch("SECRET_KEY_BASE") { raise "SECRET_KEY_BASE environment variable is not set!" }
+
   # Code is not reloaded between requests.
   config.enable_reloading = false
 
