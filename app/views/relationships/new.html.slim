@@ -183,7 +183,7 @@
 
             .shrink-0
 
-              - if profile.object.avatar.attached?
+              - if !profile.object.new_record? && profile.object.avatar.attached?
                 = image_tag profile.object.avatar,
                   class: "h-24 w-24 rounded-full object-cover border-4 border-green-100 shadow"
 
