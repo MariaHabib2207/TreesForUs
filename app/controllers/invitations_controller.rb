@@ -19,8 +19,8 @@ class InvitationsController < ApplicationController
     end
 
     raw_token = @invitee.invite!(invited_by: current_user)
-    InvitationMailer.invite(@invitee, raw_token, email).deliver_later
-
+    Rails.logger.info "Mailer delivery: #{ActionMailer::Base.delivery_method}"
+    InvitationMailer.invite(@invitee, raw_token, email).deliver_now
     respond_to do |format|
       format.turbo_stream do
         render turbo_stream: turbo_stream.replace("modal", "")
