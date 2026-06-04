@@ -1,102 +1,320 @@
+/* ============================================================
+   TREEOFUS — PREMIUM BOTANICAL THEME
+   Full stylesheet — layout, components, responsive
+   ============================================================ */
 
 /* ============================================================
-   FAMILY TREE — PREMIUM BOTANICAL THEME
+   CSS CUSTOM PROPERTIES
    ============================================================ */
 
 :root {
-  --card-w: 150px;
+  /* Tree card geometry */
+  --card-w:      150px;
   --card-radius: 22px;
 
-  --wire: rgb(201, 189, 170);
+  /* Connectors */
+  --wire:    rgb(201, 189, 170);
   --wire-px: 2px;
 
+  /* Branch spacing */
   --stem-h: 42px;
-  --arm-h: 28px;
+  --arm-h:  28px;
   --col-gap: 42px;
 
-  --bg: rgb(244, 241, 234);
+  /* Surfaces */
+  --bg:           rgb(244, 241, 234);
+  --card-bg:      rgb(255, 255, 255);
+  --card-border:  rgb(229, 221, 208);
 
-  --card-bg: rgb(255, 255, 255);
-  --card-border: rgb(229, 221, 208);
-
+  /* Shadows */
   --card-shadow:
-    0 4px 14px rgba(0,0,0,.04),
-    0 1px 3px rgba(0,0,0,.03);
-
+    0 4px 14px rgba(0, 0, 0, .04),
+    0 1px 3px  rgba(0, 0, 0, .03);
   --card-hover:
-    0 12px 32px rgba(0,0,0,.08);
+    0 12px 32px rgba(0, 0, 0, .08);
 
-  /* CHILDREN + ROOT */
-  --root-bg: rgb(62, 107, 87);
-  --root-text: rgb(255,255,255);
-  --root-sub: rgba(255,255,255,.72);
+  /* Root / child cards */
+  --root-bg:   rgb(62, 107, 87);
+  --root-text: rgb(255, 255, 255);
+  --root-sub:  rgba(255, 255, 255, .72);
 
-  /* PARTNER */
-  --partner-bg: rgb(255,255,255);
+  /* Partner cards */
+  --partner-bg:  rgb(255, 255, 255);
   --partner-bdr: rgb(229, 221, 208);
 
-  --avatar-bg: rgba(255,255,255,.88);
+  /* Avatar */
+  --avatar-bg:   rgba(255, 255, 255, .88);
   --avatar-size: 50px;
 
+  /* Typography */
   --text-name: rgb(28, 28, 28);
   --text-role: rgb(107, 114, 128);
-  --text-age: rgb(156, 163, 175);
+  --text-age:  rgb(156, 163, 175);
 
-  --accent: rgb(184, 155, 94);
+  /* Brand colours */
+  --accent:     rgb(184, 155, 94);
   --dark-green: rgb(29, 77, 58);
 }
 
 /* ============================================================
-   PAGE
+   RESET
+   ============================================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* ============================================================
+   BASE
    ============================================================ */
 
 body {
   margin: 0;
   padding: 0;
-
-  background:
-    linear-gradient(
-      180deg,
-      rgb(248, 246, 241) 0%,
-      rgb(244, 241, 234) 100%
-    );
-
-  font-family:
-    "Plus Jakarta Sans",
-    Inter,
-    ui-sans-serif,
-    system-ui,
-    sans-serif;
-
+  background: linear-gradient(
+    180deg,
+    rgb(248, 246, 241) 0%,
+    rgb(244, 241, 234) 100%
+  );
+  font-family: "Plus Jakarta Sans", Inter, ui-sans-serif, system-ui, sans-serif;
   color: var(--text-name);
 }
 
 /* ============================================================
-   BACKGROUND IMAGE
+   BACKGROUND VARIANTS
    ============================================================ */
 
 .login-bg {
+  min-height: 100vh;
+  width: 100%;
   background-image: url("/assets/background-img.png");
   background-size: cover;
-  background-position: center;
+  background-position: center center;
   background-repeat: no-repeat;
+  background-attachment: fixed;
+  overflow-x: hidden;
 }
 
 /* ============================================================
-   SCROLL CONTAINER
+   DASHBOARD PAGE WRAPPER
+   ============================================================ */
+
+.dashboard-page {
+  padding: 24px 20px 80px;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* ============================================================
+   FAMILY BAR
+   ============================================================ */
+
+.dashboard-family-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+  border-radius: 18px;
+}
+
+.family-bar-left {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.current-family-label {
+  font-size: 22px;
+  font-weight: 800;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.family-bar-right {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* Family switcher */
+.family-switcher-form {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.family-select {
+  width: 100%;
+  max-width: 260px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #1D4D3A;
+  color: #f0edff;
+  border: 1px solid #bbf7d0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+  cursor: pointer;
+  transition: all .2s ease;
+}
+
+.family-select:focus {
+  outline: none;
+  border-color: #4ade80;
+  box-shadow: 0 0 0 3px rgba(74, 222, 128, .3);
+}
+
+.family-select:hover {
+  border-color: #86efac;
+}
+
+/* Single-family badge */
+.single-family-badge {
+  padding: 8px 14px;
+  border-radius: 14px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  white-space: nowrap;
+}
+
+.badge-label {
+  display: block;
+  font-size: 12px;
+  color: #166534;
+}
+
+.badge-name {
+  font-weight: 700;
+  color: #14532d;
+}
+
+/* Create-family buttons */
+.btn-create-family,
+.btn-create-first-family {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border-radius: 12px;
+  background: #14532d;
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background .15s;
+}
+
+.btn-create-family:hover,
+.btn-create-first-family:hover {
+  background: #166534;
+}
+
+/* ============================================================
+   FAMILY HEADER BADGE  (centred pill variant)
+   ============================================================ */
+
+.family-header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.family-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #14532d, #166534);
+  color: white;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  box-shadow:
+    0 10px 25px rgba(0, 0, 0, .12),
+    inset 0 1px 0 rgba(255, 255, 255, .08);
+  animation: fadeInDown .4s ease;
+}
+
+.family-icon {
+  font-size: 22px;
+}
+
+.family-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: .4px;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+
+.empty-family-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.empty-icon {
+  font-size: 56px;
+  margin-bottom: 16px;
+}
+
+.empty-family-state h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a2e1c;
+  margin: 0 0 8px;
+}
+
+.empty-family-state p {
+  font-size: 14px;
+  color: #6b7280;
+  max-width: 320px;
+  line-height: 1.6;
+  margin: 0 0 24px;
+}
+
+/* ============================================================
+   FAMILY TREE SCROLL CONTAINER
    ============================================================ */
 
 .family-tree-scroll {
   width: 100%;
   min-height: 100vh;
-
   overflow-x: auto;
   overflow-y: visible;
-
+  -webkit-overflow-scrolling: touch;
   padding: 48px 40px 90px;
-
   position: relative;
   box-sizing: border-box;
+
+  /* Fade hint at right edge signals horizontal scroll */
+  mask-image: linear-gradient(
+    to right,
+    black calc(100% - 32px),
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    black calc(100% - 32px),
+    transparent 100%
+  );
+}
+
+/* JS can add .scrolled-end when user reaches the right edge */
+.family-tree-scroll.scrolled-end {
+  mask-image: none;
+  -webkit-mask-image: none;
 }
 
 /* ============================================================
@@ -107,6 +325,7 @@ body {
   display: flex;
   justify-content: center;
   min-width: max-content;
+  padding: 0 40px;
 }
 
 /* ============================================================
@@ -116,13 +335,10 @@ body {
 #tree-connectors {
   position: absolute;
   inset: 0;
-
   width: 100%;
   height: 100%;
-
   pointer-events: none;
   overflow: visible;
-
   z-index: 0;
 }
 
@@ -186,7 +402,7 @@ body {
 }
 
 /* ============================================================
-   CARD WRAPPER
+   CARD WRAPPER  (hover trigger zone for add buttons)
    ============================================================ */
 
 .card-wrapper {
@@ -194,7 +410,6 @@ body {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-
   padding: 0 48px 44px;
   margin: 0 -48px -44px;
 }
@@ -205,54 +420,36 @@ body {
 
 .card {
   width: var(--card-w);
-
-  background: rgba(255,255,255,.92);
-
+  background: rgba(255, 255, 255, .92);
   border: 1px solid var(--card-border);
   border-radius: var(--card-radius);
-
   box-shadow: var(--card-shadow);
-
   backdrop-filter: blur(12px);
-
   padding: 18px 12px 14px;
-
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
-
   position: relative;
   overflow: hidden;
-
+  flex-shrink: 0;
+  text-decoration: none;
   transition:
     transform .22s ease,
     box-shadow .22s ease,
     border-color .22s ease;
-
-  flex-shrink: 0;
 }
 
 .card:hover {
   transform: translateY(-4px);
-
   box-shadow: var(--card-hover);
 }
 
-/* ============================================================
-   ROOT + CHILDREN CARDS
-   ============================================================ */
-
+/* Root & child cards — green */
 .card.root,
 .card.child-card {
-  background:
-    linear-gradient(
-      145deg,
-      rgb(74, 118, 98),
-      rgb(62, 107, 87)
-    );
-
-  border: 1px solid rgba(255,255,255,.12);
+  background: linear-gradient(145deg, rgb(74, 118, 98), rgb(62, 107, 87));
+  border: 1px solid rgba(255, 255, 255, .12);
 }
 
 .card.root .card-name,
@@ -269,17 +466,13 @@ body {
 
 .card.root .avatar-initials,
 .card.child-card .avatar-initials {
-  background: rgba(255,255,255,.92);
+  background: rgba(255, 255, 255, .92);
   color: var(--dark-green);
 }
 
-/* ============================================================
-   PARTNER CARD
-   ============================================================ */
-
+/* Partner card — white */
 .card.partner-card {
-  background: rgba(255,255,255,.95);
-
+  background: rgba(255, 255, 255, .95);
   border: 1px solid var(--partner-bdr);
 }
 
@@ -290,16 +483,11 @@ body {
 .avatar {
   width: var(--avatar-size);
   height: var(--avatar-size);
-
   border-radius: 999px;
   overflow: hidden;
-
   flex-shrink: 0;
-
-  border: 3px solid rgba(255,255,255,.8);
-
-  box-shadow:
-    0 4px 10px rgba(0,0,0,.08);
+  border: 3px solid rgba(255, 255, 255, .8);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, .08);
 }
 
 .avatar-img {
@@ -311,40 +499,29 @@ body {
 .avatar-initials {
   width: 100%;
   height: 100%;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   border-radius: 999px;
-
   background: var(--avatar-bg);
-
   font-size: 14px;
   font-weight: 700;
-
   color: var(--text-role);
-
   text-transform: uppercase;
 }
 
 /* ============================================================
-   TEXT
+   CARD TEXT
    ============================================================ */
 
 .card-name {
   max-width: 100%;
-
   font-size: 14px;
   font-weight: 700;
   line-height: 1.25;
-
-  letter-spacing: -0.02em;
-
+  letter-spacing: -.02em;
   color: var(--text-name);
-
   text-align: center;
-
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -368,51 +545,34 @@ body {
 
 .tooltip {
   position: absolute;
-
   bottom: calc(100% + 12px);
   left: 50%;
-
   transform: translateX(-50%);
-
-  background: rgba(29,77,58,.96);
+  background: rgba(29, 77, 58, .96);
   color: white;
-
   padding: 10px 14px;
-
   border-radius: 12px;
-
   font-size: 11px;
   line-height: 1.45;
-
   white-space: nowrap;
-
   opacity: 0;
   visibility: hidden;
-
+  pointer-events: none;
+  z-index: 1000;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .16);
   transition:
     opacity .18s ease,
     transform .18s ease;
-
-  pointer-events: none;
-
-  z-index: 1000;
-
-  box-shadow:
-    0 12px 28px rgba(0,0,0,.16);
 }
 
 .tooltip::after {
   content: "";
-
   position: absolute;
-
   top: 100%;
   left: 50%;
-
   transform: translateX(-50%);
-
   border: 5px solid transparent;
-  border-top-color: rgba(29,77,58,.96);
+  border-top-color: rgba(29, 77, 58, .96);
 }
 
 .card:hover .tooltip {
@@ -429,39 +589,25 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-
   padding: 6px 10px;
-
-  background: rgba(255,255,255,.94);
-
-  border: 1px solid rgba(201,189,170,.6);
-
+  background: rgba(255, 255, 255, .94);
+  border: 1px solid rgba(201, 189, 170, .6);
   border-radius: 999px;
-
   color: var(--dark-green);
-
   font-size: 10px;
   font-weight: 600;
   font-family: inherit;
-
   text-decoration: none;
   white-space: nowrap;
-
   cursor: pointer;
-
-  box-shadow:
-    0 2px 8px rgba(0,0,0,.05);
-
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
   transition: all .18s ease;
 }
 
 .btn-add:hover {
-  background: rgb(248,246,241);
-
+  background: rgb(248, 246, 241);
   border-color: var(--accent);
-
   color: var(--dark-green);
-
   transform: translateY(-1px);
 }
 
@@ -470,34 +616,27 @@ body {
   line-height: 1;
 }
 
+/* Dynamic (hover-reveal) buttons */
 .btn-add--dynamic {
   position: absolute;
   opacity: 0;
   pointer-events: none;
-
+  z-index: 10;
   transition:
     opacity .18s ease,
     transform .18s ease;
-
-  z-index: 10;
 }
 
 .btn-add--spouse {
   top: 50%;
   right: 0;
-
-  transform:
-    translateY(calc(-50% - 22px))
-    scale(0.85);
+  transform: translateY(calc(-50% - 22px)) scale(.85);
 }
 
 .btn-add--child {
   bottom: 0;
   left: 50%;
-
-  transform:
-    translateX(-50%)
-    scale(0.85);
+  transform: translateX(-50%) scale(.85);
 }
 
 .card-wrapper:hover .btn-add--dynamic,
@@ -508,16 +647,46 @@ body {
 
 .card-wrapper:hover .btn-add--spouse,
 .card-wrapper:focus-within .btn-add--spouse {
-  transform:
-    translateY(calc(-50% - 22px))
-    scale(1);
+  transform: translateY(calc(-50% - 22px)) scale(1);
 }
 
 .card-wrapper:hover .btn-add--child,
 .card-wrapper:focus-within .btn-add--child {
-  transform:
-    translateX(-50%)
-    scale(1);
+  transform: translateX(-50%) scale(1);
+}
+
+/* Invite button */
+.btn-add--invite {
+  --btn-color: #6366f1;
+  border-color: var(--btn-color);
+  color: var(--btn-color);
+}
+
+.btn-add--invite:hover {
+  background: var(--btn-color);
+  color: #fff;
+}
+
+/* Invited (static, no pointer) */
+.btn-add--invited {
+  --btn-color: #9ca3af;
+  border-color: var(--btn-color);
+  border-style: solid;
+  color: var(--btn-color);
+  cursor: default;
+  pointer-events: none;
+}
+
+/* Delete button */
+.btn-add--delete {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #dc2626;
+}
+
+.btn-add--delete:hover {
+  background: #dc2626;
+  color: white;
 }
 
 /* ============================================================
@@ -528,7 +697,6 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-
   padding-top: var(--stem-h);
 }
 
@@ -536,9 +704,7 @@ body {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-
   gap: var(--col-gap);
-
   position: relative;
 }
 
@@ -546,294 +712,41 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-
   min-width: var(--card-w);
-
   padding-top: var(--arm-h);
-
   position: relative;
 }
 
 /* ============================================================
-   CSS CONNECTORS
+   CSS CONNECTOR LINES
    ============================================================ */
 
+/* Vertical arm from horizontal bar down to each child */
 .child-column::before {
   content: "";
-
   position: absolute;
-
   top: 0;
   left: 50%;
-
   width: 2px;
   height: var(--arm-h);
-
   background: var(--wire);
-
   transform: translateX(-50%);
 }
 
+/* Horizontal bar across all children */
 .children-row::before {
   content: "";
-
   position: absolute;
-
   top: 0;
   left: calc(var(--card-w) / 2);
-
   width: calc(100% - var(--card-w));
   height: 2px;
-
   background: var(--wire);
 }
 
-
-
 /* ============================================================
-   RESPONSIVE
+   INVITE ROW (inside card)
    ============================================================ */
-
-@media (max-width: 900px) {
-  :root {
-    --card-w: 132px;
-    --col-gap: 24px;
-  }
-}
-
-@media (max-width: 640px) {
-  :root {
-    --card-w: 116px;
-
-    --col-gap: 18px;
-
-    --stem-h: 28px;
-    --arm-h: 18px;
-
-    --avatar-size: 40px;
-  }
-
-  .card {
-    padding: 10px 8px;
-    border-radius: 12px;
-  }
-
-  .card-name {
-    font-size: 11px;
-  }
-
-  .card-role,
-  .card-age {
-    font-size: 9px;
-  }
-
-  /* tighten wrapper offsets on mobile */
-  .card-wrapper {
-    padding: 0 36px 36px;
-    margin: 0 -36px -36px;
-  }
-}
-/* ─────────────────────────────────────────
-   FAMILY HEADER
-───────────────────────────────────────── */
-
-.family-header {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 24px;
-}
-
-.family-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-
-  padding: 14px 24px;
-
-  background: linear-gradient(
-    135deg,
-    #14532d,
-    #166534
-  );
-
-  color: white;
-
-  border-radius: 999px;
-
-  box-shadow:
-    0 10px 25px rgba(0,0,0,0.12),
-    inset 0 1px 0 rgba(255,255,255,0.08);
-
-  border: 1px solid rgba(255,255,255,0.08);
-
-  animation: fadeInDown 0.4s ease;
-}
-
-.family-icon {
-  font-size: 22px;
-}
-
-.family-title {
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: 0.4px;
-}
-
-@keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.dashboard-family-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 28px;
-  margin-right: 20px;
-
-  border-radius: 18px;
-
-}
-
-.family-title {
-  font-size: 28px;
-  font-weight: 700;
-  color: #111827;
-}
-
-.family-subtitle {
-  margin-top: 4px;
-  color: #6b7280;
-}
-
-.family-bar-right {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.family-select {
-  min-width: 220px;
-  padding: 12px 16px;
-  border-radius: 12px;
-  border: 1px solid #d1d5db;
-  background: #1D4D3A;
-}
-
-.btn-create-family,
-.btn-create-first-family {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 18px;
-  border-radius: 12px;
-  background: #14532d;
-  color: white;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.btn-create-family:hover,
-.btn-create-first-family:hover {
-  background: #166534;
-}
-
-.single-family-badge {
-  padding: 10px 16px;
-  border-radius: 14px;
-  background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-}
-
-.badge-label {
-  display: block;
-  font-size: 12px;
-  color: #166534;
-}
-
-.badge-name {
-  font-weight: 700;
-  color: #14532d;
-}
-
-.current-family-header {
-  margin-bottom: 24px;
-}
-
-.current-family-header h1 {
-  font-size: 34px;
-  font-weight: 800;
-  color: #111827;
-}
-
-.empty-family-state {
-  text-align: center;
-  padding: 80px 20px;
-}
-
-.empty-icon {
-  font-size: 64px;
-  margin-bottom: 20px;
-}
-
-.family-switcher-form {
-  display: flex;
-  align-items: center;
-}
-
-.family-select {
-  width: 100%;
-  max-width: 260px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  background: #1D4D3A;
-  color: #f0edff; 
-  border: 1px solid #bbf7d0;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.family-select:focus {
-  outline: none;
-  border-color: #4ade80; /* green-400 */
-  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.3);
-}
-
-.family-select:hover {
-  border-color: #86efac;
-}
-.login-bg {
-  min-height: 100vh;
-  width: 100%;
-  background-image: url("/assets/background-img.png");
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-
-  overflow-x: hidden;
-}
-
-.primary-btn 
-  {
-    background-color: #1D4D3A;
-    border-color: #1D4D3A;
-    color: #fff;  
-  }
-.primary-btn:hover {
-  background-color: #16392b;
-  border-color: #1D4D3A;
-  color: #fff;  
-}
-
 
 .card-invite-row {
   margin-top: 8px;
@@ -847,23 +760,23 @@ body {
   gap: 5px;
   padding: 4px 12px;
   border-radius: 20px;
-  border: 1.5px dashed var(--color-accent, #4f46e5);
+  border: 1.5px dashed var(--accent);
   background: transparent;
-  color: var(--color-accent, #4f46e5);
-  font-size: 0.7rem;
+  color: var(--dark-green);
+  font-size: .7rem;
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
-  transition: background 0.15s, color 0.15s;
+  transition: background .15s, color .15s;
+}
 
-  &:hover {
-    background: var(--color-accent, #4f46e5);
-    color: #fff;
-  }
+.btn-invite:hover {
+  background: var(--accent);
+  color: #fff;
 }
 
 .badge-invited {
-  font-size: 0.68rem;
+  font-size: .68rem;
   color: #6b7280;
   background: #f3f4f6;
   padding: 3px 10px;
@@ -871,52 +784,26 @@ body {
   border: 1px solid #e5e7eb;
 }
 
+/* ============================================================
+   PRIMARY BUTTON
+   ============================================================ */
 
-.invitation-accept-page {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background: #f9fafb;
+.primary-btn {
+  background-color: #1D4D3A;
+  border-color: #1D4D3A;
+  color: #fff;
 }
 
-.invitation-box {
-  background: #fff;
-  border-radius: 16px;
-  padding: 40px;
-  width: 100%;
-  max-width: 420px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-  text-align: center;
-
-  h1 { font-size: 1.5rem; margin: 16px 0 4px; }
-  .subtitle { color: #6b7280; margin-bottom: 28px; }
-
-  .field { text-align: left; margin-bottom: 16px; }
-  .btn--full { width: 100%; margin-top: 8px; }
+.primary-btn:hover {
+  background-color: #16392b;
+  border-color: #1D4D3A;
+  color: #fff;
 }
 
+/* ============================================================
+   ACTIVITY FEED
+   ============================================================ */
 
-.btn-add--invite {
-  --btn-color: #6366f1;    
-  border-color: var(--btn-color);
-  color: var(--btn-color);
-
-  &:hover {
-    background: var(--btn-color);
-    color: #fff;
-  }
-}
-
-.btn-add--invited {
-  --btn-color: #9ca3af;     
-  border-color: var(--btn-color);
-  border-style: solid;
-  color: var(--btn-color);
-  cursor: default;
-  pointer-events: none;
-}
-/* Activity Feed — matches botanical theme */
 .feed-wrap {
   background: rgb(244, 241, 234);
   padding: 24px;
@@ -950,19 +837,24 @@ body {
 }
 
 .stat-card {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, .8);
   border: 1px solid rgb(229, 221, 208);
   border-radius: 12px;
   padding: 12px 14px;
 }
 
-.stat-num { font-size: 22px; font-weight: 700; color: #1D4D3A; }
-.stat-num.green { color: #166534; }
-.stat-num.amber { color: #92400e; }
-.stat-num.blue  { color: #1e40af; }
-.stat-label { font-size: 11px; color: #6b7280; margin-top: 2px; }
+.stat-num        { font-size: 22px; font-weight: 700; color: #1D4D3A; }
+.stat-num.green  { color: #166534; }
+.stat-num.amber  { color: #92400e; }
+.stat-num.blue   { color: #1e40af; }
+.stat-label      { font-size: 11px; color: #6b7280; margin-top: 2px; }
 
-.filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+.filter-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
 
 .filter-btn {
   padding: 5px 14px;
@@ -984,7 +876,7 @@ body {
 }
 
 .feed-item {
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, .92);
   border: 1px solid rgb(229, 221, 208);
   border-radius: 16px;
   padding: 14px 16px;
@@ -997,40 +889,49 @@ body {
 
 .feed-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.07);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .07);
 }
 
 .avatar-circle {
-  width: 38px; height: 38px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 700; flex-shrink: 0;
-  border: 2px solid rgba(255,255,255,0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+  border: 2px solid rgba(255, 255, 255, .8);
 }
 
-.avatar-green { background: linear-gradient(145deg, rgb(74,118,98), rgb(62,107,87)); color: #fff; }
-.avatar-cream { background: rgb(248,246,241); color: #1D4D3A; }
+.avatar-green { background: linear-gradient(145deg, rgb(74, 118, 98), rgb(62, 107, 87)); color: #fff; }
+.avatar-cream { background: rgb(248, 246, 241); color: #1D4D3A; }
 .avatar-amber { background: #fef3c7; color: #92400e; }
 .avatar-rose  { background: #fce7f3; color: #9d174d; }
 
-.item-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.item-top    { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .item-user   { font-size: 13px; font-weight: 700; color: #111827; }
 .item-action { font-size: 13px; color: #4b5563; }
 .item-target { font-size: 13px; font-weight: 600; color: #1D4D3A; }
 .item-time   { font-size: 11px; color: #9ca3af; margin-left: auto; white-space: nowrap; }
 .item-desc   { font-size: 12px; color: #6b7280; margin-top: 4px; line-height: 1.5; }
 
-.icon-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.dot-green  { background: #22c55e; }
-.dot-amber  { background: #f59e0b; }
-.dot-red    { background: #ef4444; }
-.dot-blue   { background: #3b82f6; }
-.dot-purple { background: #8b5cf6; }
+.icon-dot        { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.dot-green       { background: #22c55e; }
+.dot-amber       { background: #f59e0b; }
+.dot-red         { background: #ef4444; }
+.dot-blue        { background: #3b82f6; }
+.dot-purple      { background: #8b5cf6; }
 
 .item-badge {
-  display: inline-flex; align-items: center;
-  padding: 2px 9px; border-radius: 999px;
-  font-size: 11px; font-weight: 600; margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 6px;
 }
 
 .badge-created { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
@@ -1039,13 +940,168 @@ body {
 .badge-login   { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
 .badge-comment { background: #f5f3ff; color: #5b21b6; border: 1px solid #ddd6fe; }
 
-.btn-add--delete {
-  background: var(--color-rose, #fef2f2);
-  color: var(--color-red, #dc2626);
-  border-color: var(--color-red, #dc2626);
+/* ============================================================
+   INVITATION ACCEPT PAGE
+   ============================================================ */
 
-  &:hover {
-    background: var(--color-red, #dc2626);
-    color: white;
+.invitation-accept-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #f9fafb;
+}
+
+.invitation-box {
+  background: #fff;
+  border-radius: 16px;
+  padding: 40px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, .08);
+  text-align: center;
+}
+
+.invitation-box h1      { font-size: 1.5rem; margin: 16px 0 4px; }
+.invitation-box .subtitle { color: #6b7280; margin-bottom: 28px; }
+.invitation-box .field  { text-align: left; margin-bottom: 16px; }
+.invitation-box .btn--full { width: 100%; margin-top: 8px; }
+
+/* ============================================================
+   RESPONSIVE BREAKPOINTS
+   ============================================================ */
+
+/* ── 900 px — slightly narrower cards ── */
+@media (max-width: 900px) {
+  :root {
+    --card-w:  132px;
+    --col-gap: 24px;
   }
 }
+
+/* ── 640 px — compact cards, tighter branches ── */
+@media (max-width: 640px) {
+  :root {
+    --card-w:      116px;
+    --col-gap:     18px;
+    --stem-h:      28px;
+    --arm-h:       18px;
+    --avatar-size: 40px;
+  }
+
+  .dashboard-page {
+    padding: 16px 12px 80px;
+  }
+
+  .card {
+    padding: 10px 8px;
+    border-radius: 12px;
+  }
+
+  .card-name { font-size: 11px; }
+
+  .card-role,
+  .card-age  { font-size: 9px; }
+
+  .card-wrapper {
+    padding: 0 36px 36px;
+    margin: 0 -36px -36px;
+  }
+
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .family-tree-scroll {
+    padding: 32px 0 60px;
+  }
+}
+
+/* ── 480 px — phone-sized cards, always-visible add buttons ── */
+@media (max-width: 480px) {
+  :root {
+    --card-w:      108px;
+    --col-gap:     14px;
+    --stem-h:      24px;
+    --arm-h:       16px;
+    --avatar-size: 36px;
+    --card-radius: 14px;
+  }
+
+  .card {
+    padding: 8px 6px 10px;
+    gap: 4px;
+  }
+
+  .card-name { font-size: 10px; }
+
+  .card-role,
+  .card-age  { font-size: 9px; }
+
+  .card-wrapper {
+    padding: 0 28px 32px;
+    margin: 0 -28px -32px;
+  }
+
+  .couple-heart { font-size: 10px; }
+  .couple-line  { width: 14px; }
+
+  /* On touch screens hover doesn't fire — make add buttons always visible */
+  .btn-add--dynamic {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .btn-add--spouse {
+    transform: translateY(calc(-50% - 22px)) scale(1);
+  }
+
+  .btn-add--child {
+    transform: translateX(-50%) scale(1);
+  }
+
+  /* Family bar stacks vertically */
+  .dashboard-family-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .family-bar-right {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .family-select,
+  .family-switcher-form {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .btn-create-family {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .single-family-badge {
+    width: 100%;
+    text-align: center;
+  }
+
+  .empty-family-state {
+    padding: 40px 16px;
+  }
+
+  .empty-icon { font-size: 44px; }
+
+  .empty-family-state h2 { font-size: 19px; }
+}
+
+/* ── 360 px — micro phones ── */
+@media (max-width: 360px) {
+  .btn-create-family,
+  .btn-create-first-family {
+    font-size: 13px;
+    padding: 10px 14px;
+  }
+}
+

@@ -5,6 +5,9 @@
 .dashboard-family-bar
 
   .family-bar-left
+    - if @active_family.present?
+      .current-family-label = @active_family.name
+
   .family-bar-right
 
     - if current_user.families.any?
@@ -38,10 +41,12 @@
 - if @active_family.present?
 
   - if @family_tree.present?
-    = render "family_tree_node",
-        node: @family_tree,
-        depth: 0,
-        family: @active_family
+    .family-tree-scroll
+      .family-tree
+        = render "family_tree_node",
+            node: @family_tree,
+            depth: 0,
+            family: @active_family
 
   - else
     .empty-family-state
