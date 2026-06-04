@@ -56,7 +56,7 @@ Rails.application.configure do
   # Mailer settings
   config.action_mailer.perform_deliveries = true
   config.action_mailer.raise_delivery_errors = true
- 
+  config.action_mailer.default_options = { from: "onboarding@resend.dev" }
   config.action_mailer.default_url_options = { host: "tree-of-us.up.railway.app", protocol: "https" }
   config.action_mailer.delivery_method = :resend
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
