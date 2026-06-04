@@ -56,18 +56,9 @@ Rails.application.configure do
   # Mailer settings
   config.action_mailer.perform_deliveries = true
   config.action_mailer.raise_delivery_errors = true
+ 
   config.action_mailer.default_url_options = { host: "tree-of-us.up.railway.app", protocol: "https" }
-  config.action_mailer.delivery_method = :mailjet
-  config.action_mailer.smtp_settings = {
-    address:              "in-v3.mailjet.com",
-    port:                 465,
-    domain:               "tree-of-us.up.railway.app",
-    user_name:            ENV["MAILJET_API_KEY"],
-    password:             ENV["MAILJET_SECRET_KEY"],
-    authentication:       :plain,
-    enable_starttls_auto: true
-  }
-
+  config.action_mailer.delivery_method = :resend
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
   config.i18n.fallbacks = true
