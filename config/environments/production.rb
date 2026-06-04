@@ -53,13 +53,10 @@ Rails.application.configure do
   config.active_job.queue_adapter = :inline
   config.solid_queue.connects_to = { database: { writing: :queue } }
 
-  # Ignore bad email addresses and do not raise email delivery errors.
-  config.action_mailer.raise_delivery_errors = false
-
-  # Set host to be used by links generated in mailer templates.
+  # Mailer settings
+  config.action_mailer.perform_deliveries = true
+  config.action_mailer.raise_delivery_errors = true
   config.action_mailer.default_url_options = { host: "tree-of-us.up.railway.app", protocol: "https" }
-
-  # Mailjet SMTP settings
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
     address:              "in-v3.mailjet.com",
