@@ -1,11 +1,10 @@
 class UserProfilesController < ApplicationController
   def index
-    @user = current_user
     redirect_to dashboard_index_path
   end
 
   def show
-    @user = current_user
+    @user = User.find(params[:id])
     @user_profile = @user.user_profile || @user.create_user_profile
   end
 
@@ -13,17 +12,17 @@ class UserProfilesController < ApplicationController
   end
 
   def edit
-    @user = current_user
     @user_profile = @user.user_profile 
   end
 
   def update
-    @user_profile = current_user.user_profile
+    @user = User.find(params[:id])
+    @user_profile = @user.user_profile || @user.create_user_profile
     if @user_profile.update(user_profile_params)
        if params[:user_profile][:avatar].present?
         @user_profile.avatar.attach(params[:user_profile][:avatar])
       end
-      redirect_to user_profile_path(current_user)
+      redirect_to dashboard_index_path
     else
       render :new
     end

@@ -36,11 +36,12 @@ Rails.application.configure do
   config.action_mailer.perform_caching = false
 
   # Mailer settings
-  config.action_mailer.delivery_method = :resend
+  config.action_mailer.delivery_method = :smtp
   config.action_mailer.perform_deliveries = true
   config.action_mailer.raise_delivery_errors = true
   ## CHANGE TO LOCAL HOST FOR TESTING
-  config.action_mailer.default_url_options = { host: "tree-of-us.up.railway.app", protocol: "https" }
+  config.action_mailer.default_url_options = { host: "localhost", port: "3000" }
+  
 
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
