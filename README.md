@@ -1,8 +1,12 @@
 # 🌳 TreesForUs
 
 A **Family Hierarchy Management System** built with Ruby on Rails. TreesForUs allows families to map, manage, and visualize their family trees — tracking members, relationships, generational hierarchies, and access roles all in one place.
-
 ---
+(https://docs.google.com/document/d/1FRlTcXSPeLLuZU8SQGo2VLqj871elEDubcBH2bjOLlk/edit?tab=t.0)
+
+<img width="1678" height="889" alt="Screenshot 2026-06-05 at 8 57 27 AM" src="https://github.com/user-attachments/assets/78c503f8-1e5e-4d17-819a-9c7a9e7a36e5" />
+<img width="1449" height="740" alt="Screenshot 2026-06-05 at 8 58 13 AM" src="https://github.com/user-attachments/assets/79afba43-18ef-4103-be9b-fee5f8c9b30e" />
+
 
 ## Table of Contents
 
