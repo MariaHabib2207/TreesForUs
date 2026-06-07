@@ -4,39 +4,36 @@ html
     = csrf_meta_tags
     = csp_meta_tag
 
-  body.bg-gray-100.min-h-screen.flex.items-center.justify-center.login-bg
+  body class="bg-gray-100 min-h-screen flex items-center justify-center login-bg"
 
-    .w-full.max-w-md.bg-white.rounded-2xl.shadow-xl.p-10
+    div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 sm:p-10 mx-4 my-8"
 
       - if flash[:notice]
-        p.flash-message.bg-green-100.border-l-4.border-green-500.text-green-700.p-4.rounded.mb-4
+        p class="flash-message bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded mb-4"
           = flash[:notice]
 
       - if flash[:alert]
-        p.flash-message.bg-red-100.border-l-4.border-red-500.text-red-700.p-4.rounded.mb-4
+        p class="flash-message bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded mb-4"
           = flash[:alert]
 
-      .flex.flex-col.items-center.justify-center.text-center
+      div class="flex flex-col items-center justify-center text-center mb-6"
 
         = image_tag "logo.png", class: "w-20 h-20 mb-5"
 
-        h1.text-3xl.font-bold.text-green-900.mb-2
-          | Trees For Us
+        h1 class="text-3xl font-bold text-green-900 mb-2" Trees For Us
 
-        p.text-green-900.mb-2
-          | Discover. Connect. Belong.
+        p class="text-green-900 mb-2" Discover. Connect. Belong.
 
-        p.text-gray-900.text-sm.mb-6
+        p class="text-gray-900 text-sm"
           | Visualize your family. Explore your roots.
           br
           | Build your legacy for generations.
 
       = form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f|
 
-        .space-y-4
+        div class="space-y-4"
 
           / BASIC INFO
-
           = f.text_field :first_name,
             required: true,
             placeholder: "First Name",
@@ -63,7 +60,6 @@ html
             class: "w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
 
           / PROFILE INFO
-
           = f.fields_for :user_profile_attributes do |p|
 
             = p.date_field :birth_date,
@@ -76,7 +72,6 @@ html
               class: "w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
 
           / IDENTIFICATION
-
           = f.select :identification_type,
             options_for_select(User.identification_type_options),
             { prompt: "Select Identification Type" },
@@ -88,16 +83,13 @@ html
             class: "w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
 
           / FAMILY SECTION
-          / FAMILY SECTION
-
           = select_tag :family_id,
             options_from_collection_for_select(Family.all, :id, :name),
             prompt: "Select Existing Family",
             class: "w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500",
             id: "family_select"
 
-          .text-center.text-gray-500.font-semibold
-            | OR
+          div class="text-center text-gray-500 font-semibold" OR
 
           = text_field_tag :new_family_name,
             nil,
@@ -110,17 +102,22 @@ html
             prompt: "Select Membership Type",
             class: "w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500",
             required: true
+
           - if @minimum_password_length
-            p.text-xs.text-gray-500.text-center
+            p class="text-xs text-gray-500 text-center"
               = "#{@minimum_password_length} characters minimum"
 
+          / REMEMBER ME
+          label class="flex items-center gap-3 cursor-pointer select-none"
+            = f.check_box :remember_me,
+              class: "w-4 h-4 rounded border-gray-300 text-green-700 focus:ring-green-500 focus:ring-offset-0 accent-green-700"
+            span class="text-sm text-gray-600" Keep me signed in
+
           = f.submit "Create Account",
-            class: "w-full bg-green-900 hover:bg-green-800 text-white py-3 rounded-lg transition duration-300"
+            class: "w-full bg-green-900 hover:bg-green-800 text-white py-3 rounded-lg transition duration-300 cursor-pointer"
 
-          .text-center.mt-4
-            span.text-sm.text-gray-600
-              | Already have an account?
-
+          div class="text-center mt-2"
+            span class="text-sm text-gray-600" Already have an account?
             = link_to " Sign in",
               new_session_path(resource_name),
               class: "text-sm text-green-700 font-semibold hover:underline ml-1"
@@ -140,19 +137,13 @@ javascript:
     const newFamilyInput = document.getElementById("new_family_input");
 
     if (familySelect && newFamilyInput) {
-
       familySelect.addEventListener("change", function () {
-        if (this.value !== "") {
-          newFamilyInput.value = "";
-        }
+        if (this.value !== "") newFamilyInput.value = "";
       });
 
       newFamilyInput.addEventListener("input", function () {
-        if (this.value.trim() !== "") {
-          familySelect.selectedIndex = 0;
-        }
+        if (this.value.trim() !== "") familySelect.selectedIndex = 0;
       });
-
     }
 
   });

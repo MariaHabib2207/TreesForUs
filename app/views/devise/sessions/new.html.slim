@@ -37,12 +37,19 @@ html
                   = f.password_field :password,
                     placeholder: "Password",
                     class: "w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  div class="text-right"
+
+                  / REMEMBER ME + FORGOT PASSWORD
+                  div class="flex items-center justify-between"
+                    label class="flex items-center gap-2 cursor-pointer select-none"
+                      = f.check_box :remember_me,
+                        class: "w-4 h-4 rounded border-gray-300 accent-green-700 focus:ring-green-500 focus:ring-offset-0"
+                      span class="text-sm text-gray-600" Keep me signed in
                     = link_to "Forgot password?",
                       new_password_path(resource_name),
                       class: "text-sm text-green-700 hover:underline"
+
                   = f.submit "Sign in",
-                    class: "w-full bg-green-900 hover:bg-green-800 text-white py-3 rounded-lg transition"
+                    class: "w-full bg-green-900 hover:bg-green-800 text-white py-3 rounded-lg transition cursor-pointer"
 
               div class="relative flex items-center my-4"
                 div class="flex-grow border-t border-gray-200"
@@ -58,7 +65,7 @@ html
                   alt: "Google logo"
                 | Sign in with Google
 
-              = form_tag user_google_oauth2_omniauth_authorize_path, method: :post, id: "google-auth-form" do
+              = form_tag user_google_oauth2_omniauth_authorize_path, method: :post, id: "google-auth-form"
 
               div class="text-center mt-4"
                 span class="text-sm text-gray-600"
