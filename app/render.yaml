@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: family-tree-app
+    runtime: ruby
+    plan: free
+
+    buildCommand: |
+      bundle install
+      bundle exec rails db:migrate
+      bundle exec rails db:seed
+
+    startCommand: bundle exec puma -C config/puma.rb
+
+    envVars:
+      - key: RAILS_ENV
+        value: production
