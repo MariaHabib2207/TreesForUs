@@ -6,33 +6,32 @@
 - partners = node[:partners] || []
 - active_family = params[:family_id]
 
-.tree-node data-depth=depth data-user-id=node_user.id
+div class="tree-node" data-depth=depth data-user-id=node_user.id
 
-  .member-and-children
-    .couple-row
+  div class="member-and-children"
+    div class="couple-row"
 
-      .card-wrapper.js-card-hover
+      div class="card-wrapper js-card-hover"
 
         = link_to user_profile_path(node_user.id), class: "card #{"root" if depth == 0}", data: { turbo_frame: "modal" } do
 
-          .avatar
+          div class="avatar"
             - if profile&.avatar&.attached?
               = image_tag url_for(profile.avatar), class: "avatar-img"
             - else
-              .avatar-initials
+              div class="avatar-initials"
                 = "#{node_user&.first_name&.first}#{node_user&.last_name&.first}"
 
-          .card-name
+          div class="card-name"
             = "#{node_user.first_name} #{node_user.last_name}"
 
-          .card-role
-            = "Member"
+          div class="card-role" Member
 
           - if profile&.birth_date
-            .card-age
+            div class="card-age"
               = "Age #{((Date.today - profile.birth_date) / 365.25).floor}"
 
-          .tooltip
+          div class="tooltip"
             strong
               = "#{node_user.first_name} #{node_user.last_name}"
             div
@@ -42,96 +41,80 @@
             class: "btn-add btn-add--spouse btn-add--dynamic",
             title: "Add spouse / partner",
             data: { turbo_frame: "modal" } do
-
-          span.btn-add__icon +
-          span.btn-add__label Spouse
+          span class="btn-add__icon" +
+          span class="btn-add__label" Spouse
 
         = link_to new_relationship_path(user_id: node_user.id, family_id: params[:family_id], type: "child"),
             class: "btn-add btn-add--child btn-add--dynamic",
             title: "Add child",
             data: { turbo_frame: "modal" } do
-
-          span.btn-add__icon +
-          span.btn-add__label Child
+          span class="btn-add__icon" +
+          span class="btn-add__label" Child
 
         / --- INVITE ---
         - if node_user.tree_member? && node_user != current_user
-
           - if node_user.invitation_sent_at.present?
-            .btn-add.btn-add--invite.btn-add--dynamic.btn-add--invited
-              span.btn-add__icon ✉
-              span.btn-add__label Invited
-
+            div class="btn-add btn-add--invite btn-add--dynamic btn-add--invited"
+              span class="btn-add__icon" ✉
+              span class="btn-add__label" Invited
           - else
             = link_to new_user_invitation_path(user_id: node_user.id),
                 class: "btn-add btn-add--invite btn-add--dynamic",
                 title: "Invite to app",
                 data: { turbo_frame: "modal" } do
-
-              span.btn-add__icon ✉
-              span.btn-add__label Invite
-
- 
+              span class="btn-add__icon" ✉
+              span class="btn-add__label" Invite
 
       - partners.each do |partner|
-
         - p_profile = partner.user_profile
 
-        .couple-connector
-          .couple-line
-          .couple-heart ♥
+        div class="couple-connector"
+          div class="couple-line"
+          div class="couple-heart" ♥
 
         = link_to user_profile_path(partner), class: "card partner-card", id: "user_card_#{partner.id}", data: { turbo_frame: "modal" } do
 
-          .avatar
+          div class="avatar"
             - if p_profile&.avatar&.attached?
               = image_tag url_for(p_profile.avatar), class: "avatar-img"
             - else
-              .avatar-initials
+              div class="avatar-initials"
                 = "#{partner&.first_name&.first}#{partner&.last_name&.first}"
 
-          .card-name
+          div class="card-name"
             = "#{partner.first_name} #{partner.last_name}"
 
-          .card-role
-            = "Partner"
+          div class="card-role" Partner
 
           - if p_profile&.birth_date
-            .card-age
+            div class="card-age"
               = "Age #{((Date.today - p_profile.birth_date) / 365.25).floor}"
 
-          .tooltip
+          div class="tooltip"
             strong
               = "#{partner.first_name} #{partner.last_name}"
             div
               = p_profile&.occupation || "—"
 
-        / --- INVITE ---
+        / --- PARTNER INVITE ---
         - if partner.tree_member?
-
           - if partner.invitation_sent_at.present?
-            .btn-add.btn-add--invite.btn-add--dynamic.btn-add--invited
-              span.btn-add__icon ✉
-              span.btn-add__label Invited
-
+            div class="btn-add btn-add--invite btn-add--dynamic btn-add--invited"
+              span class="btn-add__icon" ✉
+              span class="btn-add__label" Invited
           - else
             = link_to new_user_invitation_path(user_id: partner.id),
                 class: "btn-add btn-add--invite btn-add--dynamic",
                 title: "Invite to app",
                 data: { turbo_frame: "modal" } do
-
-              span.btn-add__icon ✉
-              span.btn-add__label Invite
-
+              span class="btn-add__icon" ✉
+              span class="btn-add__label" Invite
 
     - if children.any?
-
-      .children-branch
-        .children-row
-
+      div class="children-branch"
+        div class="children-row"
           - children.each do |child_node|
-
-            .child-column
+            div class="child-column"
               = render "family_tree_node",
                   node: child_node,
                   depth: depth + 1,

@@ -285,6 +285,14 @@ body {
 }
 
 /* ============================================================
+   SCROLL HINT STRIP  (mobile-only, above tree)
+   ============================================================ */
+
+.tree-scroll-hint {
+  display: none;
+}
+
+/* ============================================================
    FAMILY TREE SCROLL CONTAINER
    ============================================================ */
 
@@ -294,9 +302,12 @@ body {
   overflow-x: auto;
   overflow-y: visible;
   -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
   padding: 48px 40px 90px;
   position: relative;
   box-sizing: border-box;
+  /* Pinch-to-zoom on mobile */
+  touch-action: pan-x pan-y;
 
   /* Fade hint at right edge signals horizontal scroll */
   mask-image: linear-gradient(
@@ -579,6 +590,13 @@ body {
   opacity: 1;
   visibility: visible;
   transform: translateX(-50%) translateY(-2px);
+}
+
+/* Disable tooltip on touch (it flickers on tap) */
+@media (hover: none) {
+  .tooltip {
+    display: none;
+  }
 }
 
 /* ============================================================
@@ -1015,6 +1033,35 @@ body {
   .family-tree-scroll {
     padding: 32px 0 60px;
   }
+
+  /* Feed header stacks on small screens */
+  .feed-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  /* Feed items: tighten up */
+  .feed-item {
+    padding: 12px 12px;
+    gap: 10px;
+  }
+
+  .item-time {
+    margin-left: 0;
+    display: block;
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  /* Family badge shrinks */
+  .family-badge {
+    padding: 10px 16px;
+  }
+
+  .family-title {
+    font-size: 15px;
+  }
 }
 
 /* ── 480 px — phone-sized cards, always-visible add buttons ── */
@@ -1060,6 +1107,20 @@ body {
     transform: translateX(-50%) scale(1);
   }
 
+  /* Shrink add button labels on very small cards */
+  .btn-add__label {
+    display: none;
+  }
+
+  .btn-add {
+    padding: 5px 7px;
+    font-size: 11px;
+  }
+
+  .btn-add__icon {
+    font-size: 12px;
+  }
+
   /* Family bar stacks vertically */
   .dashboard-family-bar {
     flex-direction: column;
@@ -1094,14 +1155,82 @@ body {
   .empty-icon { font-size: 44px; }
 
   .empty-family-state h2 { font-size: 19px; }
+
+  /* Scroll hint strip — show on mobile */
+  .tree-scroll-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 12px;
+    font-size: 11px;
+    color: #9ca3af;
+    font-weight: 500;
+  }
+
+  .tree-scroll-hint svg {
+    width: 14px;
+    height: 14px;
+    opacity: .6;
+  }
+
+  /* Stats row: 2-col on phone */
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Invitation box: tighter padding */
+  .invitation-box {
+    padding: 28px 20px;
+  }
 }
 
 /* ── 360 px — micro phones ── */
 @media (max-width: 360px) {
+  :root {
+    --card-w:      96px;
+    --col-gap:     10px;
+    --avatar-size: 32px;
+  }
+
   .btn-create-family,
   .btn-create-first-family {
     font-size: 13px;
     padding: 10px 14px;
   }
+
+  .current-family-label {
+    font-size: 18px;
+  }
+
+  .card-name { font-size: 9px; }
 }
 
+/* ── Touch devices: disable hover-only interactions ── */
+@media (hover: none) and (pointer: coarse) {
+  /* Always show add buttons */
+  .btn-add--dynamic {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .btn-add--spouse {
+    transform: translateY(calc(-50% - 22px)) scale(1);
+  }
+
+  .btn-add--child {
+    transform: translateX(-50%) scale(1);
+  }
+
+  /* No hover lift on cards (causes sticky state on touch) */
+  .card:hover {
+    transform: none;
+    box-shadow: var(--card-shadow);
+  }
+
+  /* No hover on feed items */
+  .feed-item:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}

@@ -1,18 +1,69 @@
 = stylesheet_link_tag "family_tree", media: "all"
 
-nav.bg-white.shadow-md.px-6.py-4.flex.items-center.justify-between
+nav class="bg-white shadow-md px-5 py-4"
+  div class="flex items-center justify-between"
 
-  .flex.items-center.space-x-3
-    = image_tag "logo.png", class: "w-8 h-8"
-    span.font-bold.text-green-900.text-lg TreesForUs
+    / LOGO
+    a href="/" class="flex items-center space-x-3"
+      = image_tag "logo.png", class: "w-8 h-8"
+      span class="font-bold text-green-900 text-lg" TreesForUs
 
-  .flex.items-center.space-x-3
+    / DESKTOP NAV
+    div class="hidden sm:flex items-center space-x-3"
+      - unless current_page?(dashboard_index_path)
+        = link_to dashboard_index_path, class: "text-sm font-medium text-white primary-btn hover:bg-green-700 px-4 py-2 rounded-lg transition" do
+          | Dashboard
+
+      - unless current_page?(new_relationship_path)
+        = link_to new_relationship_path, class: "text-sm font-medium text-white primary-btn hover:bg-green-700 px-4 py-2 rounded-lg transition" do
+          | Add Relationships
+
+      - user_family = current_user.family_memberships.first&.family
+      - if user_family
+        - unless current_page?(activity_feed_family_path(user_family))
+          - family_user_ids = FamilyMembership.where(family_id: user_family.id).pluck(:user_id)
+          - last_read = session[:activities_last_read] ? Time.parse(session[:activities_last_read]) : 24.hours.ago
+          - unread = PublicActivity::Activity.where(owner_type: 'User', owner_id: family_user_ids).where('created_at > ?', last_read).count
+          = link_to activity_feed_family_path(user_family), class: "relative text-sm font-medium text-white primary-btn hover:bg-green-700 px-4 py-2 rounded-lg transition flex items-center gap-1" do
+            i class="ti ti-activity" style="font-size: 16px;"
+            | Activity
+
+      = link_to user_profile_path(current_user), class: "flex items-center" do
+        - profile = current_user.user_profile
+        - if profile&.avatar&.attached?
+          = image_tag profile.avatar, class: "w-10 h-10 rounded-full border-2 border-green-700 object-cover"
+        - else
+          = image_tag "logo.png", class: "w-10 h-10 rounded-full border-2 border-gray-300 object-cover"
+
+      = button_to destroy_user_session_path, method: :delete, class: "text-sm font-medium text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition" do
+        | Logout
+
+    / MOBILE: avatar + hamburger
+    div class="flex items-center gap-3 sm:hidden"
+      = link_to user_profile_path(current_user), class: "flex items-center" do
+        - profile = current_user.user_profile
+        - if profile&.avatar&.attached?
+          = image_tag profile.avatar, class: "w-9 h-9 rounded-full border-2 border-green-700 object-cover"
+        - else
+          = image_tag "logo.png", class: "w-9 h-9 rounded-full border-2 border-gray-300 object-cover"
+
+      button id="mobile-menu-btn" class="text-green-900 focus:outline-none" aria-label="Toggle menu"
+        / Hamburger icon
+        svg id="icon-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"
+        / Close icon (hidden by default)
+        svg id="icon-close" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"
+
+  / MOBILE MENU DROPDOWN
+  div id="mobile-menu" class="hidden sm:hidden mt-3 flex flex-col gap-2 border-t pt-4"
+
     - unless current_page?(dashboard_index_path)
-      = link_to dashboard_index_path, class: "text-sm font-medium text-white primary-btn hover:bg-green-700 px-4 py-2 rounded-lg transition" do
+      = link_to dashboard_index_path, class: "text-sm font-medium text-white primary-btn hover:bg-green-700 px-4 py-2 rounded-lg transition text-center" do
         | Dashboard
 
     - unless current_page?(new_relationship_path)
-      = link_to new_relationship_path, class: "text-sm font-medium text-white primary-btn hover:bg-green-700 px-4 py-2 rounded-lg transition" do
+      = link_to new_relationship_path, class: "text-sm font-medium text-white primary-btn hover:bg-green-700 px-4 py-2 rounded-lg transition text-center" do
         | Add Relationships
 
     - user_family = current_user.family_memberships.first&.family
@@ -21,16 +72,30 @@ nav.bg-white.shadow-md.px-6.py-4.flex.items-center.justify-between
         - family_user_ids = FamilyMembership.where(family_id: user_family.id).pluck(:user_id)
         - last_read = session[:activities_last_read] ? Time.parse(session[:activities_last_read]) : 24.hours.ago
         - unread = PublicActivity::Activity.where(owner_type: 'User', owner_id: family_user_ids).where('created_at > ?', last_read).count
-        = link_to activity_feed_family_path(user_family), class: "relative text-sm font-medium text-white primary-btn hover:bg-green-700 px-4 py-2 rounded-lg transition flex items-center gap-1" do
-          i.ti.ti-activity style="font-size: 16px;"
+        = link_to activity_feed_family_path(user_family), class: "text-sm font-medium text-white primary-btn hover:bg-green-700 px-4 py-2 rounded-lg transition flex items-center justify-center gap-1" do
+          i class="ti ti-activity" style="font-size: 16px;"
           | Activity
 
-    = link_to user_profile_path(current_user), class: "flex items-center" do
-      - profile = current_user.user_profile
-      - if profile&.avatar&.attached?
-        = image_tag profile.avatar, class: "w-10 h-10 rounded-full border-2 border-green-700 object-cover"
-      - else
-        = image_tag "logo.png", class: "w-10 h-10 rounded-full border-2 border-gray-300 object-cover"
-
-    = button_to destroy_user_session_path, method: :delete, class: "text-sm font-medium text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition" do
+    = button_to destroy_user_session_path, method: :delete, class: "w-full text-sm font-medium text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition" do
       | Logout
+
+javascript:
+  const btn = document.getElementById('mobile-menu-btn');
+  const menu = document.getElementById('mobile-menu');
+  const iconOpen = document.getElementById('icon-open');
+  const iconClose = document.getElementById('icon-close');
+
+  btn.addEventListener('click', () => {
+    menu.classList.toggle('hidden');
+    iconOpen.classList.toggle('hidden');
+    iconClose.classList.toggle('hidden');
+  });
+
+  // Close menu on outside click
+  document.addEventListener('click', (e) => {
+    if (!btn.contains(e.target) && !menu.contains(e.target)) {
+      menu.classList.add('hidden');
+      iconOpen.classList.remove('hidden');
+      iconClose.classList.add('hidden');
+    }
+  });
