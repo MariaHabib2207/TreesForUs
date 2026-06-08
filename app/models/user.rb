@@ -58,8 +58,7 @@ class User < ApplicationRecord
        :registerable,
        :recoverable,
        :rememberable,
-       :validatable,
-       :confirmable
+       :validatable
   with_options if: :login_enabled? do
     validates :email, presence: true
     validates :password, presence: true
