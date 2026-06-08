@@ -100,7 +100,7 @@ div class="tree-node" data-depth=depth data-user-id=node_user.id
             div class="btn-add btn-add--invite btn-add--dynamic btn-add--invited"
               span class="btn-add__icon" ✉
               span class="btn-add__label" Invited
-        - else
+          - else
             = link_to new_user_invitation_path(user_id: partner.id),
                 class: "btn-add btn-add--invite btn-add--dynamic",
                 title: "Invite to app",
