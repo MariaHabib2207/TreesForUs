@@ -24,7 +24,7 @@
 # Indexes
 #
 #  index_user_profiles_on_user_id  (user_id)
-#
+
 class UserProfile < ApplicationRecord
   has_one_attached :avatar
   belongs_to :user
