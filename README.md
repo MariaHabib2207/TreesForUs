@@ -1,4 +1,4 @@
-# 🌳 TreesForUs
+# 🌳 TreesForUs (https://tree-of-us.up.railway.app/)
 
 A **Family Hierarchy Management System** built with Ruby on Rails. TreesForUs allows families to map, manage, and visualize their family trees — tracking members, relationships, generational hierarchies, and access roles all in one place.
 ---
