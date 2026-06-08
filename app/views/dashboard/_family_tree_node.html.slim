@@ -52,18 +52,18 @@ div class="tree-node" data-depth=depth data-user-id=node_user.id
           span class="btn-add__label" Child
 
         / --- INVITE ---
-        
-        - if node_user.invitation_sent_at.present?
-            div class="btn-add btn-add--invite btn-add--dynamic btn-add--invited"
-              span class="btn-add__icon" ✉
-              span class="btn-add__label" Invited
-        - else
-            = link_to new_user_invitation_path(user_id: node_user.id),
-                class: "btn-add btn-add--invite btn-add--dynamic",
-                title: "Invite to app",
-                data: { turbo_frame: "modal" } do
-              span class="btn-add__icon" ✉
-              span class="btn-add__label" Invite
+        -if node_user != current_user
+          - if node_user.invitation_sent_at.present?
+              div class="btn-add btn-add--invite btn-add--dynamic btn-add--invited"
+                span class="btn-add__icon" ✉
+                span class="btn-add__label" Invited
+          - else
+              = link_to new_user_invitation_path(user_id: node_user.id),
+                  class: "btn-add btn-add--invite btn-add--dynamic",
+                  title: "Invite to app",
+                  data: { turbo_frame: "modal" } do
+                span class="btn-add__icon" ✉
+                span class="btn-add__label" Invite
 
       - partners.each do |partner|
         - p_profile = partner.user_profile
@@ -100,7 +100,7 @@ div class="tree-node" data-depth=depth data-user-id=node_user.id
             div class="btn-add btn-add--invite btn-add--dynamic btn-add--invited"
               span class="btn-add__icon" ✉
               span class="btn-add__label" Invited
-          - else
+        - else
             = link_to new_user_invitation_path(user_id: partner.id),
                 class: "btn-add btn-add--invite btn-add--dynamic",
                 title: "Invite to app",
