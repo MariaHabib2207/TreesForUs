@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_06_07_085218) do
+ActiveRecord::Schema[8.0].define(version: 2026_06_13_050019) do
   create_table "active_admin_comments", force: :cascade do |t|
     t.string "namespace"
     t.text "body"
@@ -136,6 +136,30 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_07_085218) do
     t.index ["user_id"], name: "index_user_profiles_on_user_id"
   end
 
+  create_table "user_sessions", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "ip_address"
+    t.string "city"
+    t.string "country"
+    t.string "region"
+    t.string "browser"
+    t.string "browser_version"
+    t.string "os"
+    t.string "os_version"
+    t.string "device_type"
+    t.string "device_name"
+    t.datetime "last_active_at"
+    t.string "user_agent"
+    t.float "latitude"
+    t.float "longitude"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "zip"
+    t.string "continent"
+    t.string "device_brand"
+    t.index ["user_id"], name: "index_user_sessions_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -185,4 +209,5 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_07_085218) do
   add_foreign_key "family_memberships", "users"
   add_foreign_key "user_partners", "users"
   add_foreign_key "user_partners", "users", column: "partner_id"
+  add_foreign_key "user_sessions", "users"
 end

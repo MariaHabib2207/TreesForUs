@@ -1,4 +1,3 @@
-
 Rails.application.routes.draw do
   devise_for :admin_users, ActiveAdmin::Devise.config
   ActiveAdmin.routes(self)
@@ -25,17 +24,15 @@ Rails.application.routes.draw do
     resources :invitations, only: [:new, :create]
   end
 
-  get  "identification", to: "identification#edit",   as: :edit_identification
+  get  "identification", to: "identification#edit",  as: :edit_identification
   patch "identification", to: "identification#update", as: :update_identification
 
   resources :relationships, only: [:create, :destroy, :new]
 
   scope "/invitations/:token" do
-    get   "accept", to: "accept_invitations#edit",   as: :accept_invitation
+    get  "accept", to: "accept_invitations#edit",   as: :accept_invitation
     patch "accept", to: "accept_invitations#update", as: :update_invitation
   end
-
-  get "dashboard/index"
 
   authenticated :user do
     root to: "dashboard#index", as: :authenticated_root

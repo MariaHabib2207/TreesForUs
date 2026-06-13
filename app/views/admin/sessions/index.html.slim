@@ -1,0 +1,34 @@
+/ app/views/admin/sessions/index.html.slim
+
+h1 Active User Sessions
+p
+  | 🟢 Online now:
+  strong = @online_count
+
+table
+  thead
+    tr
+      th User
+      th IP Address
+      th Location
+      th Device
+      th OS
+      th Browser
+      th Last Active
+      th Status
+  tbody
+    - @sessions.each do |s|
+      tr
+        td = s.user.email
+        td
+          code = s.ip_address
+        td = [s.city, s.region, s.country].compact.join(', ')
+        td = "#{s.device_type} #{s.device_name}".strip
+        td = "#{s.os} #{s.os_version}".strip
+        td = "#{s.browser} #{s.browser_version}".strip
+        td = "#{time_ago_in_words(s.last_active_at)} ago"
+        td
+          - if s.last_active_at > 5.minutes.ago
+            span style="color:green" | ● Online
+          - else
+            span style="color:gray" | ○ Offline

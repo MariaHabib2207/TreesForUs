@@ -78,8 +78,14 @@ gem "sprockets-rails"
 gem 'mailjet'
 gem 'public_activity'
 gem 'kaminari'
+gem 'browser'       
+gem 'geocoder'
+gem 'user_agent_parser'
+gem 'httparty'
+gem 'device_detector'
 group :development, :test do
   gem 'sqlite3', '~> 2.0'
+  
 end
 
 group :production do

@@ -361,6 +361,16 @@ def self.from_omniauth(auth)
 
   user
 end
+
+has_many :user_sessions, dependent: :destroy
+
+  def last_active_at
+    user_sessions.maximum(:last_active_at)
+  end
+
+  def online?
+    last_active_at&.> 5.minutes.ago
+  end
   # ===================================================
   # PRIVATE METHODS
   # ===================================================
