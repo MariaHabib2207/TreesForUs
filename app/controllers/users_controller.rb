@@ -66,7 +66,7 @@ class UsersController < ApplicationController
   def destroy
     @user.create_activity :destroy, owner: current_user  # before destroy!
     @user.destroy
-    redirect_to dashboard_index_path, notice: "Family member removed."
+    redirect_to authenticated_root_path, notice: "Family member removed."
   end
 
   private

@@ -17,7 +17,7 @@
           span.badge-name = current_user.families.first.name
 
       - else
-        = form_with url: dashboard_index_path,
+        = form_with url: authenticated_root_path,
           method: :get,
           local: true,
           class: "family-switcher-form",

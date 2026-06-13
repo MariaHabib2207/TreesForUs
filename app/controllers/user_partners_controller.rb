@@ -29,7 +29,7 @@ class UserPartnersController < ApplicationController
       @user_partner.partner.user_profile.avatar.attach(avatar)
     end
 
-    redirect_to dashboard_index_path, notice: "Spouse added successfully."
+    redirect_to authenticated_root_path, notice: "Spouse added successfully."
 
   rescue ActiveRecord::RecordInvalid => e
     @user_partner ||= UserPartner.new

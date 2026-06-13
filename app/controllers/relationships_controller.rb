@@ -41,7 +41,7 @@ def create
       )
     end
 
-    redirect_to dashboard_index_path,
+    redirect_to authenticated_root_path,
                 notice: "Member created successfully."
 
   else

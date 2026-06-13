@@ -10,8 +10,8 @@ nav class="bg-white shadow-md px-5 py-4"
 
     / DESKTOP NAV
     div class="hidden sm:flex items-center space-x-3"
-      - unless current_page?(dashboard_index_path)
-        = link_to dashboard_index_path, class: "text-sm font-medium text-white primary-btn hover:bg-green-700 px-4 py-2 rounded-lg transition" do
+      - unless current_page?(authenticated_root_path)
+        = link_to authenticated_root_path, class: "text-sm font-medium text-white primary-btn hover:bg-green-700 px-4 py-2 rounded-lg transition" do
           | Dashboard
 
       - unless current_page?(new_relationship_path)
@@ -58,8 +58,8 @@ nav class="bg-white shadow-md px-5 py-4"
   / MOBILE MENU DROPDOWN
   div id="mobile-menu" class="hidden sm:hidden mt-3 flex flex-col gap-2 border-t pt-4"
 
-    - unless current_page?(dashboard_index_path)
-      = link_to dashboard_index_path, class: "text-sm font-medium text-white primary-btn hover:bg-green-700 px-4 py-2 rounded-lg transition text-center" do
+    - unless current_page?(authenticated_root_path)
+      = link_to authenticated_root_path, class: "text-sm font-medium text-white primary-btn hover:bg-green-700 px-4 py-2 rounded-lg transition text-center" do
         | Dashboard
 
     - unless current_page?(new_relationship_path)

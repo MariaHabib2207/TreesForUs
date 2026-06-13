@@ -1,6 +1,6 @@
 class UserProfilesController < ApplicationController
   def index
-    redirect_to dashboard_index_path
+    redirect_to authenticated_root_path
   end
 
   def show
@@ -23,7 +23,7 @@ class UserProfilesController < ApplicationController
        if params[:user_profile][:avatar].present?
         @user_profile.avatar.attach(params[:user_profile][:avatar])
       end
-      redirect_to dashboard_index_path
+      redirect_to authenticated_root_path
     else
       render :new
     end

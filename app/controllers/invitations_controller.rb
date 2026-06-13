@@ -26,7 +26,7 @@ class InvitationsController < ApplicationController
         render turbo_stream: turbo_stream.replace("modal", "")
       end
       format.html do
-        redirect_back fallback_location: dashboard_index_path,
+        redirect_back fallback_location: authenticated_root_path,
                       notice: "Invitation sent to #{email}!"
       end
     end
