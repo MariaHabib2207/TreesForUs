@@ -1,6 +1,6 @@
-# 🌳 TreesForUs (https://tree-of-us.up.railway.app/)
+# 🌳 TreeOfUs (https://tree-of-us.up.railway.app/)
 
-A **Family Hierarchy Management System** built with Ruby on Rails. TreesForUs allows families to map, manage, and visualize their family trees — tracking members, relationships, generational hierarchies, and access roles all in one place.
+A **Family Hierarchy Management System** built with Ruby on Rails. TreeOfUs allows families to map, manage, and visualize their family trees — tracking members, relationships, generational hierarchies, and access roles all in one place.
 ---
 Detailed Documentation At : (https://docs.google.com/document/d/1FRlTcXSPeLLuZU8SQGo2VLqj871elEDubcBH2bjOLlk/edit?tab=t.0)
 
@@ -27,7 +27,7 @@ Detailed Documentation At : (https://docs.google.com/document/d/1FRlTcXSPeLLuZU8
 
 ## Overview
 
-TreesForUs is a web application that lets families build and manage their family hierarchy. Users can be added as tree-only members (without login access) or as full login-enabled members. The system supports parent-child relationships, spouse/partner links, and family group memberships, all with role-based access control.
+TreeOfUs is a web application that lets families build and manage their family hierarchy. Users can be added as tree-only members (without login access) or as full login-enabled members. The system supports parent-child relationships, spouse/partner links, and family group memberships, all with role-based access control.
 
 ---
 
@@ -85,8 +85,8 @@ Before you begin, make sure you have the following installed:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/MariaHabib2207/TreesForUs.git
-cd TreesForUs
+git clone https://github.com/MariaHabib2207/TreeOfUs.git
+cd TreeOfUs
 ```
 
 ### 2. Install Ruby dependencies

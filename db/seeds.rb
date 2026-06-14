@@ -1,5 +1,5 @@
 # ==============================================================================
-# db/seeds.rb — TreesForUs Family Hierarchy System
+# db/seeds.rb — TreeOfUs Family Hierarchy System
 # ==============================================================================
 # Run with:       rails db:seed
 # Full reset:     rails db:drop db:create db:migrate db:seed
@@ -9,7 +9,7 @@
 ActionMailer::Base.delivery_method = :test
 ActionMailer::Base.perform_deliveries = false
 
-puts "🌱 Seeding TreesForUs database..."
+puts "🌱 Seeding TreeOfUs database..."
 puts "=" * 60
 
 # ------------------------------------------------------------------------------
