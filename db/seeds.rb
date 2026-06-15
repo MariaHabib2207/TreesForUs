@@ -38,6 +38,11 @@ AdminUser.create!(
   password:              "admin123456",
   password_confirmation: "admin123456"
 )
+AdminUser.create!(
+  email:                 "admin@trees-for-us.com",
+  password:              "admin123456",
+  password_confirmation: "admin123456"
+)
 
 puts "   ✓ AdminUser created → admin@treesfor.us / admin123456"
 
