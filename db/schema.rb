@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_06_13_050019) do
+ActiveRecord::Schema[8.0].define(version: 2026_06_15_000525) do
   create_table "active_admin_comments", force: :cascade do |t|
     t.string "namespace"
     t.text "body"
@@ -181,10 +181,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_13_050019) do
     t.datetime "last_sign_in_at"
     t.string "current_sign_in_ip"
     t.string "last_sign_in_ip"
-    t.string "confirmation_token"
-    t.datetime "confirmed_at"
-    t.datetime "confirmation_sent_at"
-    t.string "unconfirmed_email"
     t.integer "failed_attempts", default: 0, null: false
     t.string "unlock_token"
     t.datetime "locked_at"
@@ -196,7 +192,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_13_050019) do
     t.string "provider"
     t.string "uid"
     t.string "remember_token"
-    t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true
     t.index ["identification_type", "identification_number"], name: "index_users_on_id_type_and_number", unique: true
     t.index ["parent_id"], name: "index_users_on_parent_id"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true

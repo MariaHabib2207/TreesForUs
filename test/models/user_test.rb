@@ -3,9 +3,6 @@
 # Table name: users
 #
 #  id                     :integer          not null, primary key
-#  confirmation_sent_at   :datetime
-#  confirmation_token     :string
-#  confirmed_at           :datetime
 #  created_by             :integer
 #  current_sign_in_at     :datetime
 #  current_sign_in_ip     :string
@@ -32,7 +29,6 @@
 #  sign_in_count          :integer          default(0), not null
 #  status                 :integer          default("alive"), not null
 #  uid                    :string
-#  unconfirmed_email      :string
 #  unlock_token           :string
 #  updated_by             :integer
 #  created_at             :datetime         not null
@@ -41,7 +37,6 @@
 #
 # Indexes
 #
-#  index_users_on_confirmation_token    (confirmation_token) UNIQUE
 #  index_users_on_id_type_and_number    (identification_type,identification_number) UNIQUE
 #  index_users_on_parent_id             (parent_id)
 #  index_users_on_reset_password_token  (reset_password_token) UNIQUE
