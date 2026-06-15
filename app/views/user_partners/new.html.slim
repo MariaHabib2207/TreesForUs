@@ -194,6 +194,7 @@
             = label_tag "birth_date", "Date of Birth", class: "block text-sm font-medium text-gray-700"
             = date_field_tag "partner[user_profile_attributes][birth_date]", nil,
               id: "birth_date",
+              max: Date.today,
               class: "w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
 
           .space-y-2

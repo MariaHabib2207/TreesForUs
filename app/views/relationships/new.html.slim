@@ -163,6 +163,7 @@
             = profile.label :birth_date, "Date of Birth", class: "block text-sm font-medium text-gray-700"
             = profile.date_field :birth_date,
               required: true,
+              max: Date.today,
               class: "w-full rounded-xl border #{profile.object.errors[:birth_date].any? ? 'border-red-400 bg-red-50' : 'border-gray-300'} px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
             - if profile.object.errors[:birth_date].any?
               p class="text-xs text-red-600 mt-1" = profile.object.errors[:birth_date].first
