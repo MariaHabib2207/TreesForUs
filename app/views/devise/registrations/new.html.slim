@@ -29,11 +29,27 @@ html
           br
           | Build your legacy for generations.
 
+      / ── GOOGLE OAUTH ───────────────────────────────────────────────────────
+      = link_to omniauth_authorize_path(resource_name, :google_oauth2),
+          method: :post,
+          class: "flex items-center justify-center gap-3 w-full border border-gray-300 rounded-lg py-3 px-4 mb-4 hover:bg-gray-50 transition duration-200" do
+        svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" class="w-5 h-5 flex-shrink-0"
+          path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"
+          path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+          path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+          path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+          path fill="none" d="M0 0h48v48H0z"
+        span class="text-sm font-medium text-gray-700" Sign up with Google
+
+      div class="flex items-center gap-3 mb-4"
+        div class="flex-1 h-px bg-gray-200"
+        span class="text-xs text-gray-400 font-medium" OR
+        div class="flex-1 h-px bg-gray-200"
+
       = form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f|
 
         div class="space-y-4"
 
-          / BASIC INFO
           = f.text_field :first_name,
             required: true,
             placeholder: "First Name",
@@ -59,7 +75,6 @@ html
             placeholder: "Confirm Password",
             class: "w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
 
-  
           = f.fields_for :user_profile_attributes do |p|
 
             = p.date_field :birth_date,
@@ -75,7 +90,6 @@ html
               id: "marital_status_select",
               class: "w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
 
-
           = f.select :identification_type,
             options_for_select(User.identification_type_options),
             { prompt: "Select Identification Type" },
@@ -89,20 +103,17 @@ html
           p id="under16_family_hint" class="hidden text-xs text-amber-600 font-medium"
             | You are under 16 — family type is set to Birth Family automatically.
 
-          / Hidden fields submitted with the form
           = hidden_field_tag :family_id, "", id: "family_id_hidden"
           = hidden_field_tag :new_family_name, "", id: "new_family_name_hidden"
 
-          / Hidden Rails select — used only as a data source for the JS combobox
           = select_tag :_family_data_source,
             options_from_collection_for_select(Family.all, :id, :name),
             id: "family_data_source",
             style: "display:none"
 
-          / ── FAMILY COMBOBOX WIDGET ────────────────────────────────────────
+          / ── FAMILY COMBOBOX WIDGET ──────────────────────────────────────────
           div id="family_widget" class="relative"
 
-            / STATE 1: Search/select mode (default)
             div id="family_search_mode"
               div class="relative"
                 input#family_search_input type="text" placeholder="Search or select a family..." autocomplete="off" class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 pr-10"
@@ -117,7 +128,6 @@ html
                     path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"
                   span#family_create_label Create new family
 
-            / STATE 2: Create new family mode
             div#family_create_mode class="hidden"
               div class="relative"
                 input#family_new_input type="text" placeholder="Enter new family name..." autocomplete="off" class="w-full px-4 py-3 border-2 border-green-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 pr-10"
@@ -126,8 +136,6 @@ html
                     path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"
               p class="text-xs text-green-700 mt-1 ml-1" A new family will be created with this name.
 
-          / Membership type — auto-locked to Birth Family for users under 16
-          / Hidden carries value when select is disabled (browsers skip disabled fields)
           = hidden_field_tag :membership_type, "", id: "membership_type_hidden"
           = select_tag :membership_type,
             options_for_select(FamilyMembership.family_memberships_type_options),
@@ -140,7 +148,6 @@ html
             p class="text-xs text-gray-500 text-center"
               = "#{@minimum_password_length} characters minimum"
 
-          / REMEMBER ME
           label class="flex items-center gap-3 cursor-pointer select-none"
             = f.check_box :remember_me,
               class: "w-4 h-4 rounded border-gray-300 text-green-700 focus:ring-green-500 focus:ring-offset-0 accent-green-700"
@@ -168,14 +175,13 @@ javascript:
     }, 3000);
 
     // ── Element references ──────────────────────────────────────────────────
-    const birthDateField      = document.getElementById("birth_date_field");
-    const maritalStatusSelect = document.getElementById("marital_status_select");
-    const membershipSelect    = document.getElementById("membership_type_select");
-    const under16Hint         = document.getElementById("under16_family_hint");
-    const maritalStatusHidden = document.getElementById("marital_status_hidden");
+    const birthDateField       = document.getElementById("birth_date_field");
+    const maritalStatusSelect  = document.getElementById("marital_status_select");
+    const membershipSelect     = document.getElementById("membership_type_select");
+    const under16Hint          = document.getElementById("under16_family_hint");
+    const maritalStatusHidden  = document.getElementById("marital_status_hidden");
     const membershipTypeHidden = document.getElementById("membership_type_hidden");
 
-    // Family widget elements
     const familyIdHidden      = document.getElementById("family_id_hidden");
     const newFamilyNameHidden = document.getElementById("new_family_name_hidden");
     const familySearchMode    = document.getElementById("family_search_mode");
@@ -188,11 +194,11 @@ javascript:
     const familyNewInput      = document.getElementById("family_new_input");
     const familyCancelBtn     = document.getElementById("family_cancel_btn");
 
-    // ── 1. Restrict DOB — no future dates ──────────────────────────────────
+    // ── DOB max ─────────────────────────────────────────────────────────────
     const today = new Date().toISOString().split("T")[0];
     birthDateField.setAttribute("max", today);
 
-    // ── 2. Age-based logic ──────────────────────────────────────────────────
+    // ── Age calculation ──────────────────────────────────────────────────────
     function calculateAge(dateString) {
       if (!dateString) return null;
       const birth = new Date(dateString);
@@ -203,43 +209,49 @@ javascript:
       return age;
     }
 
+    // ── Age rules ────────────────────────────────────────────────────────────
     function applyAgeRules() {
       const age = calculateAge(birthDateField.value);
       if (age === null) return;
 
       if (age < 16) {
-        // Lock marital status to Single
         const singleOpt = Array.from(maritalStatusSelect.options)
           .find(o => o.text.toLowerCase() === "single" || o.value.toLowerCase() === "single");
         if (singleOpt) {
           maritalStatusSelect.value = singleOpt.value;
-          maritalStatusHidden.value = singleOpt.value;  // sync hidden so disabled select still submits
+          maritalStatusHidden.value = singleOpt.value;
         }
         maritalStatusSelect.disabled = true;
+        maritalStatusSelect.classList.add("opacity-50", "cursor-not-allowed");
 
-        // Lock membership type to Birth Family
         const birthOpt = Array.from(membershipSelect.options)
           .find(o => o.text.toLowerCase().includes("birth") || o.value.toLowerCase().includes("birth"));
         if (birthOpt) {
           membershipSelect.value     = birthOpt.value;
-          membershipTypeHidden.value = birthOpt.value;  // sync hidden so disabled select still submits
+          membershipTypeHidden.value = birthOpt.value;
         }
         membershipSelect.disabled = true;
+        membershipSelect.classList.add("opacity-50", "cursor-not-allowed");
 
         if (under16Hint) under16Hint.classList.remove("hidden");
       } else {
-        // Unlock — clear hidden fields so they don't override the live selects
         maritalStatusSelect.disabled = false;
-        membershipSelect.disabled    = false;
+        maritalStatusSelect.classList.remove("opacity-50", "cursor-not-allowed");
         maritalStatusHidden.value    = "";
-        membershipTypeHidden.value   = "";
+
+        membershipSelect.disabled = false;
+        membershipSelect.classList.remove("opacity-50", "cursor-not-allowed");
+        membershipTypeHidden.value = "";
+
         if (under16Hint) under16Hint.classList.add("hidden");
       }
     }
 
     birthDateField.addEventListener("change", applyAgeRules);
+    applyAgeRules(); // run on load in case birth date is pre-filled
 
-    const dataSource = document.getElementById("family_data_source");
+    // ── Family combobox ──────────────────────────────────────────────────────
+    const dataSource  = document.getElementById("family_data_source");
     const allFamilies = dataSource
       ? Array.from(dataSource.options)
           .filter(o => o.value !== "")
@@ -248,33 +260,24 @@ javascript:
 
     let activeIndex = -1;
 
-    function openDropdown() {
-      familyDropdown.classList.remove("hidden");
-    }
-
-    function closeDropdown() {
-      familyDropdown.classList.add("hidden");
-      activeIndex = -1;
-    }
+    function openDropdown()  { familyDropdown.classList.remove("hidden"); }
+    function closeDropdown() { familyDropdown.classList.add("hidden"); activeIndex = -1; }
 
     function renderOptions(query) {
-      const q = query.trim().toLowerCase();
-      const matched = q === ""
-        ? allFamilies
-        : allFamilies.filter(f => f.name.toLowerCase().includes(q));
+      const q       = query.trim().toLowerCase();
+      const matched = q === "" ? allFamilies : allFamilies.filter(f => f.name.toLowerCase().includes(q));
 
-      // Clear existing dynamic items
       familyOptionsList.innerHTML = "";
 
       if (matched.length === 0 && q !== "") {
         const li = document.createElement("li");
-        li.className = "px-4 py-2 text-sm text-gray-400 italic";
+        li.className   = "px-4 py-2 text-sm text-gray-400 italic";
         li.textContent = "No matching families found";
         familyOptionsList.appendChild(li);
       } else {
         matched.forEach(function (family) {
           const li = document.createElement("li");
-          li.className = "px-4 py-3 text-sm text-gray-700 cursor-pointer hover:bg-green-50 hover:text-green-800 transition";
+          li.className   = "px-4 py-3 text-sm text-gray-700 cursor-pointer hover:bg-green-50 hover:text-green-800 transition";
           li.textContent = family.name;
           li.dataset.id  = family.id;
           li.addEventListener("mousedown", function (e) {
@@ -285,12 +288,7 @@ javascript:
         });
       }
 
-      // Update "Create new family" label
-      if (q !== "") {
-        familyCreateLabel.textContent = `Create "${query.trim()}"`;
-      } else {
-        familyCreateLabel.textContent = "Create new family";
-      }
+      familyCreateLabel.textContent = q !== "" ? `Create "${query.trim()}"` : "Create new family";
     }
 
     function selectFamily(id, name) {
@@ -300,18 +298,12 @@ javascript:
       closeDropdown();
     }
 
-    function resetSearch() {
-      familyIdHidden.value      = "";
-      newFamilyNameHidden.value = "";
-      familySearchInput.value   = "";
-    }
-
     function enterCreateMode(prefill) {
       familySearchMode.classList.add("hidden");
       familyCreateMode.classList.remove("hidden");
-      familyNewInput.value = prefill || "";
+      familyNewInput.value      = prefill || "";
       newFamilyNameHidden.value = prefill || "";
-      familyIdHidden.value = "";
+      familyIdHidden.value      = "";
       familyNewInput.focus();
     }
 
@@ -325,18 +317,8 @@ javascript:
       familySearchInput.focus();
     }
 
-    // Search input events
-    familySearchInput.addEventListener("focus", function () {
-      renderOptions(this.value);
-      openDropdown();
-    });
-
-    familySearchInput.addEventListener("input", function () {
-      // Clear any previously selected family id
-      familyIdHidden.value = "";
-      renderOptions(this.value);
-      openDropdown();
-    });
+    familySearchInput.addEventListener("focus", function () { renderOptions(this.value); openDropdown(); });
+    familySearchInput.addEventListener("input", function () { familyIdHidden.value = ""; renderOptions(this.value); openDropdown(); });
 
     familySearchInput.addEventListener("keydown", function (e) {
       const items = familyOptionsList.querySelectorAll("li[data-id]");
@@ -350,39 +332,24 @@ javascript:
         items.forEach((li, i) => li.classList.toggle("bg-green-50", i === activeIndex));
       } else if (e.key === "Enter") {
         e.preventDefault();
-        if (activeIndex >= 0 && items[activeIndex]) {
-          items[activeIndex].dispatchEvent(new MouseEvent("mousedown"));
-        }
+        if (activeIndex >= 0 && items[activeIndex]) items[activeIndex].dispatchEvent(new MouseEvent("mousedown"));
       } else if (e.key === "Escape") {
         closeDropdown();
       }
     });
 
-    // "Create new family" option click
     familyCreateOption.addEventListener("mousedown", function (e) {
       e.preventDefault();
       enterCreateMode(familySearchInput.value.trim());
       closeDropdown();
     });
 
-    // New family input — sync to hidden field
-    familyNewInput.addEventListener("input", function () {
-      newFamilyNameHidden.value = this.value.trim();
-    });
+    familyNewInput.addEventListener("input", function () { newFamilyNameHidden.value = this.value.trim(); });
+    familyCancelBtn.addEventListener("click", exitCreateMode);
 
-    // Cancel button — back to search mode
-    familyCancelBtn.addEventListener("click", function () {
-      exitCreateMode();
-    });
-
-    // Close dropdown when clicking outside
     document.addEventListener("mousedown", function (e) {
-      if (!document.getElementById("family_widget").contains(e.target)) {
-        closeDropdown();
-      }
+      if (!document.getElementById("family_widget").contains(e.target)) closeDropdown();
     });
 
-    // Initial render
     renderOptions("");
-
   });
