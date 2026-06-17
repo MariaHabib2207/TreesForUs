@@ -327,7 +327,7 @@ def invitation_token_valid?
   invitation_sent_at.present? && invitation_sent_at > 7.days.ago
 end
 
-def accept_invitation!(email:, password:, password_confirmation:)
+def accept_invitation!(email:, password:, password_confirmation:, family_code: nil)
   self.email                  = email
   self.password               = password
   self.password_confirmation  = password_confirmation
@@ -335,8 +335,47 @@ def accept_invitation!(email:, password:, password_confirmation:)
   self.invitation_token       = nil
   self.invitation_sent_at     = nil
   self.invitation_accepted_at = Time.current
-  skip_confirmation!
-  save
+
+  ActiveRecord::Base.transaction do
+    save!(validate: false)
+    redeem_family_code!(family_code) if family_code&.redeemable?
+  end
+
+  true
+rescue ActiveRecord::RecordInvalid => e
+  errors.add(:base, e.message)
+  false
+end
+
+private
+
+def redeem_family_code!(family_code)
+  # Mark the code as used
+  family_code.mark_used!(self)
+
+  # Create FamilyMembership unless one already exists
+  unless family_memberships.exists?(family: family_code.family)
+    family_memberships.create!(
+      family:          family_code.family,
+      membership_type: family_code.membership_type
+    )
+  end
+
+  # Wire up the relationship to the related user (parent or partner)
+  return unless family_code.related_user.present?
+
+  if family_code.birth?
+    # related_user is the parent — create parent→child relationship
+    unless UserParentRelationship.exists?(parent: family_code.related_user, child: self)
+      UserParentRelationship.create!(parent: family_code.related_user, child: self)
+    end
+  elsif family_code.marriage?
+    # related_user is the partner — create partner relationship
+    unless UserPartner.exists?(user: family_code.related_user, partner: self) ||
+           UserPartner.exists?(user: self, partner: family_code.related_user)
+      UserPartner.create!(user: family_code.related_user, partner: self)
+    end
+  end
 end
 # ===================================================
 # OMNIAUTH

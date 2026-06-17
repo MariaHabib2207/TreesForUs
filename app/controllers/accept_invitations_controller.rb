@@ -2,17 +2,19 @@
 class AcceptInvitationsController < ApplicationController
   before_action :load_invitee
 
-  # GET /accept_invitation?token=RAW_TOKEN
-  # Renders the set-email + set-password form
+  # GET /accept_invitation?token=RAW_TOKEN&family_code=XXXX
   def edit
   end
 
-  # PATCH /accept_invitation?token=RAW_TOKEN
+  # PATCH /accept_invitation?token=RAW_TOKEN&family_code=XXXX
   def update
+    family_code = FamilyCode.valid.find_by(code: params[:family_code])
+
     if @invitee.accept_invitation!(
       email:                 accept_params[:email],
       password:              accept_params[:password],
-      password_confirmation: accept_params[:password_confirmation]
+      password_confirmation: accept_params[:password_confirmation],
+      family_code:           family_code
     )
       sign_in(@invitee)
       redirect_to root_path, notice: "Welcome, #{@invitee.first_name}! Your account is now active."

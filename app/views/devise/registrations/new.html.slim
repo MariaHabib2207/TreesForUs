@@ -17,19 +17,15 @@ html
           = flash[:alert]
 
       div class="flex flex-col items-center justify-center text-center mb-6"
-
         = image_tag "logo.png", class: "w-20 h-20 mb-5"
-
         h1 class="text-3xl font-bold text-green-900 mb-2" Tree Of Us
-
         p class="text-green-900 mb-2" Discover. Connect. Belong.
-
         p class="text-gray-900 text-sm"
           | Visualize your family. Explore your roots.
           br
           | Build your legacy for generations.
 
-      / ── GOOGLE OAUTH ───────────────────────────────────────────────────────
+      / ── GOOGLE OAUTH ─────────────────────────────────────────────────────
       = link_to omniauth_authorize_path(resource_name, :google_oauth2),
           method: :post,
           class: "flex items-center justify-center gap-3 w-full border border-gray-300 rounded-lg py-3 px-4 mb-4 hover:bg-gray-50 transition duration-200" do
@@ -76,7 +72,6 @@ html
             class: "w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
 
           = f.fields_for :user_profile_attributes do |p|
-
             = p.date_field :birth_date,
               required: true,
               id: "birth_date_field",
@@ -103,46 +98,35 @@ html
           p id="under16_family_hint" class="hidden text-xs text-amber-600 font-medium"
             | You are under 16 — family type is set to Birth Family automatically.
 
-          = hidden_field_tag :family_id, "", id: "family_id_hidden"
-          = hidden_field_tag :new_family_name, "", id: "new_family_name_hidden"
+          / ── FAMILY SECTION ──────────────────────────────────────────────────
+          div id="family_section"
 
-          = select_tag :_family_data_source,
-            options_from_collection_for_select(Family.all, :id, :name),
-            id: "family_data_source",
-            style: "display:none"
+            / Toggle tabs
+            div class="flex rounded-lg border border-gray-200 overflow-hidden mb-3"
+              button type="button" id="tab_code" class="flex-1 py-2 text-sm font-medium bg-green-900 text-white transition"
+                | Enter Family Code
+              button type="button" id="tab_new" class="flex-1 py-2 text-sm font-medium bg-white text-gray-600 hover:bg-gray-50 transition"
+                | Create New Family
 
-          / ── FAMILY COMBOBOX WIDGET ──────────────────────────────────────────
-          div id="family_widget" class="relative"
+            / Panel: family code
+            div id="panel_code"
+              input type="text" name="family_code" id="family_code_input" placeholder="Enter your family code" value=params[:family_code].to_s autocomplete="off" class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 uppercase tracking-widest"
+              p class="text-xs text-green-700 mt-1 ml-1"
+                | Your family and membership type will be set automatically.
 
-            div id="family_search_mode"
-              div class="relative"
-                input#family_search_input type="text" placeholder="Search or select a family..." autocomplete="off" class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 pr-10"
-                span class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400"
-                  svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                    path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"
+            / Panel: create new family
+            div id="panel_new" class="hidden"
+              = hidden_field_tag :new_family_name, "", id: "new_family_name_hidden"
+              input type="text" id="new_family_name_input" placeholder="Enter new family name" autocomplete="off" class="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              p class="text-xs text-green-700 mt-1 ml-1"
+                | A new family tree will be created with this name.
 
-              div#family_dropdown class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-56 overflow-y-auto"
-                ul#family_options_list class="py-1"
-                li#family_create_option class="flex items-center gap-2 px-4 py-3 text-green-700 font-semibold cursor-pointer hover:bg-green-50 border-t border-gray-100"
-                  svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                    path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"
-                  span#family_create_label Create new family
-
-            div#family_create_mode class="hidden"
-              div class="relative"
-                input#family_new_input type="text" placeholder="Enter new family name..." autocomplete="off" class="w-full px-4 py-3 border-2 border-green-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 pr-10"
-                button#family_cancel_btn type="button" title="Cancel" class="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-red-500 transition"
-                  svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                    path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"
-              p class="text-xs text-green-700 mt-1 ml-1" A new family will be created with this name.
-
-          = hidden_field_tag :membership_type, "", id: "membership_type_hidden"
-          = select_tag :membership_type,
-            options_for_select(FamilyMembership.family_memberships_type_options),
-            prompt: "Select Membership Type",
-            id: "membership_type_select",
-            class: "w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500",
-            required: true
+              = hidden_field_tag :membership_type, "", id: "membership_type_hidden"
+              = select_tag :membership_type,
+                options_for_select(FamilyMembership.family_memberships_type_options),
+                prompt: "Select Membership Type",
+                id: "membership_type_select",
+                class: "w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 mt-3"
 
           - if @minimum_password_length
             p class="text-xs text-gray-500 text-center"
@@ -165,7 +149,7 @@ html
 javascript:
   document.addEventListener("DOMContentLoaded", function () {
 
-    // ── Flash auto-dismiss ──────────────────────────────────────────────────
+    // ── Flash auto-dismiss ──────────────────────────────────────────────
     setTimeout(function () {
       document.querySelectorAll(".flash-message").forEach(function (el) {
         el.style.transition = "opacity 0.5s ease";
@@ -174,31 +158,63 @@ javascript:
       });
     }, 3000);
 
-    // ── Element references ──────────────────────────────────────────────────
+    // ── Element references ──────────────────────────────────────────────
     const birthDateField       = document.getElementById("birth_date_field");
     const maritalStatusSelect  = document.getElementById("marital_status_select");
     const membershipSelect     = document.getElementById("membership_type_select");
+    const membershipTypeHidden = document.getElementById("membership_type_hidden");
     const under16Hint          = document.getElementById("under16_family_hint");
     const maritalStatusHidden  = document.getElementById("marital_status_hidden");
-    const membershipTypeHidden = document.getElementById("membership_type_hidden");
 
-    const familyIdHidden      = document.getElementById("family_id_hidden");
-    const newFamilyNameHidden = document.getElementById("new_family_name_hidden");
-    const familySearchMode    = document.getElementById("family_search_mode");
-    const familyCreateMode    = document.getElementById("family_create_mode");
-    const familySearchInput   = document.getElementById("family_search_input");
-    const familyDropdown      = document.getElementById("family_dropdown");
-    const familyOptionsList   = document.getElementById("family_options_list");
-    const familyCreateOption  = document.getElementById("family_create_option");
-    const familyCreateLabel   = document.getElementById("family_create_label");
-    const familyNewInput      = document.getElementById("family_new_input");
-    const familyCancelBtn     = document.getElementById("family_cancel_btn");
+    const tabCode    = document.getElementById("tab_code");
+    const tabNew     = document.getElementById("tab_new");
+    const panelCode  = document.getElementById("panel_code");
+    const panelNew   = document.getElementById("panel_new");
+    const codeInput  = document.getElementById("family_code_input");
+    const newNameInput   = document.getElementById("new_family_name_input");
+    const newNameHidden  = document.getElementById("new_family_name_hidden");
 
-    // ── DOB max ─────────────────────────────────────────────────────────────
+    // ── Tab switching ───────────────────────────────────────────────────
+    function activateTab(tab) {
+      if (tab === "code") {
+        tabCode.classList.add("bg-green-900", "text-white");
+        tabCode.classList.remove("bg-white", "text-gray-600");
+        tabNew.classList.add("bg-white", "text-gray-600");
+        tabNew.classList.remove("bg-green-900", "text-white");
+        panelCode.classList.remove("hidden");
+        panelNew.classList.add("hidden");
+        // clear new family fields
+        newNameInput.value  = "";
+        newNameHidden.value = "";
+        if (membershipSelect) membershipSelect.value = "";
+      } else {
+        tabNew.classList.add("bg-green-900", "text-white");
+        tabNew.classList.remove("bg-white", "text-gray-600");
+        tabCode.classList.add("bg-white", "text-gray-600");
+        tabCode.classList.remove("bg-green-900", "text-white");
+        panelNew.classList.remove("hidden");
+        panelCode.classList.add("hidden");
+        // clear code field
+        codeInput.value = "";
+      }
+    }
+
+    tabCode.addEventListener("click", () => activateTab("code"));
+    tabNew.addEventListener("click",  () => activateTab("new"));
+
+    // Auto-activate code tab if param present
+    if (codeInput.value.trim().length > 0) activateTab("code");
+
+    // Sync new family name to hidden field
+    newNameInput.addEventListener("input", function () {
+      newNameHidden.value = this.value.trim();
+    });
+
+    // ── DOB max ─────────────────────────────────────────────────────────
     const today = new Date().toISOString().split("T")[0];
     birthDateField.setAttribute("max", today);
 
-    // ── Age calculation ──────────────────────────────────────────────────────
+    // ── Age rules ────────────────────────────────────────────────────────
     function calculateAge(dateString) {
       if (!dateString) return null;
       const birth = new Date(dateString);
@@ -209,7 +225,6 @@ javascript:
       return age;
     }
 
-    // ── Age rules ────────────────────────────────────────────────────────────
     function applyAgeRules() {
       const age = calculateAge(birthDateField.value);
       if (age === null) return;
@@ -224,132 +239,34 @@ javascript:
         maritalStatusSelect.disabled = true;
         maritalStatusSelect.classList.add("opacity-50", "cursor-not-allowed");
 
-        const birthOpt = Array.from(membershipSelect.options)
-          .find(o => o.text.toLowerCase().includes("birth") || o.value.toLowerCase().includes("birth"));
-        if (birthOpt) {
-          membershipSelect.value     = birthOpt.value;
-          membershipTypeHidden.value = birthOpt.value;
+        if (membershipSelect) {
+          const birthOpt = Array.from(membershipSelect.options)
+            .find(o => o.text.toLowerCase().includes("birth") || o.value.toLowerCase().includes("birth"));
+          if (birthOpt) {
+            membershipSelect.value     = birthOpt.value;
+            membershipTypeHidden.value = birthOpt.value;
+          }
+          membershipSelect.disabled = true;
+          membershipSelect.classList.add("opacity-50", "cursor-not-allowed");
         }
-        membershipSelect.disabled = true;
-        membershipSelect.classList.add("opacity-50", "cursor-not-allowed");
 
         if (under16Hint) under16Hint.classList.remove("hidden");
       } else {
         maritalStatusSelect.disabled = false;
         maritalStatusSelect.classList.remove("opacity-50", "cursor-not-allowed");
-        maritalStatusHidden.value    = "";
+        maritalStatusHidden.value = "";
 
-        membershipSelect.disabled = false;
-        membershipSelect.classList.remove("opacity-50", "cursor-not-allowed");
-        membershipTypeHidden.value = "";
+        if (membershipSelect) {
+          membershipSelect.disabled = false;
+          membershipSelect.classList.remove("opacity-50", "cursor-not-allowed");
+          membershipTypeHidden.value = "";
+        }
 
         if (under16Hint) under16Hint.classList.add("hidden");
       }
     }
 
     birthDateField.addEventListener("change", applyAgeRules);
-    applyAgeRules(); // run on load in case birth date is pre-filled
+    applyAgeRules();
 
-    // ── Family combobox ──────────────────────────────────────────────────────
-    const dataSource  = document.getElementById("family_data_source");
-    const allFamilies = dataSource
-      ? Array.from(dataSource.options)
-          .filter(o => o.value !== "")
-          .map(o => ({ id: o.value, name: o.text }))
-      : [];
-
-    let activeIndex = -1;
-
-    function openDropdown()  { familyDropdown.classList.remove("hidden"); }
-    function closeDropdown() { familyDropdown.classList.add("hidden"); activeIndex = -1; }
-
-    function renderOptions(query) {
-      const q       = query.trim().toLowerCase();
-      const matched = q === "" ? allFamilies : allFamilies.filter(f => f.name.toLowerCase().includes(q));
-
-      familyOptionsList.innerHTML = "";
-
-      if (matched.length === 0 && q !== "") {
-        const li = document.createElement("li");
-        li.className   = "px-4 py-2 text-sm text-gray-400 italic";
-        li.textContent = "No matching families found";
-        familyOptionsList.appendChild(li);
-      } else {
-        matched.forEach(function (family) {
-          const li = document.createElement("li");
-          li.className   = "px-4 py-3 text-sm text-gray-700 cursor-pointer hover:bg-green-50 hover:text-green-800 transition";
-          li.textContent = family.name;
-          li.dataset.id  = family.id;
-          li.addEventListener("mousedown", function (e) {
-            e.preventDefault();
-            selectFamily(family.id, family.name);
-          });
-          familyOptionsList.appendChild(li);
-        });
-      }
-
-      familyCreateLabel.textContent = q !== "" ? `Create "${query.trim()}"` : "Create new family";
-    }
-
-    function selectFamily(id, name) {
-      familyIdHidden.value      = id;
-      newFamilyNameHidden.value = "";
-      familySearchInput.value   = name;
-      closeDropdown();
-    }
-
-    function enterCreateMode(prefill) {
-      familySearchMode.classList.add("hidden");
-      familyCreateMode.classList.remove("hidden");
-      familyNewInput.value      = prefill || "";
-      newFamilyNameHidden.value = prefill || "";
-      familyIdHidden.value      = "";
-      familyNewInput.focus();
-    }
-
-    function exitCreateMode() {
-      familyCreateMode.classList.add("hidden");
-      familySearchMode.classList.remove("hidden");
-      familyNewInput.value      = "";
-      newFamilyNameHidden.value = "";
-      familyIdHidden.value      = "";
-      familySearchInput.value   = "";
-      familySearchInput.focus();
-    }
-
-    familySearchInput.addEventListener("focus", function () { renderOptions(this.value); openDropdown(); });
-    familySearchInput.addEventListener("input", function () { familyIdHidden.value = ""; renderOptions(this.value); openDropdown(); });
-
-    familySearchInput.addEventListener("keydown", function (e) {
-      const items = familyOptionsList.querySelectorAll("li[data-id]");
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        activeIndex = Math.min(activeIndex + 1, items.length - 1);
-        items.forEach((li, i) => li.classList.toggle("bg-green-50", i === activeIndex));
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        activeIndex = Math.max(activeIndex - 1, 0);
-        items.forEach((li, i) => li.classList.toggle("bg-green-50", i === activeIndex));
-      } else if (e.key === "Enter") {
-        e.preventDefault();
-        if (activeIndex >= 0 && items[activeIndex]) items[activeIndex].dispatchEvent(new MouseEvent("mousedown"));
-      } else if (e.key === "Escape") {
-        closeDropdown();
-      }
-    });
-
-    familyCreateOption.addEventListener("mousedown", function (e) {
-      e.preventDefault();
-      enterCreateMode(familySearchInput.value.trim());
-      closeDropdown();
-    });
-
-    familyNewInput.addEventListener("input", function () { newFamilyNameHidden.value = this.value.trim(); });
-    familyCancelBtn.addEventListener("click", exitCreateMode);
-
-    document.addEventListener("mousedown", function (e) {
-      if (!document.getElementById("family_widget").contains(e.target)) closeDropdown();
-    });
-
-    renderOptions("");
   });

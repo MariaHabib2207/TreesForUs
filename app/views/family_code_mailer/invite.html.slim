@@ -1,0 +1,13 @@
+h2 You're invited to join #{@family.name}
+
+p #{@manager.full_name} has invited you to join their family tree.
+
+p Click the link below to register — your family and membership type will be set automatically.
+
+p = link_to "Accept Invitation", @register_url
+
+p
+  | Or enter this code manually during registration:
+  strong  #{@family_code.code}
+
+p This invitation expires on #{@expires_at} and can only be used once.

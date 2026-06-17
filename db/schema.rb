@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_06_13_050019) do
+ActiveRecord::Schema[8.0].define(version: 2026_06_16_004853) do
   create_table "active_admin_comments", force: :cascade do |t|
     t.string "namespace"
     t.text "body"
@@ -88,6 +88,26 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_13_050019) do
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "family_codes", force: :cascade do |t|
+    t.integer "family_id", null: false
+    t.integer "created_by_id", null: false
+    t.string "code", null: false
+    t.string "email", null: false
+    t.integer "membership_type", null: false
+    t.datetime "expires_at", null: false
+    t.datetime "used_at"
+    t.integer "used_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "related_user_id"
+    t.index ["code"], name: "index_family_codes_on_code", unique: true
+    t.index ["created_by_id"], name: "index_family_codes_on_created_by_id"
+    t.index ["email"], name: "index_family_codes_on_email"
+    t.index ["family_id"], name: "index_family_codes_on_family_id"
+    t.index ["related_user_id"], name: "index_family_codes_on_related_user_id"
+    t.index ["used_by_id"], name: "index_family_codes_on_used_by_id"
   end
 
   create_table "family_memberships", force: :cascade do |t|
@@ -206,6 +226,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_13_050019) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "family_codes", "families"
+  add_foreign_key "family_codes", "users", column: "created_by_id"
+  add_foreign_key "family_codes", "users", column: "related_user_id"
+  add_foreign_key "family_codes", "users", column: "used_by_id"
   add_foreign_key "family_memberships", "families"
   add_foreign_key "family_memberships", "users"
   add_foreign_key "user_partners", "users"

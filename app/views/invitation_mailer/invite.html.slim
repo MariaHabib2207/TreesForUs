@@ -1,4 +1,3 @@
-
 / app/views/invitation_mailer/invite.html.slim
 
 doctype html
@@ -59,16 +58,27 @@ html
               |  TreeOfUs Family Tree
 
         / Message
-        p style="font-size:14.5px; line-height:1.75; color:#4a4a3f; margin:0 0 28px;"
+        p style="font-size:14.5px; line-height:1.75; color:#4a4a3f; margin:0 0 24px;"
           | You've been added to a family tree on
           strong style="color:#2d3a2e; font-weight:500;"
             |  TreeOfUs
           | . Click the button below to set up your account and access your family tree.
 
+        / ── Family code block ───────────────────────────────────────────
+        div style="background:#f2f7f1; border:0.5px solid #c8dcc6; border-radius:10px; padding:16px 20px; margin-bottom:28px;"
+          p style="margin:0 0 6px; font-size:11px; font-weight:600; color:#5a7857; letter-spacing:0.08em; text-transform:uppercase;"
+            | Your membership code
+          div style="display:flex; align-items:center; justify-content:space-between; gap:12px;"
+            span style="font-family:'Lora', serif; font-size:22px; font-weight:600; color:#2d3a2e; letter-spacing:0.18em;"
+              = @family_code.code
+            span style="font-size:11px; color:#8a9e87; background:#e4efe3; border-radius:20px; padding:3px 10px; white-space:nowrap;"
+              = @family_code.membership_type.humanize
+          p style="margin:10px 0 0; font-size:11.5px; color:#8a9e87; line-height:1.5;"
+            | This code is embedded in your link and will be applied automatically. Keep it handy in case you need to enter it manually.
+
         / CTA
         div style="margin-bottom:28px;"
-          = link_to "Set up my account →", @invitation_url,
-              style: "display:inline-block; padding:13px 30px; background:#2d3a2e; color:#e8f5e6; font-family:'DM Sans', sans-serif; font-size:14px; font-weight:500; letter-spacing:0.03em; border-radius:8px; text-decoration:none;"
+          = link_to "Set up my account →", @invitation_url, style: "display:inline-block; padding:13px 30px; background:#2d3a2e; color:#e8f5e6; font-family:'DM Sans', sans-serif; font-size:14px; font-weight:500; letter-spacing:0.03em; border-radius:8px; text-decoration:none;"
 
         / Rule
         div style="height:0.5px; background:#e6dfd4; margin-bottom:18px;"
@@ -78,8 +88,4 @@ html
           | This link expires in 7 days. If you didn't expect this email, you can safely ignore it — no account will be created without your action.
 
       / Bottom bar
-      div style="background:#f7f2eb; border-top:0.5px solid #e6dfd4; padding:14px 32px; display:flex; align-items:center; justify-content:space-between;"
-        span style="font-family:'Lora', serif; font-size:12px; color:#8a9e87; font-weight:600;"
-          | TreeOfUs
-        span style="font-size:11px; color:#b0a898;"
-          | Privacy
+      div

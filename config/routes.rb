@@ -10,6 +10,7 @@ Rails.application.routes.draw do
 
   resources :families do
     resources :family_memberships
+    resources :family_codes, only: [:index, :new, :create, :destroy]
     member do
       get :activity_feed
     end
