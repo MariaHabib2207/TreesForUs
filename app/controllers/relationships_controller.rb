@@ -79,6 +79,7 @@ def user_params
       :password_confirmation,
       user_profile_attributes: [
         :birth_date,
+        :death_date,
         :gender,
         :phone,
         :occupation,

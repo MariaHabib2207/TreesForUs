@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_06_16_004853) do
+ActiveRecord::Schema[8.0].define(version: 2026_06_17_063402) do
   create_table "active_admin_comments", force: :cascade do |t|
     t.string "namespace"
     t.text "body"
@@ -156,6 +156,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_16_004853) do
     t.integer "created_by"
     t.integer "updated_by"
     t.string "current_status"
+    t.date "death_date"
     t.index ["user_id"], name: "index_user_profiles_on_user_id"
   end
 

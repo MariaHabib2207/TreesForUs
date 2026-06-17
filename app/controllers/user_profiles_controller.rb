@@ -38,6 +38,7 @@ def user_profile_params
     :avatar,
     :birth_date,
     :gender,
+    :death_date,
     :marital_status,
     :occupation,
     :address,

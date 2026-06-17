@@ -15,6 +15,7 @@
 #  country        :string
 #  created_by     :integer
 #  current_status :string
+#  death_date     :date
 #  gender         :string
 #  marital_status :string
 #  nationality    :string

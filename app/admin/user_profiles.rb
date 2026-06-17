@@ -2,6 +2,7 @@ ActiveAdmin.register UserProfile do
 
   permit_params :user_id,
                 :birth_date,
+                :death_date,
                 :gender,
                 :marital_status,
                 :occupation,
@@ -43,6 +44,7 @@ ActiveAdmin.register UserProfile do
     f.inputs do
       f.input :user
       f.input :birth_date, as: :datepicker
+      f.input :death_date, as: :datepicker
       f.input :gender
       f.input :marital_status
       f.input :occupation

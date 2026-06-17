@@ -1,3 +1,36 @@
+# == Schema Information
+#
+# Table name: family_codes
+#
+#  id              :integer          not null, primary key
+#  code            :string           not null
+#  email           :string           not null
+#  expires_at      :datetime         not null
+#  membership_type :integer          not null
+#  used_at         :datetime
+#  created_at      :datetime         not null
+#  updated_at      :datetime         not null
+#  created_by_id   :integer          not null
+#  family_id       :integer          not null
+#  related_user_id :integer
+#  used_by_id      :integer
+#
+# Indexes
+#
+#  index_family_codes_on_code             (code) UNIQUE
+#  index_family_codes_on_created_by_id    (created_by_id)
+#  index_family_codes_on_email            (email)
+#  index_family_codes_on_family_id        (family_id)
+#  index_family_codes_on_related_user_id  (related_user_id)
+#  index_family_codes_on_used_by_id       (used_by_id)
+#
+# Foreign Keys
+#
+#  created_by_id    (created_by_id => users.id)
+#  family_id        (family_id => families.id)
+#  related_user_id  (related_user_id => users.id)
+#  used_by_id       (used_by_id => users.id)
+#
 class FamilyCode < ApplicationRecord
   belongs_to :family
   belongs_to :created_by,   class_name: "User"

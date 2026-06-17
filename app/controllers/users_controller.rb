@@ -85,6 +85,7 @@ class UsersController < ApplicationController
       :login_enabled,
       user_profile_attributes: [
         :birth_date,
+        :death_date,
         :gender,
         :marital_status,
         :occupation,

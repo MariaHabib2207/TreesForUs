@@ -1,5 +1,4 @@
 div.min-h-screen.bg-gray-100.flex.items-center.justify-center.p-6
-
   .w-full.max-w-2xl.bg-white.rounded-2xl.shadow-lg.p-8
 
     .text-center.mb-8
@@ -9,7 +8,6 @@ div.min-h-screen.bg-gray-100.flex.items-center.justify-center.p-6
     = form_with model: @user_profile, local: true, html: { multipart: true } do |f|
 
       .flex.flex-col.items-center.mb-6
-
         - if @user_profile.avatar.attached?
           = image_tag @user_profile.avatar,
             class: "w-28 h-28 rounded-full border-4 border-green-700 object-cover mb-3"
@@ -19,6 +17,7 @@ div.min-h-screen.bg-gray-100.flex.items-center.justify-center.p-6
 
         = f.file_field :avatar,
           class: "text-sm text-gray-600"
+
       .grid.grid-cols-1.md:grid-cols-2.gap-4
 
         div
@@ -42,6 +41,22 @@ div.min-h-screen.bg-gray-100.flex.items-center.justify-center.p-6
           = f.label :identification_number, class: "text-sm text-gray-600"
           = f.text_field :identification_number,
             class: "w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
+
+      .mt-4
+        .flex.items-center.gap-2
+          = check_box_tag :is_alive, "1", true,
+            onchange: "
+              const deathDate = document.getElementById('death-date-container');
+              deathDate.style.display = this.checked ? 'none' : 'block';
+            "
+
+          = label_tag :is_alive, "Alive", class: "text-sm text-gray-700"
+
+      #death-date-container.mt-4 style="display:none;"
+        = f.label :death_date, class: "text-sm text-gray-600"
+        = f.date_field :death_date,
+          max: Date.current,
+          class: "w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500"
 
       .mt-6
         = f.submit "Create Profile",
