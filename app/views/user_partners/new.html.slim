@@ -36,9 +36,7 @@
         | Spouse Mode
 
       label.flex.items-center.gap-4.cursor-pointer.mb-4
-
         input#create_new_partner_toggle name="create_new_partner" value="1" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-green-700 focus:ring-green-700"
-
         span.text-sm.font-medium.text-gray-700
           | Create new spouse instead of selecting existing member
 
@@ -56,14 +54,7 @@
 
       .space-y-2
         = f.label :partner_id, "Spouse", class: "block text-sm font-medium text-gray-700"
-
-        = f.collection_select :partner_id,
-          @available_users,
-          :id,
-          :full_name,
-          { prompt: "Choose spouse" },
-          class: "w-full rounded-xl border #{@user_partner.errors[:partner_id].any? ? 'border-red-400 bg-red-50' : 'border-gray-300'} px-4 py-3 bg-white focus:ring-2 focus:ring-green-700 focus:border-green-700"
-
+        = f.collection_select :partner_id, @available_users, :id, :full_name, { prompt: "Choose spouse" }, class: "w-full rounded-xl border #{@user_partner.errors[:partner_id].any? ? 'border-red-400 bg-red-50' : 'border-gray-300'} px-4 py-3 bg-white focus:ring-2 focus:ring-green-700 focus:border-green-700"
         - if @user_partner.errors[:partner_id].any?
           p.text-xs.text-red-600.mt-1 = @user_partner.errors[:partner_id].first
 
@@ -84,51 +75,53 @@
 
           .space-y-2
             = label_tag "first_name", "First name", class: "block text-sm font-medium text-gray-700"
-            = text_field_tag "partner[first_name]", nil,
-              id: "first_name",
-              placeholder: "e.g. Siti",
-              class: "w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
+            = text_field_tag "partner[first_name]", nil, id: "first_name", placeholder: "e.g. Siti", class: "w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
 
           .space-y-2
             = label_tag "last_name", "Last name", class: "block text-sm font-medium text-gray-700"
-            = text_field_tag "partner[last_name]", nil,
-              id: "last_name",
-              placeholder: "e.g. Abdullah",
-              class: "w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
+            = text_field_tag "partner[last_name]", nil, id: "last_name", placeholder: "e.g. Abdullah", class: "w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
 
           .space-y-2
             = label_tag "id_type", "ID Type", class: "block text-sm font-medium text-gray-700"
-            = select_tag "partner[identification_type]",
-              options_for_select(User.identification_types.keys.map { |k| [k.humanize, k] }),
-              include_blank: "Select ID Type",
-              id: "id_type",
-              class: "w-full rounded-xl border border-gray-300 px-4 py-3 bg-white focus:ring-2 focus:ring-green-700 focus:border-green-700"
+            = select_tag "partner[identification_type]", options_for_select(User.identification_types.keys.map { |k| [k.humanize, k] }), include_blank: "Select ID Type", id: "id_type", class: "w-full rounded-xl border border-gray-300 px-4 py-3 bg-white focus:ring-2 focus:ring-green-700 focus:border-green-700"
 
           .space-y-2
             = label_tag "id_number", "ID Number", class: "block text-sm font-medium text-gray-700"
-            = text_field_tag "partner[identification_number]", nil,
-              id: "id_number",
-              placeholder: "Enter ID number",
-              class: "w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
+            = text_field_tag "partner[identification_number]", nil, id: "id_number", placeholder: "Enter ID number", class: "w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
 
-          .space-y-2
-            = label_tag "partner_status", "Status", class: "block text-sm font-medium text-gray-700"
-            = select_tag "partner[status]",
-              options_for_select(User.statuses.keys.map { |k| [k.humanize, k] }),
-              id: "partner_status",
-              class: "w-full rounded-xl border border-gray-300 px-4 py-3 bg-white focus:ring-2 focus:ring-green-700 focus:border-green-700"
+      / ── Vital Status ──────────────────────────────────
+
+      .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-8.mb-8
+
+        h2.text-xl.font-semibold.text-gray-900.mb-5
+          | Vital Status
+
+        / Hidden status field — toggled by JS
+        input#partner_status_field name="partner[status]" type="hidden" value="alive"
+
+        label.flex.items-center.gap-4.cursor-pointer.mb-4
+          input#partner_is_alive_checkbox type="checkbox" checked="checked" class="h-5 w-5 rounded border-gray-300 text-green-700 focus:ring-green-700"
+          span.text-sm.font-medium.text-gray-700
+            | This spouse is alive
+
+        / Death date — hidden by default
+        #partner_death_date_field.hidden.mt-4
+          .bg-red-50.border.border-red-200.rounded-xl.p-4
+            .flex.items-center.gap-2.mb-4
+              span.text-red-600.text-sm.font-medium ✝ Deceased — please enter the date of passing
+            .space-y-2.max-w-xs
+              label.block.text-sm.font-medium.text-gray-700 Date of Death
+              = date_field_tag "partner[user_profile_attributes][death_date]", nil, id: "partner_death_date", max: Date.today, class: "w-full rounded-xl border border-red-300 px-4 py-3 focus:ring-2 focus:ring-red-400 focus:border-red-400"
 
       / ── Login Access ──────────────────────────────────
 
-      .bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-8.mb-8
+      #partner_login_access_section.bg-white.rounded-2xl.shadow-sm.border.border-gray-100.p-8.mb-8
 
         h2.text-xl.font-semibold.text-gray-900.mb-6
           | Login Access
 
         label.flex.items-center.gap-4.cursor-pointer.mb-4
-
           input#partner_login_enabled name="partner[login_enabled]" value="1" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-green-700 focus:ring-green-700"
-
           span.text-sm.font-medium.text-gray-700
             | Enable login access for this spouse
 
@@ -139,29 +132,19 @@
           span.font-semibold.text-gray-700.mx-1 Viewers.
 
         #partner_login_fields.hidden
-
           .grid.grid-cols-1.md:grid-cols-3.gap-6
 
             .space-y-2
               = label_tag "partner_email", "Email Address", class: "block text-sm font-medium text-gray-700"
-              = email_field_tag "partner[email]", nil,
-                id: "partner_email",
-                placeholder: "email@example.com",
-                class: "w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
+              = email_field_tag "partner[email]", nil, id: "partner_email", placeholder: "email@example.com", class: "w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
 
             .space-y-2
               = label_tag "partner_password", "Password", class: "block text-sm font-medium text-gray-700"
-              = password_field_tag "partner[password]", nil,
-                id: "partner_password",
-                placeholder: "Min. 8 characters",
-                class: "w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
+              = password_field_tag "partner[password]", nil, id: "partner_password", placeholder: "Min. 8 characters", class: "w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
 
             .space-y-2
               = label_tag "partner_password_confirmation", "Confirm Password", class: "block text-sm font-medium text-gray-700"
-              = password_field_tag "partner[password_confirmation]", nil,
-                id: "partner_password_confirmation",
-                placeholder: "Repeat password",
-                class: "w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
+              = password_field_tag "partner[password_confirmation]", nil, id: "partner_password_confirmation", placeholder: "Repeat password", class: "w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
 
       / ── Profile Details ───────────────────────────────
 
@@ -172,75 +155,48 @@
 
         .mb-8
           label.block.text-sm.font-medium.text-gray-700.mb-3 Profile Photo
-
           .flex.items-center.gap-6
-
             .shrink-0
               .h-24.w-24.rounded-full.bg-gray-100.border-2.border-dashed.border-gray-300.flex.items-center.justify-center.text-gray-400.text-sm
                 | Photo
-
             .flex-1
-              = file_field_tag "partner[user_profile_attributes][avatar]",
-                accept: "image/*",
-                id: "partner_avatar",
-                class: "block w-full text-sm text-gray-600 file:mr-4 file:rounded-xl file:border-0 file:bg-green-700 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-green-800"
-
-              p.text-xs.text-gray-500.mt-2
-                | JPG, PNG or WEBP recommended
+              = file_field_tag "partner[user_profile_attributes][avatar]", accept: "image/*", id: "partner_avatar", class: "block w-full text-sm text-gray-600 file:mr-4 file:rounded-xl file:border-0 file:bg-green-700 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-green-800"
+              p.text-xs.text-gray-500.mt-2 JPG, PNG or WEBP recommended
 
         .grid.grid-cols-1.md:grid-cols-2.gap-6
 
           .space-y-2
             = label_tag "birth_date", "Date of Birth", class: "block text-sm font-medium text-gray-700"
-            = date_field_tag "partner[user_profile_attributes][birth_date]", nil,
-              id: "birth_date",
-              max: Date.today,
-              class: "w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
+            = date_field_tag "partner[user_profile_attributes][birth_date]", nil, id: "birth_date", max: Date.today, class: "w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
 
           .space-y-2
             = label_tag "gender", "Gender", class: "block text-sm font-medium text-gray-700"
-            = select_tag "partner[user_profile_attributes][gender]",
-              options_for_select([["Male", "male"], ["Female", "female"]]),
-              include_blank: "Select Gender",
-              id: "gender",
-              class: "w-full rounded-xl border border-gray-300 px-4 py-3 bg-white focus:ring-2 focus:ring-green-700 focus:border-green-700"
+            = select_tag "partner[user_profile_attributes][gender]", options_for_select([["Male", "male"], ["Female", "female"]]), include_blank: "Select Gender", id: "gender", class: "w-full rounded-xl border border-gray-300 px-4 py-3 bg-white focus:ring-2 focus:ring-green-700 focus:border-green-700"
 
           .space-y-2
             = label_tag "phone", "Phone Number", class: "block text-sm font-medium text-gray-700"
-            = text_field_tag "partner[user_profile_attributes][phone]", nil,
-              id: "phone",
-              placeholder: "+60 12-345 6789",
-              class: "w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
+            = text_field_tag "partner[user_profile_attributes][phone]", nil, id: "phone", placeholder: "+60 12-345 6789", class: "w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
 
           .space-y-2
             = label_tag "occupation", "Occupation", class: "block text-sm font-medium text-gray-700"
-            = text_field_tag "partner[user_profile_attributes][occupation]", nil,
-              id: "occupation",
-              placeholder: "e.g. Engineer",
-              class: "w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
+            = text_field_tag "partner[user_profile_attributes][occupation]", nil, id: "occupation", placeholder: "e.g. Engineer", class: "w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
 
           .space-y-2.md:col-span-2
             = label_tag "address", "Address", class: "block text-sm font-medium text-gray-700"
-            = text_area_tag "partner[user_profile_attributes][address]", nil,
-              id: "address",
-              rows: 3,
-              placeholder: "Street, City, Postcode",
-              class: "w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
+            = text_area_tag "partner[user_profile_attributes][address]", nil, id: "address", rows: 3, placeholder: "Street, City, Postcode", class: "w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
 
     / =====================================================
     / ACTIONS
     / =====================================================
 
     .flex.justify-end.gap-4.mt-8
-      = link_to "Cancel", user_path(@user),
-        class: "inline-flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 px-6 py-3 text-gray-700 font-medium transition duration-200"
-      = f.submit "Add Spouse",
-        class: "inline-flex items-center justify-center rounded-xl primary-btn px-8 py-4 text-white font-semibold shadow-md transition duration-200"
+      = link_to "Cancel", user_path(@user), class: "inline-flex items-center justify-center rounded-xl bg-gray-100 hover:bg-gray-200 px-6 py-3 text-gray-700 font-medium transition duration-200"
+      = f.submit "Add Spouse", class: "inline-flex items-center justify-center rounded-xl primary-btn px-8 py-4 text-white font-semibold shadow-md transition duration-200"
 
 javascript:
   document.addEventListener("DOMContentLoaded", function () {
 
-    // Toggle 1: existing vs new spouse
+    // ── Toggle 1: existing vs new spouse ──────────────────────────────
     var modeToggle    = document.getElementById("create_new_partner_toggle");
     var existingSec   = document.getElementById("existing_partner_section");
     var newSec        = document.getElementById("new_partner_section");
@@ -255,15 +211,31 @@ javascript:
     modeToggle.addEventListener("change", updateMode);
     updateMode();
 
-    // Toggle 2: login access fields
-    var loginCheckbox = document.getElementById("partner_login_enabled");
-    var loginFields   = document.getElementById("partner_login_fields");
-    var emailField    = document.getElementById("partner_email");
+    // ── Toggle 2: alive / deceased ────────────────────────────────────
+    var aliveCheckbox      = document.getElementById("partner_is_alive_checkbox");
+    var statusField        = document.getElementById("partner_status_field");
+    var deathDateSection   = document.getElementById("partner_death_date_field");
+    var loginAccessSection = document.getElementById("partner_login_access_section");
+    var loginCheckbox      = document.getElementById("partner_login_enabled");
+    var loginFields        = document.getElementById("partner_login_fields");
+
+    function updateAlive() {
+      var alive = aliveCheckbox.checked;
+      statusField.value = alive ? "alive" : "dead";
+      deathDateSection.classList.toggle("hidden", alive);
+      loginAccessSection.classList.toggle("hidden", !alive);
+      if (!alive) {
+        loginCheckbox.checked = false;
+        updateLogin();
+      }
+    }
+
+    // ── Toggle 3: login access fields ─────────────────────────────────
+    var emailField   = document.getElementById("partner_email");
     var passwordField = document.getElementById("partner_password");
     var confirmField  = document.getElementById("partner_password_confirmation");
 
     function updateLogin() {
-      if (!loginCheckbox) return;
       var enabled = loginCheckbox.checked;
       loginFields.classList.toggle("hidden", !enabled);
       if (emailField)    emailField.required    = enabled;
@@ -271,12 +243,12 @@ javascript:
       if (confirmField)  confirmField.required  = enabled;
     }
 
-    if (loginCheckbox) {
-      loginCheckbox.addEventListener("change", updateLogin);
-      updateLogin();
-    }
+    aliveCheckbox.addEventListener("change", updateAlive);
+    loginCheckbox.addEventListener("change", updateLogin);
+    updateAlive();
+    updateLogin();
 
-    // Auto-open new form if nothing selected on submit
+    // ── Auto-open new form if nothing selected on submit ───────────────
     modeToggle.closest("form").addEventListener("submit", function (e) {
       if (!modeToggle.checked && (!partnerSelect || !partnerSelect.value)) {
         e.preventDefault();
