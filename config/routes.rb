@@ -17,7 +17,7 @@ Rails.application.routes.draw do
   end
 
   resources :activities, only: [:index]
-
+resources :friendships, only: [:new, :create, :destroy]
   resources :user_profiles
 
   resources :users do

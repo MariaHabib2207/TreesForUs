@@ -70,7 +70,8 @@ class User < ApplicationRecord
   # ===================================================
   # ASSOCIATIONS
   # ===================================================
-
+  has_many :friendships, dependent: :destroy
+  has_many :friends, through: :friendships
   # -------------------------
   # PROFILE
   # -------------------------
@@ -186,25 +187,21 @@ class User < ApplicationRecord
 
     case identification_type
     when "nric"
-      # Example: Malaysian NRIC format (simplified)
       unless identification_number.match?(/\A\d{6}-\d{2}-\d{4}\z/)
         errors.add(:identification_number, "must be in NRIC format XXXXXX-XX-XXXX")
       end
 
     when "passport"
-      # Common passport pattern (alphanumeric, 6–9 chars)
       unless identification_number.match?(/\A[A-Z0-9]{6,9}\z/i)
         errors.add(:identification_number, "must be a valid passport number")
       end
 
     when "driving_license"
-      # Example: alphanumeric, 5–15 chars
       unless identification_number.match?(/\A[A-Z0-9\-]{5,15}\z/i)
         errors.add(:identification_number, "must be a valid driving license number")
       end
 
     when "birth_certificate"
-      # Example: digits only (adjust if your country differs)
       unless identification_number.match?(/\A\d{6,20}\z/)
         errors.add(:identification_number, "must be a valid birth certificate number")
       end
@@ -214,12 +211,10 @@ class User < ApplicationRecord
   # DEVISE OVERRIDES
   # ===================================================
 
-  # Email required only for login-enabled users
   def email_required?
     login_enabled?
   end
 
-  # Password required only for login-enabled users
   def password_required?
     return false unless login_enabled?
 
@@ -229,11 +224,19 @@ class User < ApplicationRecord
   # ===================================================
   # BUSINESS RULES
   # ===================================================
-  def cannot_have_more_than_two_families
-    return if families.size <= 2
+ def cannot_have_more_than_two_families
+  birth_families = families.select { |f| f.family_membership_type == "birth" }
+  marriage_families = families.select { |f| f.family_membership_type == "marriage" }
 
-    errors.add(:families, "cannot exceed 2")
+  if birth_families.size > 1
+    errors.add(:families, "can only have one birth family")
   end
+
+  if marriage_families.size > 1
+    errors.add(:families, "can only have one marriage family")
+  end
+
+end
 
   # ===================================================
   # RANSACK

@@ -15,6 +15,11 @@ class Family < ApplicationRecord
     %w[id name created_at updated_at]
   end
 
+  def friend_family?
+    family_memberships.exists? &&
+      family_memberships.all? { |m| m.friend? }
+  end
+
   def self.ransackable_associations(auth_object = nil)
     %w[users family_memberships]
   end

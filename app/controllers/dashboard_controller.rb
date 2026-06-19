@@ -1,27 +1,33 @@
 class DashboardController < ApplicationController
   before_action :authenticate_user!
 
-  def index
-    @user = current_user
-    @user_profile = @user.user_profile
+def index  
+  @user = current_user
+  @user_profile = @user.user_profile
 
-    @active_family = resolve_active_family
-    return unless @active_family.present?
 
-    preload_family_relationships
-
-    @family_user_ids = @preloaded_users.map(&:id)
-
-    @root_member =
-      find_root_member_in_family(@active_family)
-
-    @family_tree =
-      @root_member.present? ? build_family_tree(@root_member) : nil
+  @active_family = resolve_active_family
+  return unless @active_family.present?
+  @family_type = current_user.family_memberships.last&.membership_type
+  if @active_family.family_memberships.last&.membership_type == "friend"
+    @friend_members = @active_family.family_memberships
+                                    .where.not(user: current_user)
+                                    .includes(user: :user_profile)
+                                    .map { |m| { user: m.user, profile: m.user.user_profile } }
+    return
   end
 
+
+  preload_family_relationships
+
+  @family_user_ids = @preloaded_users.map(&:id)
+
+  @root_member = find_root_member_in_family(@active_family)
+  @family_tree = @root_member.present? ? build_family_tree(@root_member) : nil
+end
   private
 
-  def resolve_active_family
+  def resolve_active_family 
     family_id =
       if params[:family_id].present?
         params[:family_id].to_i

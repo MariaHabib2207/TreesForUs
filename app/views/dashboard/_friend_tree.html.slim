@@ -3,9 +3,6 @@
 - friend_nodes = members || []
 - total = friend_nodes.size
 - radius = 170
-
-h1 Friends
-
 - if total.zero?
   div.friend-circle-empty
     p No friends yet. Use the button below to add your first friend.
@@ -26,17 +23,6 @@ h1 Friends
         span.btn-add__icon +
         span.btn-add__label Friend
 
-      / --- INVITE (current user card) ---
-      - if current_user != current_user && !current_user.login_enabled?
-        - if current_user.invitation_sent_at.present?
-          div.btn-add.btn-add--invite.btn-add--dynamic.btn-add--invited
-            span.btn-add__icon ✉
-            span.btn-add__label Invited
-        - else
-          = link_to new_user_invitation_path(user_id: current_user.id, type: "friend", related_user_id: current_user.id), class: "btn-add btn-add--invite btn-add--dynamic", title: "Invite to app", data: { turbo_frame: "modal" } do
-            span.btn-add__icon ✉
-            span.btn-add__label Invite
-
 - else
   div.friend-circle(data-family-id=params[:family_id] style="position: relative; width: 480px; height: 480px; margin: 0 auto;")
 
@@ -48,8 +34,7 @@ h1 Friends
         line(x1="240" y1="240" x2="#{x}" y2="#{y}" stroke="var(--wire)" stroke-width="2")
 
     / --- CENTER: current user ---
-    div(style="position: absolute; top: 240px; left: 240px; transform: translate(-50%, -50%); z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 6px;")
-
+    div(style="position: absolute; top: 240px; left: 240px; transform: translate(-50%, -50%); z-index: 2;")
       div.card-wrapper
         = link_to user_profile_path(current_user.id), class: "card friend-card friend-card--current", data: { turbo_frame: "modal" } do
           div.avatar.avatar--lg
@@ -74,8 +59,7 @@ h1 Friends
       - x         = 240 + (radius * Math.cos(angle)).round
       - y         = 240 + (radius * Math.sin(angle)).round
 
-      div(data-user-id=f_user.id style="position: absolute; top: #{y}px; left: #{x}px; transform: translate(-50%, -50%); z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 6px;")
-
+      div(data-user-id=f_user.id style="position: absolute; top: #{y}px; left: #{x}px; transform: translate(-50%, -50%); z-index: 2;")
         div.card-wrapper
           = link_to user_profile_path(f_user.id), class: "card friend-card", data: { turbo_frame: "modal" } do
             div.avatar
@@ -92,12 +76,12 @@ h1 Friends
               strong = "#{f_user.first_name} #{f_user.last_name}"
               div = f_profile&.occupation || "—"
 
-          / --- ADD FRIEND (from this node) ---
+          / --- ADD FRIEND ---
           = link_to new_friendship_path(user_id: f_user.id, family_id: params[:family_id]), class: "btn-add btn-add--friend btn-add--dynamic", title: "Add friend", data: { turbo_frame: "modal" } do
             span.btn-add__icon +
             span.btn-add__label Friend
 
-          / --- INVITE ---
+          / --- INVITE (inside card-wrapper so hover works) ---
           - if f_user != current_user && !f_user.login_enabled?
             - if f_user.invitation_sent_at.present?
               div.btn-add.btn-add--invite.btn-add--dynamic.btn-add--invited

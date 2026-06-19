@@ -306,10 +306,7 @@ body {
   padding: 48px 40px 90px;
   position: relative;
   box-sizing: border-box;
-  /* Pinch-to-zoom on mobile */
   touch-action: pan-x pan-y;
-
-  /* Fade hint at right edge signals horizontal scroll */
   mask-image: linear-gradient(
     to right,
     black calc(100% - 32px),
@@ -322,7 +319,6 @@ body {
   );
 }
 
-/* JS can add .scrolled-end when user reaches the right edge */
 .family-tree-scroll.scrolled-end {
   mask-image: none;
   -webkit-mask-image: none;
@@ -592,7 +588,6 @@ body {
   transform: translateX(-50%) translateY(-2px);
 }
 
-/* Disable tooltip on touch (it flickers on tap) */
 @media (hover: none) {
   .tooltip {
     display: none;
@@ -692,7 +687,6 @@ body {
   border-style: solid;
   color: var(--btn-color);
   cursor: default;
-  pointer-events: none;
 }
 
 /* Delete button */
@@ -739,7 +733,6 @@ body {
    CSS CONNECTOR LINES
    ============================================================ */
 
-/* Vertical arm from horizontal bar down to each child */
 .child-column::before {
   content: "";
   position: absolute;
@@ -751,7 +744,6 @@ body {
   transform: translateX(-50%);
 }
 
-/* Horizontal bar across all children */
 .children-row::before {
   content: "";
   position: absolute;
@@ -935,12 +927,12 @@ body {
 .item-time   { font-size: 11px; color: #9ca3af; margin-left: auto; white-space: nowrap; }
 .item-desc   { font-size: 12px; color: #6b7280; margin-top: 4px; line-height: 1.5; }
 
-.icon-dot        { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.dot-green       { background: #22c55e; }
-.dot-amber       { background: #f59e0b; }
-.dot-red         { background: #ef4444; }
-.dot-blue        { background: #3b82f6; }
-.dot-purple      { background: #8b5cf6; }
+.icon-dot   { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.dot-green  { background: #22c55e; }
+.dot-amber  { background: #f59e0b; }
+.dot-red    { background: #ef4444; }
+.dot-blue   { background: #3b82f6; }
+.dot-purple { background: #8b5cf6; }
 
 .item-badge {
   display: inline-flex;
@@ -980,16 +972,16 @@ body {
   text-align: center;
 }
 
-.invitation-box h1      { font-size: 1.5rem; margin: 16px 0 4px; }
+.invitation-box h1        { font-size: 1.5rem; margin: 16px 0 4px; }
 .invitation-box .subtitle { color: #6b7280; margin-bottom: 28px; }
-.invitation-box .field  { text-align: left; margin-bottom: 16px; }
+.invitation-box .field    { text-align: left; margin-bottom: 16px; }
 .invitation-box .btn--full { width: 100%; margin-top: 8px; }
 
 /* ============================================================
    RESPONSIVE BREAKPOINTS
    ============================================================ */
 
-/* ── 900 px — slightly narrower cards ── */
+/* ── 900 px ── */
 @media (max-width: 900px) {
   :root {
     --card-w:  132px;
@@ -997,7 +989,7 @@ body {
   }
 }
 
-/* ── 640 px — compact cards, tighter branches ── */
+/* ── 640 px ── */
 @media (max-width: 640px) {
   :root {
     --card-w:      116px;
@@ -1007,9 +999,7 @@ body {
     --avatar-size: 40px;
   }
 
-  .dashboard-page {
-    padding: 16px 12px 80px;
-  }
+  .dashboard-page { padding: 16px 12px 80px; }
 
   .card {
     padding: 10px 8px;
@@ -1017,7 +1007,6 @@ body {
   }
 
   .card-name { font-size: 11px; }
-
   .card-role,
   .card-age  { font-size: 9px; }
 
@@ -1026,26 +1015,17 @@ body {
     margin: 0 -36px -36px;
   }
 
-  .stats-row {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
 
-  .family-tree-scroll {
-    padding: 32px 0 60px;
-  }
+  .family-tree-scroll { padding: 32px 0 60px; }
 
-  /* Feed header stacks on small screens */
   .feed-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 10px;
   }
 
-  /* Feed items: tighten up */
-  .feed-item {
-    padding: 12px 12px;
-    gap: 10px;
-  }
+  .feed-item { padding: 12px; gap: 10px; }
 
   .item-time {
     margin-left: 0;
@@ -1054,17 +1034,11 @@ body {
     margin-top: 4px;
   }
 
-  /* Family badge shrinks */
-  .family-badge {
-    padding: 10px 16px;
-  }
-
-  .family-title {
-    font-size: 15px;
-  }
+  .family-badge  { padding: 10px 16px; }
+  .family-title  { font-size: 15px; }
 }
 
-/* ── 480 px — phone-sized cards, always-visible add buttons ── */
+/* ── 480 px ── */
 @media (max-width: 480px) {
   :root {
     --card-w:      108px;
@@ -1081,7 +1055,6 @@ body {
   }
 
   .card-name { font-size: 10px; }
-
   .card-role,
   .card-age  { font-size: 9px; }
 
@@ -1093,35 +1066,24 @@ body {
   .couple-heart { font-size: 10px; }
   .couple-line  { width: 14px; }
 
-  /* On touch screens hover doesn't fire — make add buttons always visible */
-  .btn-add--dynamic {
+  /* Always-visible add buttons on touch — but NOT inside friend-circle */
+  .btn-add--dynamic:not(.friend-circle *) {
     opacity: 1;
     pointer-events: auto;
   }
 
-  .btn-add--spouse {
-    transform: translateY(calc(-50% - 22px)) scale(1);
-  }
+  .btn-add--spouse { transform: translateY(calc(-50% - 22px)) scale(1); }
+  .btn-add--child  { transform: translateX(-50%) scale(1); }
 
-  .btn-add--child {
-    transform: translateX(-50%) scale(1);
-  }
-
-  /* Shrink add button labels on very small cards */
-  .btn-add__label {
-    display: none;
-  }
+  .btn-add__label { display: none; }
 
   .btn-add {
     padding: 5px 7px;
     font-size: 11px;
   }
 
-  .btn-add__icon {
-    font-size: 12px;
-  }
+  .btn-add__icon { font-size: 12px; }
 
-  /* Family bar stacks vertically */
   .dashboard-family-bar {
     flex-direction: column;
     align-items: stretch;
@@ -1148,15 +1110,10 @@ body {
     text-align: center;
   }
 
-  .empty-family-state {
-    padding: 40px 16px;
-  }
-
-  .empty-icon { font-size: 44px; }
-
+  .empty-family-state { padding: 40px 16px; }
+  .empty-icon         { font-size: 44px; }
   .empty-family-state h2 { font-size: 19px; }
 
-  /* Scroll hint strip — show on mobile */
   .tree-scroll-hint {
     display: flex;
     align-items: center;
@@ -1174,18 +1131,12 @@ body {
     opacity: .6;
   }
 
-  /* Stats row: 2-col on phone */
-  .stats-row {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
 
-  /* Invitation box: tighter padding */
-  .invitation-box {
-    padding: 28px 20px;
-  }
+  .invitation-box { padding: 28px 20px; }
 }
 
-/* ── 360 px — micro phones ── */
+/* ── 360 px ── */
 @media (max-width: 360px) {
   :root {
     --card-w:      96px;
@@ -1199,38 +1150,94 @@ body {
     padding: 10px 14px;
   }
 
-  .current-family-label {
-    font-size: 18px;
-  }
-
-  .card-name { font-size: 9px; }
+  .current-family-label { font-size: 18px; }
+  .card-name            { font-size: 9px; }
 }
 
-/* ── Touch devices: disable hover-only interactions ── */
+/* ── Touch devices ── */
 @media (hover: none) and (pointer: coarse) {
-  /* Always show add buttons */
-  .btn-add--dynamic {
+  /* Always show add buttons — but NOT inside friend-circle */
+  .btn-add--dynamic:not(.friend-circle *) {
     opacity: 1;
     pointer-events: auto;
   }
 
-  .btn-add--spouse {
-    transform: translateY(calc(-50% - 22px)) scale(1);
-  }
+  .btn-add--spouse { transform: translateY(calc(-50% - 22px)) scale(1); }
+  .btn-add--child  { transform: translateX(-50%) scale(1); }
 
-  .btn-add--child {
-    transform: translateX(-50%) scale(1);
-  }
-
-  /* No hover lift on cards (causes sticky state on touch) */
   .card:hover {
     transform: none;
     box-shadow: var(--card-shadow);
   }
 
-  /* No hover on feed items */
   .feed-item:hover {
     transform: none;
     box-shadow: none;
   }
+}
+
+/* ============================================================
+   FRIEND CARD — current user style
+   ============================================================ */
+
+.card.friend-card--current {
+  background: linear-gradient(145deg, rgb(74, 118, 98), rgb(62, 107, 87));
+  border: 1px solid rgba(255, 255, 255, .12);
+}
+
+.card.friend-card--current .card-name  { color: var(--root-text); }
+.card.friend-card--current .card-role,
+.card.friend-card--current .card-age   { color: var(--root-sub); }
+.card.friend-card--current .avatar-initials {
+  background: rgba(255, 255, 255, .92);
+  color: var(--dark-green);
+}
+
+/* ============================================================
+   FRIEND CIRCLE — card-wrapper & button positioning
+   ============================================================ */
+
+.friend-circle .card-wrapper {
+  margin: 0;
+  padding: 44px 8px;
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Both buttons hidden by default — explicit override beats media queries */
+.friend-circle .btn-add--friend.btn-add--dynamic,
+.friend-circle .btn-add--invite.btn-add--dynamic {
+  position: absolute;
+  left: 50%;
+  right: auto;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  z-index: 10;
+  transform: translateX(-50%) scale(.85);
+  transition: opacity .18s ease, transform .18s ease;
+}
+
+/* Add Friend → top */
+.friend-circle .btn-add--friend.btn-add--dynamic {
+  top: 0;
+  bottom: auto;
+}
+
+/* Invite → bottom */
+.friend-circle .btn-add--invite.btn-add--dynamic {
+  bottom: 0;
+  top: auto;
+}
+
+/* Reveal on hover / focus */
+.friend-circle .card-wrapper:hover .btn-add--friend.btn-add--dynamic,
+.friend-circle .card-wrapper:hover .btn-add--invite.btn-add--dynamic,
+.friend-circle .card-wrapper:focus-within .btn-add--friend.btn-add--dynamic,
+.friend-circle .card-wrapper:focus-within .btn-add--invite.btn-add--dynamic {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: translateX(-50%) scale(1);
 }

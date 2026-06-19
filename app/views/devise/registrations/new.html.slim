@@ -96,7 +96,7 @@ html
             class: "w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
 
           p id="under16_family_hint" class="hidden text-xs text-amber-600 font-medium"
-            | You are under 16 — family type is set to Birth Family automatically.
+            |  You are under 16 — only Birth Family and Friend family types are available.
 
           / ── FAMILY SECTION ──────────────────────────────────────────────────
           div id="family_section"
@@ -225,46 +225,65 @@ javascript:
       return age;
     }
 
-    function applyAgeRules() {
-      const age = calculateAge(birthDateField.value);
-      if (age === null) return;
+  function applyAgeRules() {
+  const age = calculateAge(birthDateField.value);
+  if (age === null) return;
 
-      if (age < 16) {
-        const singleOpt = Array.from(maritalStatusSelect.options)
-          .find(o => o.text.toLowerCase() === "single" || o.value.toLowerCase() === "single");
-        if (singleOpt) {
-          maritalStatusSelect.value = singleOpt.value;
-          maritalStatusHidden.value = singleOpt.value;
-        }
-        maritalStatusSelect.disabled = true;
-        maritalStatusSelect.classList.add("opacity-50", "cursor-not-allowed");
-
-        if (membershipSelect) {
-          const birthOpt = Array.from(membershipSelect.options)
-            .find(o => o.text.toLowerCase().includes("birth") || o.value.toLowerCase().includes("birth"));
-          if (birthOpt) {
-            membershipSelect.value     = birthOpt.value;
-            membershipTypeHidden.value = birthOpt.value;
-          }
-          membershipSelect.disabled = true;
-          membershipSelect.classList.add("opacity-50", "cursor-not-allowed");
-        }
-
-        if (under16Hint) under16Hint.classList.remove("hidden");
-      } else {
-        maritalStatusSelect.disabled = false;
-        maritalStatusSelect.classList.remove("opacity-50", "cursor-not-allowed");
-        maritalStatusHidden.value = "";
-
-        if (membershipSelect) {
-          membershipSelect.disabled = false;
-          membershipSelect.classList.remove("opacity-50", "cursor-not-allowed");
-          membershipTypeHidden.value = "";
-        }
-
-        if (under16Hint) under16Hint.classList.add("hidden");
-      }
+  if (age < 16) {
+    // Lock marital status to Single
+    const singleOpt = Array.from(maritalStatusSelect.options)
+      .find(o => o.text.toLowerCase() === "single" || o.value.toLowerCase() === "single");
+    if (singleOpt) {
+      maritalStatusSelect.value = singleOpt.value;
+      maritalStatusHidden.value = singleOpt.value;
     }
+    maritalStatusSelect.disabled = true;
+    maritalStatusSelect.classList.add("opacity-50", "cursor-not-allowed");
+
+    // Allow only Birth and Friend membership types
+    if (membershipSelect) {
+      Array.from(membershipSelect.options).forEach(opt => {
+        const val = opt.value.toLowerCase();
+        const txt = opt.text.toLowerCase();
+        const isAllowed = val === "" ||
+                          txt.includes("birth") || val.includes("birth") ||
+                          txt.includes("friend") || val.includes("friend");
+        opt.disabled = !isAllowed;
+        opt.style.display = isAllowed ? "" : "none";
+      });
+
+      // If current selection is now disallowed, reset it
+      const currentOpt = membershipSelect.options[membershipSelect.selectedIndex];
+      if (currentOpt && currentOpt.disabled) {
+        membershipSelect.value     = "";
+        membershipTypeHidden.value = "";
+      }
+
+      membershipSelect.disabled = false;
+      membershipSelect.classList.remove("opacity-50", "cursor-not-allowed");
+    }
+
+    if (under16Hint) under16Hint.classList.remove("hidden");
+
+  } else {
+    // Over 16 — unlock everything
+    maritalStatusSelect.disabled = false;
+    maritalStatusSelect.classList.remove("opacity-50", "cursor-not-allowed");
+    maritalStatusHidden.value = "";
+
+    if (membershipSelect) {
+      Array.from(membershipSelect.options).forEach(opt => {
+        opt.disabled = false;
+        opt.style.display = "";
+      });
+      membershipSelect.disabled = false;
+      membershipSelect.classList.remove("opacity-50", "cursor-not-allowed");
+      membershipTypeHidden.value = "";
+    }
+
+    if (under16Hint) under16Hint.classList.add("hidden");
+  }
+}
 
     birthDateField.addEventListener("change", applyAgeRules);
     applyAgeRules();

@@ -10,7 +10,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
     respond_with resource
   end
 
-  def create
+  def create    
     build_resource(sign_up_params)
 
     ActiveRecord::Base.transaction do
@@ -52,7 +52,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
             user:            resource,
             family:          family,
             membership_type: params[:membership_type],
-            pending_link:    pending
+       
           )
         end
       end

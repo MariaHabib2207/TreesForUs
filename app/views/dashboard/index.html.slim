@@ -1,3 +1,6 @@
 body.login-bg
   .dashboard-page
-    = render "family_tree", node: @family_tree, depth: 0
+    - if @active_family.family_memberships.first.membership_type== "friend"
+      = render "friend_tree", members: @friend_members
+    - else
+       = render "family_tree", node: @family_tree, depth: 0

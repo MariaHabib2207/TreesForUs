@@ -1,0 +1,251 @@
+= form_with model: @user,
+  url: friendships_path,
+  method: :post,
+  local: true,
+  html: { multipart: true } do |f|
+
+  / HIDDEN FIELDS
+  = hidden_field_tag :user_id, params[:user_id] || @anchor&.id
+  = hidden_field_tag :family_id, params[:family_id] || @active_family&.id
+  = f.hidden_field :role, value: (@login_enabled ? "family_manager" : "viewer")
+
+  div class="max-w-6xl mx-auto p-4 sm:p-6"
+
+    / =====================================================
+    / HEADER
+    / =====================================================
+    div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-8 mb-6 sm:mb-8"
+
+      h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2" Add Friend
+
+      p class="text-gray-600 text-base"
+        | Adding a new friend connected to
+        span class="font-semibold text-green-800 ml-1"
+          = @anchor&.full_name || "selected member"
+
+      - if @user.errors.any?
+        div class="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 sm:p-5"
+          div class="flex items-center gap-2 mb-3"
+            span class="text-red-600 font-semibold text-sm"
+              = "#{@user.errors.count} error(s) prevented this friend from being saved:"
+          ul class="list-disc list-inside space-y-1"
+            - @user.errors.full_messages.each do |msg|
+              li class="text-sm text-red-700" = msg
+
+    / =====================================================
+    / PERSONAL INFORMATION
+    / =====================================================
+    div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-8 mb-6 sm:mb-8"
+
+      h2 class="text-xl font-semibold text-gray-900 mb-5 sm:mb-6" Personal Information
+
+      div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6"
+
+        div class="space-y-2"
+          = f.label :first_name, class: "block text-sm font-medium text-gray-700"
+          = f.text_field :first_name, required: true, placeholder: "e.g. Ahmad", class: "w-full rounded-xl border #{@user.errors[:first_name].any? ? 'border-red-400 bg-red-50' : 'border-gray-300'} px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
+          - if @user.errors[:first_name].any?
+            p class="text-xs text-red-600 mt-1" = @user.errors[:first_name].first
+
+        div class="space-y-2"
+          = f.label :last_name, class: "block text-sm font-medium text-gray-700"
+          = f.text_field :last_name, required: true, placeholder: "e.g. Abdullah", class: "w-full rounded-xl border #{@user.errors[:last_name].any? ? 'border-red-400 bg-red-50' : 'border-gray-300'} px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
+          - if @user.errors[:last_name].any?
+            p class="text-xs text-red-600 mt-1" = @user.errors[:last_name].first
+
+        div class="space-y-2"
+          = f.label :identification_type, "ID Type", class: "block text-sm font-medium text-gray-700"
+          = f.select :identification_type, User.identification_types.keys.map { |k| [k.humanize, k] }, { prompt: "Select ID Type" }, class: "w-full rounded-xl border #{@user.errors[:identification_type].any? ? 'border-red-400 bg-red-50' : 'border-gray-300'} px-4 py-3 bg-white focus:ring-2 focus:ring-green-700 focus:border-green-700"
+          - if @user.errors[:identification_type].any?
+            p class="text-xs text-red-600 mt-1" = @user.errors[:identification_type].first
+
+        div class="space-y-2"
+          = f.label :identification_number, "ID Number", class: "block text-sm font-medium text-gray-700"
+          = f.text_field :identification_number, placeholder: "Enter ID number", class: "w-full rounded-xl border #{@user.errors[:identification_number].any? ? 'border-red-400 bg-red-50' : 'border-gray-300'} px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
+          - if @user.errors[:identification_number].any?
+            p class="text-xs text-red-600 mt-1" = @user.errors[:identification_number].first
+
+    / =====================================================
+    / ALIVE / DECEASED TOGGLE
+    / =====================================================
+    div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-8 mb-6 sm:mb-8"
+
+      h2 class="text-xl font-semibold text-gray-900 mb-5" Vital Status
+
+      label class="flex items-center gap-4 cursor-pointer mb-4"
+        input type="checkbox" id="is_alive_checkbox" checked="checked" class="h-5 w-5 rounded border-gray-300 text-green-700 focus:ring-green-700"
+        span class="text-sm font-medium text-gray-700" This member is alive
+
+      / Hidden status field — toggled by JS
+      = f.hidden_field :status, value: "alive", id: "status_field"
+
+      / Death date — hidden by default
+      div id="death_date_field" class="hidden mt-4"
+        div class="bg-red-50 border border-red-200 rounded-xl p-4 sm:p-5"
+          div class="flex items-center gap-2 mb-4"
+            span class="text-red-600 text-sm font-medium" ✝ Deceased — please enter the date of passing
+          div class="space-y-2 max-w-xs"
+            label class="block text-sm font-medium text-gray-700" Date of Death
+            = f.fields_for :user_profile do |profile|
+              = profile.date_field :death_date, max: Date.today, class: "w-full rounded-xl border border-red-300 px-4 py-3 focus:ring-2 focus:ring-red-400 focus:border-red-400"
+
+    / =====================================================
+    / LOGIN ACCESS
+    / =====================================================
+    div id="login_access_section" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-8 mb-6 sm:mb-8"
+
+      h2 class="text-xl font-semibold text-gray-900 mb-5 sm:mb-6" Login Access
+
+      label class="flex items-center gap-4 cursor-pointer mb-4"
+        = f.check_box :login_enabled, id: "login_enabled_checkbox", class: "h-5 w-5 rounded border-gray-300 text-green-700 focus:ring-green-700"
+        span class="text-sm font-medium text-gray-700"
+          | Enable login access for this friend
+
+      p class="text-sm text-gray-500 mb-6"
+        | Login users get
+        span class="font-semibold text-green-700 mx-1" Family Manager
+        | access. Non-login members are added as
+        span class="font-semibold text-gray-700 mx-1" Viewers.
+
+      div id="login_fields" class="hidden"
+        div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
+
+          div class="space-y-2"
+            = f.label :email, "Email Address", class: "block text-sm font-medium text-gray-700"
+            = f.email_field :email, placeholder: "email@example.com", class: "w-full rounded-xl border #{@user.errors[:email].any? ? 'border-red-400 bg-red-50' : 'border-gray-300'} px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
+            - if @user.errors[:email].any?
+              p class="text-xs text-red-600 mt-1" = @user.errors[:email].first
+
+          div class="space-y-2"
+            = f.label :password, class: "block text-sm font-medium text-gray-700"
+            = f.password_field :password, placeholder: "Min. 8 characters", class: "w-full rounded-xl border #{@user.errors[:password].any? ? 'border-red-400 bg-red-50' : 'border-gray-300'} px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
+            - if @user.errors[:password].any?
+              p class="text-xs text-red-600 mt-1" = @user.errors[:password].first
+
+          div class="space-y-2 sm:col-span-2 lg:col-span-1"
+            = f.label :password_confirmation, "Confirm Password", class: "block text-sm font-medium text-gray-700"
+            = f.password_field :password_confirmation, placeholder: "Repeat password", class: "w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
+
+    / =====================================================
+    / PROFILE DETAILS
+    / =====================================================
+    div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-8 mb-6 sm:mb-8"
+
+      h2 class="text-xl font-semibold text-gray-900 mb-5 sm:mb-6" Profile Details
+
+      = f.fields_for :user_profile do |profile|
+
+        div class="mb-6 sm:mb-8"
+          = profile.label :avatar, class: "block text-sm font-medium text-gray-700 mb-3"
+          div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6"
+            div class="shrink-0"
+              - if !profile.object.new_record? && profile.object.avatar.attached?
+                = image_tag profile.object.avatar, class: "h-24 w-24 rounded-full object-cover border-4 border-green-100 shadow"
+              - else
+                div class="h-24 w-24 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-sm"
+                  | No Avatar
+            div class="flex-1 w-full sm:w-auto text-center sm:text-left"
+              = profile.file_field :avatar, accept: "image/*", class: "block w-full text-sm text-gray-600 file:mr-4 file:rounded-xl file:border-0 file:bg-green-700 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-green-800"
+              p class="text-xs text-gray-500 mt-2" JPG, PNG or WEBP recommended
+
+        div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6"
+
+          div class="space-y-2"
+            = profile.label :birth_date, "Date of Birth", class: "block text-sm font-medium text-gray-700"
+            = profile.date_field :birth_date, required: true, max: Date.today, class: "w-full rounded-xl border #{profile.object.errors[:birth_date].any? ? 'border-red-400 bg-red-50' : 'border-gray-300'} px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
+            - if profile.object.errors[:birth_date].any?
+              p class="text-xs text-red-600 mt-1" = profile.object.errors[:birth_date].first
+
+          div class="space-y-2"
+            = profile.label :gender, class: "block text-sm font-medium text-gray-700"
+            = profile.select :gender, [["Male", "male"], ["Female", "female"]], { prompt: "Select Gender" }, class: "w-full rounded-xl border border-gray-300 px-4 py-3 bg-white focus:ring-2 focus:ring-green-700 focus:border-green-700"
+
+          div class="space-y-2"
+            = profile.label :phone, "Phone Number", class: "block text-sm font-medium text-gray-700"
+            = profile.text_field :phone, placeholder: "+60 12-345 6789", class: "w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
+
+          div class="space-y-2"
+            = profile.label :occupation, class: "block text-sm font-medium text-gray-700"
+            = profile.text_field :occupation, placeholder: "e.g. Engineer", class: "w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
+
+          div class="space-y-2 sm:col-span-2"
+            = profile.label :address, class: "block text-sm font-medium text-gray-700"
+            = profile.text_area :address, rows: 3, placeholder: "Street, City, Postcode", class: "w-full rounded-xl border border-gray-300 px-4 py-3 focus:ring-2 focus:ring-green-700 focus:border-green-700"
+
+    / =====================================================
+    / FAMILY & RELATIONSHIP
+    / =====================================================
+    div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-8 mb-6 sm:mb-8"
+
+      h2 class="text-xl font-semibold text-gray-900 mb-5 sm:mb-6" Family & Relationship
+
+      div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6"
+        div class="bg-gray-50 rounded-xl p-4 sm:p-5 border border-gray-200"
+          p class="text-sm font-medium text-gray-500 mb-1" Family
+          p class="text-lg font-semibold text-gray-900"
+            = @active_family&.name || current_user.families.first&.name || "—"
+
+        div class="bg-gray-50 rounded-xl p-4 sm:p-5 border border-gray-200"
+          p class="text-sm font-medium text-gray-500 mb-1" Membership Type
+          p class="text-lg font-semibold text-gray-900" Friend
+
+      div class="mt-5 sm:mt-6 flex items-center gap-4 bg-green-50 border border-green-200 rounded-2xl p-4 sm:p-5"
+        div class="h-12 w-12 sm:h-14 sm:w-14 shrink-0 rounded-full bg-green-700 text-white flex items-center justify-center text-lg font-bold"
+          = @anchor&.first_name&.first&.upcase || "?"
+        div class="flex flex-col min-w-0"
+          span class="text-base sm:text-lg font-semibold text-gray-900 truncate"
+            = @anchor&.full_name || "No member selected"
+          span class="text-sm text-gray-500" Connected via
+
+    / =====================================================
+    / SUBMIT
+    / =====================================================
+    div class="flex flex-col sm:flex-row sm:justify-end mt-6 sm:mt-8"
+      = f.submit "Add Friend", class: "w-full sm:w-auto inline-flex items-center justify-center rounded-xl primary-btn px-8 py-4 text-white font-semibold shadow-md transition duration-200 cursor-pointer"
+
+javascript:
+  (function () {
+    const aliveCheckbox      = document.getElementById("is_alive_checkbox");
+    const statusField        = document.getElementById("status_field");
+    const deathDateSection   = document.getElementById("death_date_field");
+    const loginSection       = document.getElementById("login_access_section");
+    const loginCheckbox      = document.getElementById("login_enabled_checkbox");
+    const loginFields        = document.getElementById("login_fields");
+    const roleField          = document.querySelector('input[name="user[role]"]');
+    const emailField         = document.querySelector('input[name="user[email]"]');
+    const passwordField      = document.querySelector('input[name="user[password]"]');
+    const passwordConfField  = document.querySelector('input[name="user[password_confirmation]"]');
+
+    function toggleAlive() {
+      const alive = aliveCheckbox.checked;
+
+      // Update hidden status field
+      statusField.value = alive ? "alive" : "dead";
+
+      // Show/hide death date
+      deathDateSection.classList.toggle("hidden", alive);
+
+      // Hide login section entirely for deceased members and force login off
+      loginSection.classList.toggle("hidden", !alive);
+      if (!alive) {
+        loginCheckbox.checked = false;
+        toggleLogin();
+      }
+    }
+
+    function toggleLogin() {
+      const enabled = loginCheckbox.checked;
+      loginFields.classList.toggle("hidden", !enabled);
+      if (roleField)         roleField.value     = enabled ? "family_manager" : "viewer";
+      if (emailField)        emailField.required = enabled;
+      if (passwordField)     passwordField.required = enabled;
+      if (passwordConfField) passwordConfField.required = enabled;
+    }
+
+    aliveCheckbox.addEventListener("change", toggleAlive);
+    loginCheckbox.addEventListener("change", toggleLogin);
+
+    // Init both on page load
+    toggleAlive();
+    toggleLogin();
+  })();

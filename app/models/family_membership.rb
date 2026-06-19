@@ -26,7 +26,8 @@ class FamilyMembership < ApplicationRecord
 
   enum :membership_type, {
     birth: 0,
-    marriage: 1
+    marriage: 1,
+    friend: 2
   }
   
 
