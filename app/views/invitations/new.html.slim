@@ -39,25 +39,25 @@ div style="min-height:100vh; background:#f0ebe3; display:flex; align-items:cente
                 = msg
 
         / ── Membership summary (read-only) ──────────────────────────
-          div style="background:#f2f7f1; border:0.5px solid #c8dcc6; border-radius:10px; padding:14px 16px; margin-bottom:20px; display:flex; align-items:center; gap:12px;"
-            - icon = case @membership_type
-              - when "marriage" then "ti-heart-handshake"
-              - when "friend"   then "ti-users"
-              - else                 "ti-baby-carriage"
-            - label = case @membership_type
-              - when "marriage" then "Joining as partner"
-              - when "friend"   then "Joining as friend"
-              - else                 "Joining as child"
-            i class="ti #{icon}" style="font-size:18px; color:#5a7857; flex-shrink:0;"
-            div
-              div style="font-size:13px; font-weight:500; color:#2d3a2e;" = label
-              - if @related_user
-                div style="font-size:12px; color:#8a9e87; margin-top:2px;"
-                  - role_label = case @membership_type
-                    - when "marriage" then "Partner of"
-                    - when "friend"   then "Friend of"
-                    - else                 "Child of"
-                  = "#{role_label}: #{@related_user.first_name} #{@related_user.last_name}"
+        div style="background:#f2f7f1; border:0.5px solid #c8dcc6; border-radius:10px; padding:14px 16px; margin-bottom:20px; display:flex; align-items:center; gap:12px;"
+          - icon = case @membership_type
+            - when "marriage" then "ti-heart-handshake"
+            - when "friend"   then "ti-users"
+            - else                 "ti-baby-carriage"
+          - label = case @membership_type
+            - when "marriage" then "Joining as partner"
+            - when "friend"   then "Joining as friend"
+            - else                 "Joining as child"
+          i class="ti #{icon}" style="font-size:18px; color:#5a7857; flex-shrink:0;"
+          div
+            div style="font-size:13px; font-weight:500; color:#2d3a2e;" = label
+            - if @related_user
+              div style="font-size:12px; color:#8a9e87; margin-top:2px;"
+                - role_label = case @membership_type
+                  - when "marriage" then "Partner of"
+                  - when "friend"   then "Friend of"
+                  - else                 "Child of"
+                = "#{role_label}: #{@related_user.first_name} #{@related_user.last_name}"
         / ── Email ───────────────────────────────────────────────────
         div style="margin-bottom:20px;"
           label style="display:block; font-size:13px; font-weight:500; color:#5a7857; margin-bottom:7px; letter-spacing:0.01em;"
