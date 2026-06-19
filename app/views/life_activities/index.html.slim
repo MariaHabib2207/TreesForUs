@@ -1,0 +1,58 @@
+.dashboard-page
+  .life-timeline-header
+    h1.timeline-title
+      | ✨ #{@owner.first_name}'s Life Timeline
+
+    - if current_user == @owner
+      = link_to new_user_life_activity_path(@owner),
+          class: "btn-add-activity",
+          data: { turbo_frame: "modal" } do
+        span + Add Activity
+
+  - if @activities.empty?
+    .timeline-empty
+      .empty-icon 📖
+      p No life activities yet.
+      - if current_user == @owner
+        p Start by adding your first memory!
+
+  - else
+    .timeline-feed
+      - @activities.group_by { |a| a.occurred_on&.year || a.created_at.year }.each do |year, acts|
+        .timeline-year-group
+          .timeline-year-label = year
+
+          - acts.each do |activity|
+            .timeline-card
+              .timeline-dot = activity.category_emoji
+
+              .timeline-body
+                .timeline-card-header
+                  .timeline-meta
+                    span.timeline-category = activity.category.humanize
+                    span.timeline-date = activity.occurred_on&.strftime("%b %d") || ""
+                    span.timeline-visibility
+                      = visibility_icon(activity.visibility)
+
+                  - if current_user == @owner
+                    .timeline-actions
+                      = link_to edit_user_life_activity_path(@owner,activity), class: "btn-icon", data: { turbo_frame: "modal" } do
+                        | ✏️
+                      = link_to user_life_activity_path(@owner,activity),
+                          method: :delete,
+                          data: { confirm: "Remove this activity?" },
+                          class: "btn-icon btn-icon--danger" do
+                        | 🗑
+
+                h2.timeline-card-title = activity.title
+
+                - if activity.location.present?
+                  p.timeline-location 📍 #{activity.location}
+
+                - if activity.description.present?
+                  p.timeline-description = activity.description
+
+                - if activity.photos.attached?
+                  .timeline-photos
+                    - activity.photos.each do |photo|
+                      = image_tag url_for(photo), class: "timeline-photo"

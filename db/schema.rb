@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_06_18_232051) do
+ActiveRecord::Schema[8.0].define(version: 2026_06_19_001702) do
   create_table "active_admin_comments", force: :cascade do |t|
     t.string "namespace"
     t.text "body"
@@ -130,6 +130,21 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_18_232051) do
     t.index ["user_id"], name: "index_friendships_on_user_id"
   end
 
+  create_table "life_activities", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "title", null: false
+    t.text "description"
+    t.string "category", null: false
+    t.date "occurred_on"
+    t.string "location"
+    t.string "visibility", default: "friends_and_family", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "occurred_on"], name: "index_life_activities_on_user_id_and_occurred_on"
+    t.index ["user_id"], name: "index_life_activities_on_user_id"
+    t.index ["visibility"], name: "index_life_activities_on_visibility"
+  end
+
   create_table "user_parent_child_relationships", force: :cascade do |t|
     t.integer "parent_id"
     t.integer "child_id"
@@ -245,6 +260,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_18_232051) do
   add_foreign_key "family_memberships", "users"
   add_foreign_key "friendships", "users"
   add_foreign_key "friendships", "users", column: "friend_id"
+  add_foreign_key "life_activities", "users"
   add_foreign_key "user_partners", "users"
   add_foreign_key "user_partners", "users", column: "partner_id"
   add_foreign_key "user_sessions", "users"

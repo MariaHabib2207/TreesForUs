@@ -23,6 +23,7 @@ resources :friendships, only: [:new, :create, :destroy]
   resources :users do
     resources :user_partners, only: [:new, :create]
     resources :invitations, only: [:new, :create]
+    resources :life_activities, only: %i[index new create edit update destroy]
   end
 
   get  "identification", to: "identification#edit",  as: :edit_identification

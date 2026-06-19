@@ -1,4 +1,6 @@
+
 = stylesheet_link_tag "family_tree", media: "all"
+= stylesheet_link_tag "life_activities", media: "all"
 
 nav class="bg-white shadow-md px-5 py-4"
   div class="flex items-center justify-between"
@@ -28,6 +30,11 @@ nav class="bg-white shadow-md px-5 py-4"
             i class="ti ti-activity" style="font-size: 16px;"
             | Activity
 
+      - unless current_page?(user_life_activities_path(current_user))
+        = link_to user_life_activities_path(current_user), class: "text-sm font-medium text-white primary-btn hover:bg-green-700 px-4 py-2 rounded-lg transition flex items-center gap-1" do
+          i class="ti ti-timeline" style="font-size: 16px;"
+          | Timeline
+
       = link_to user_profile_path(current_user), class: "flex items-center" do
         - profile = current_user.user_profile
         - if profile&.avatar&.attached?
@@ -48,10 +55,8 @@ nav class="bg-white shadow-md px-5 py-4"
           = image_tag "logo.png", class: "w-9 h-9 rounded-full border-2 border-gray-300 object-cover"
 
       button id="mobile-menu-btn" class="text-green-900 focus:outline-none" aria-label="Toggle menu"
-        / Hamburger icon
         svg id="icon-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
           path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"
-        / Close icon (hidden by default)
         svg id="icon-close" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"
           path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"
 
@@ -76,6 +81,11 @@ nav class="bg-white shadow-md px-5 py-4"
           i class="ti ti-activity" style="font-size: 16px;"
           | Activity
 
+    - unless current_page?(user_life_activities_path(current_user))
+      = link_to user_life_activities_path(current_user), class: "text-sm font-medium text-white primary-btn hover:bg-green-700 px-4 py-2 rounded-lg transition flex items-center justify-center gap-1" do
+        i class="ti ti-timeline" style="font-size: 16px;"
+        | Timeline
+
     = button_to destroy_user_session_path, method: :delete, class: "w-full text-sm font-medium text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition" do
       | Logout
 
@@ -91,7 +101,6 @@ javascript:
     iconClose.classList.toggle('hidden');
   });
 
-  // Close menu on outside click
   document.addEventListener('click', (e) => {
     if (!btn.contains(e.target) && !menu.contains(e.target)) {
       menu.classList.add('hidden');
