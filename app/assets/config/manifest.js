@@ -1,4 +1,4 @@
 //= link_tree ../images
 //= link_directory ../stylesheets .css
 //= link_directory ../javascripts .js
-//= link life_activities.css
+ //= link life_activities.css
