@@ -83,6 +83,7 @@ gem 'geocoder'
 gem 'user_agent_parser'
 gem 'httparty'
 gem 'device_detector'
+
 group :development, :test do
   gem 'sqlite3', '~> 2.0'
   gem "letter_opener", group: :development
@@ -96,3 +97,5 @@ end
 
 gem 'omniauth-google-oauth2'
 gem 'omniauth-rails_csrf_protection'
+
+gem "noticed", "~> 3.0"

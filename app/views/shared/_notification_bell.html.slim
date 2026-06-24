@@ -1,0 +1,41 @@
+- unread_count = current_user.noticed_notifications.where(read_at: nil).count
+
+div class="relative" id="notification_bell_wrapper"
+  button class="relative text-green-900 hover:text-green-700 focus:outline-none p-2" type="button" id="bell-btn" aria-label="Notifications"
+    svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
+      path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+    - if unread_count > 0
+      span class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 min-w-[16px] text-center leading-none"
+        = unread_count
+
+  div id="notif-dropdown" class="hidden absolute right-0 mt-2 w-80 max-h-96 bg-white rounded-lg shadow-xl border border-gray-100 flex flex-col overflow-hidden z-50"
+    div class="flex items-center justify-between px-4 py-3 border-b border-gray-100"
+      span class="font-semibold text-gray-800 text-sm" Notifications
+      - if unread_count > 0
+        = button_to "Mark all as read", mark_all_read_notifications_path, method: :patch, form: { data: { turbo_stream: true } }, class: "text-xs text-green-700 hover:underline bg-transparent border-none p-0 cursor-pointer"
+
+    div class="overflow-y-auto flex-1"
+      - recent = current_user.noticed_notifications.includes(:event).order(created_at: :desc).limit(8)
+      - if recent.any?
+        - recent.each do |notification|
+          = render "notifications/notification_item", notification: notification
+      - else
+        div class="px-4 py-6 text-center text-sm text-gray-400"
+          | No notifications yet
+
+javascript:
+  (function() {
+    const btn = document.getElementById('bell-btn');
+    const dropdown = document.getElementById('notif-dropdown');
+
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      dropdown.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', function(e) {
+      if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
+        dropdown.classList.add('hidden');
+      }
+    });
+  })();

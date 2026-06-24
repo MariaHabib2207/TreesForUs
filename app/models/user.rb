@@ -46,6 +46,11 @@
 #  index_users_on_unlock_token          (unlock_token) UNIQUE
 #
 class User < ApplicationRecord
+# Remove: include Noticed::Model
+# Remove: has_noticed_notifications
+
+# Add this instead:
+  has_many :noticed_notifications, as: :recipient, dependent: :destroy, class_name: "Noticed::Notification"
   # ===================================================
   # Activity feed
   include PublicActivity::Model

@@ -19,16 +19,14 @@ class UserProfilesController < ApplicationController
   def update
     @user = User.find(params[:id])
     @user_profile = @user.user_profile || @user.create_user_profile
-    if @user_profile.update(user_profile_params)
-       if params[:user_profile][:avatar].present?
+    if @user_profile.update(user_profile_params.merge(updated_by: current_user.id))
+      if params[:user_profile][:avatar].present?
         @user_profile.avatar.attach(params[:user_profile][:avatar])
       end
       redirect_to authenticated_root_path
     else
-      render :new
+      render :edit
     end
-
-    
   end
 
 private

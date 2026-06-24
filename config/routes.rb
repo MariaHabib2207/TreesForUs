@@ -17,7 +17,7 @@ Rails.application.routes.draw do
   end
 
   resources :activities, only: [:index]
-resources :friendships, only: [:new, :create, :destroy]
+  resources :friendships, only: [:new, :create, :destroy]
   resources :user_profiles
 
   resources :users do
@@ -26,16 +26,24 @@ resources :friendships, only: [:new, :create, :destroy]
     resources :life_activities, only: %i[index new create edit update destroy]
   end
 
-  get  "identification", to: "identification#edit",  as: :edit_identification
+  get   "identification", to: "identification#edit",   as: :edit_identification
   patch "identification", to: "identification#update", as: :update_identification
 
   resources :relationships, only: [:create, :destroy, :new]
 
   scope "/invitations/:token" do
-    get  "accept", to: "accept_invitations#edit",   as: :accept_invitation
+    get   "accept", to: "accept_invitations#edit",   as: :accept_invitation
     patch "accept", to: "accept_invitations#update", as: :update_invitation
   end
 
+  resources :notifications, only: [:index, :destroy] do
+    collection do
+      patch :mark_all_read
+    end
+    member do
+      patch :mark_read
+    end
+  end
   authenticated :user do
     root to: "dashboard#index", as: :authenticated_root
   end

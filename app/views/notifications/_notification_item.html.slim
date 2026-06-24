@@ -1,0 +1,19 @@
+div class="px-4 py-3 hover:bg-gray-50 border-b border-gray-50 #{'bg-green-50' unless notification.read_at?}"
+  - url = notification.event.params[:url]
+  - is_family_notification = notification.event.type == "NewFamilyMemberNotifier"
+  div class="flex items-start justify-between gap-2"
+    - if url.present? && !is_family_notification
+      a href=url class="flex-1 block"
+        p class="text-sm text-gray-800 leading-snug"
+          = notification.event.params[:message]
+        p class="text-xs text-gray-400 mt-0.5"
+          = notification.created_at.strftime("%b %d, %H:%M")
+    - else
+      div class="flex-1"
+        p class="text-sm text-gray-800 leading-snug"
+          = notification.event.params[:message]
+        p class="text-xs text-gray-400 mt-0.5"
+          = notification.created_at.strftime("%b %d, %H:%M")
+    = button_to notification_path(notification), method: :delete, class: "text-gray-300 hover:text-red-500 transition flex-shrink-0 bg-transparent border-none p-0 cursor-pointer", form: { data: { turbo_confirm: false } } do
+      svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+        path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"

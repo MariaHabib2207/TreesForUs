@@ -296,6 +296,8 @@ GEM
       racc (~> 1.4)
     nokogiri (1.19.2-x86_64-linux-musl)
       racc (~> 1.4)
+    noticed (3.0.0)
+      rails (>= 6.1.0)
     oauth2 (2.0.20)
       auth-sanitizer (~> 0.1, >= 0.1.3)
       faraday (>= 0.17.3, < 4.0)
@@ -590,6 +592,7 @@ DEPENDENCIES
   kaminari
   letter_opener
   mailjet
+  noticed (~> 3.0)
   omniauth-google-oauth2
   omniauth-rails_csrf_protection
   pg (~> 1.5)

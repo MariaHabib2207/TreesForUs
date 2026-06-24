@@ -1,4 +1,29 @@
 # app/models/life_activity.rb
+# == Schema Information
+#
+# Table name: life_activities
+#
+#  id          :integer          not null, primary key
+#  category    :string           not null
+#  description :text
+#  location    :string
+#  occurred_on :date
+#  title       :string           not null
+#  visibility  :string           default("friends_and_family"), not null
+#  created_at  :datetime         not null
+#  updated_at  :datetime         not null
+#  user_id     :integer          not null
+#
+# Indexes
+#
+#  index_life_activities_on_user_id                  (user_id)
+#  index_life_activities_on_user_id_and_occurred_on  (user_id,occurred_on)
+#  index_life_activities_on_visibility               (visibility)
+#
+# Foreign Keys
+#
+#  user_id  (user_id => users.id)
+#
 class LifeActivity < ApplicationRecord
   belongs_to :user
   has_many_attached :photos

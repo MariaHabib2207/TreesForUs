@@ -1,109 +1,109 @@
-/ _friend_tree.html.slim
-- current_user_profile = current_user.user_profile
-- friend_nodes = members || []
-- total = friend_nodes.size
-- radius = 170
+- node_user = node[:user]
+- profile = node[:profile]
+- children = node[:children] || []
+- partners = node[:partners] || []
+- active_family = params[:family_id]
+- node_age = profile&.birth_date ? ((Date.today - profile.birth_date) / 365.25).floor : nil
+- is_adult = node_age.nil? || node_age >= 16
 
-h1 Friends
+div class="tree-node" data-depth=depth data-user-id=node_user.id
 
-- if total.zero?
-  div.friend-circle-empty
-    p No friends yet. Use the button below to add your first friend.
+  div class="member-and-children"
+    div class="couple-row"
 
-  div(style="position: relative; width: 480px; height: 480px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;")
-    div.card-wrapper
-      = link_to user_profile_path(current_user.id), class: "card friend-card friend-card--current", data: { turbo_frame: "modal" } do
-        div.avatar.avatar--lg
-          - if current_user_profile&.avatar&.attached?
-            = image_tag url_for(current_user_profile.avatar), class: "avatar-img"
+      div class="card-wrapper js-card-hover"
+
+        = link_to user_profile_path(node_user.id), class: "card #{"root" if depth == 0}", data: { turbo_frame: "modal" } do
+
+          div class="avatar"
+            - if profile&.avatar&.attached?
+              = image_tag url_for(profile.avatar), class: "avatar-img"
+            - else
+              div class="avatar-initials"
+                = "#{node_user&.first_name&.first}#{node_user&.last_name&.first}"
+
+          div class="card-name"
+            = "#{node_user.first_name} #{node_user.last_name}"
+
+          div class="card-role" Member
+
+          - if profile&.birth_date
+            div class="card-age"
+              = "Age #{node_age}"
+
+          div class="tooltip"
+            strong
+              = "#{node_user.first_name} #{node_user.last_name}"
+            div
+              = profile&.occupation || "—"
+
+        - if is_adult
+          = link_to new_user_user_partner_path(user_id: node_user.id, family_id: params[:family_id], type: "partner"), class: "btn-add btn-add--spouse btn-add--dynamic", title: "Add spouse / partner", data: { turbo_frame: "modal" } do
+            span class="btn-add__icon" +
+            span class="btn-add__label" Spouse
+
+          = link_to new_relationship_path(user_id: node_user.id, family_id: params[:family_id], type: "child"), class: "btn-add btn-add--child btn-add--dynamic", title: "Add child", data: { turbo_frame: "modal" } do
+            span class="btn-add__icon" +
+            span class="btn-add__label" Child
+
+        / --- INVITE (main card) ---
+        - if node_user != current_user && !node_user.login_enabled?
+          - if node_user.invitation_sent_at.present?
+            div class="btn-add btn-add--invite btn-add--dynamic btn-add--invited"
+              span class="btn-add__icon" ✉
+              span class="btn-add__label" Invited
           - else
-            div.avatar-initials
-              = "#{current_user.first_name.first}#{current_user.last_name.first}"
-        div.card-name = "#{current_user.first_name} #{current_user.last_name}"
-        div.card-role You
+            = link_to new_user_invitation_path(user_id: node_user.id, type: "child", related_user_id: node_user.parents.first&.id), class: "btn-add btn-add--invite btn-add--dynamic", title: "Invite to app", data: { turbo_frame: "modal" } do
+              span class="btn-add__icon" ✉
+              span class="btn-add__label" Invite
 
-      = link_to new_friendship_path(user_id: current_user.id, family_id: params[:family_id]), class: "btn-add btn-add--friend btn-add--dynamic", title: "Add friend", data: { turbo_frame: "modal" } do
-        span.btn-add__icon +
-        span.btn-add__label Friend
+      - partners.each do |partner|
+        - p_profile = partner.user_profile
+        - partner_age = p_profile&.birth_date ? ((Date.today - p_profile.birth_date) / 365.25).floor : nil
+        - partner_is_adult = partner_age.nil? || partner_age >= 16
 
-      / --- INVITE (current user card) ---
-      - if current_user != current_user && !current_user.login_enabled?
-        - if current_user.invitation_sent_at.present?
-          div.btn-add.btn-add--invite.btn-add--dynamic.btn-add--invited
-            span.btn-add__icon ✉
-            span.btn-add__label Invited
-        - else
-          = link_to new_user_invitation_path(user_id: current_user.id, type: "friend", related_user_id: current_user.id), class: "btn-add btn-add--invite btn-add--dynamic", title: "Invite to app", data: { turbo_frame: "modal" } do
-            span.btn-add__icon ✉
-            span.btn-add__label Invite
+        div class="couple-connector"
+          div class="couple-line"
+          div class="couple-heart" ♥
 
-- else
-  div.friend-circle(data-family-id=params[:family_id] style="position: relative; width: 480px; height: 480px; margin: 0 auto;")
+        = link_to user_profile_path(partner), class: "card partner-card", id: "user_card_#{partner.id}", data: { turbo_frame: "modal" } do
 
-    svg(style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;" aria-hidden="true")
-      - friend_nodes.each_with_index do |node, i|
-        - angle = (2 * Math::PI * i / total) - Math::PI / 2
-        - x = 240 + (radius * Math.cos(angle)).round
-        - y = 240 + (radius * Math.sin(angle)).round
-        line(x1="240" y1="240" x2="#{x}" y2="#{y}" stroke="var(--wire)" stroke-width="2")
-
-    / --- CENTER: current user ---
-    div(style="position: absolute; top: 240px; left: 240px; transform: translate(-50%, -50%); z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 6px;")
-
-      div.card-wrapper
-        = link_to user_profile_path(current_user.id), class: "card friend-card friend-card--current", data: { turbo_frame: "modal" } do
-          div.avatar.avatar--lg
-            - if current_user_profile&.avatar&.attached?
-              = image_tag url_for(current_user_profile.avatar), class: "avatar-img"
+          div class="avatar"
+            - if p_profile&.avatar&.attached?
+              = image_tag url_for(p_profile.avatar), class: "avatar-img"
             - else
-              div.avatar-initials
-                = "#{current_user.first_name.first}#{current_user.last_name.first}"
-          div.card-name = "#{current_user.first_name} #{current_user.last_name}"
-          div.card-role You
+              div class="avatar-initials"
+                = "#{partner&.first_name&.first}#{partner&.last_name&.first}"
 
-        = link_to new_friendship_path(user_id: current_user.id, family_id: params[:family_id]), class: "btn-add btn-add--friend btn-add--dynamic", title: "Add friend", data: { turbo_frame: "modal" } do
-          span.btn-add__icon +
-          span.btn-add__label Friend
+          div class="card-name"
+            = "#{partner.first_name} #{partner.last_name}"
 
-    / --- FRIEND NODES ---
-    - friend_nodes.each_with_index do |node, i|
-      - f_user    = node[:user]
-      - f_profile = node[:profile]
-      - f_age     = f_profile&.birth_date ? ((Date.today - f_profile.birth_date) / 365.25).floor : nil
-      - angle     = (2 * Math::PI * i / total) - Math::PI / 2
-      - x         = 240 + (radius * Math.cos(angle)).round
-      - y         = 240 + (radius * Math.sin(angle)).round
+          div class="card-role" Partner
 
-      div(data-user-id=f_user.id style="position: absolute; top: #{y}px; left: #{x}px; transform: translate(-50%, -50%); z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 6px;")
+          - if p_profile&.birth_date
+            div class="card-age"
+              = "Age #{partner_age}"
 
-        div.card-wrapper
-          = link_to user_profile_path(f_user.id), class: "card friend-card", data: { turbo_frame: "modal" } do
-            div.avatar
-              - if f_profile&.avatar&.attached?
-                = image_tag url_for(f_profile.avatar), class: "avatar-img"
-              - else
-                div.avatar-initials
-                  = "#{f_user.first_name.first}#{f_user.last_name.first}"
-            div.card-name = "#{f_user.first_name} #{f_user.last_name}"
-            div.card-role Friend
-            - if f_age
-              div.card-age = "Age #{f_age}"
-            div.tooltip
-              strong = "#{f_user.first_name} #{f_user.last_name}"
-              div = f_profile&.occupation || "—"
+          div class="tooltip"
+            strong
+              = "#{partner.first_name} #{partner.last_name}"
+            div
+              = p_profile&.occupation || "—"
 
-          / --- ADD FRIEND (from this node) ---
-          = link_to new_friendship_path(user_id: f_user.id, family_id: params[:family_id]), class: "btn-add btn-add--friend btn-add--dynamic", title: "Add friend", data: { turbo_frame: "modal" } do
-            span.btn-add__icon +
-            span.btn-add__label Friend
+        / --- INVITE (partner card) ---
+        - if partner != current_user && !partner.login_enabled?
+          - if partner.invitation_sent_at.present?
+            div class="btn-add btn-add--invite btn-add--dynamic btn-add--invited"
+              span class="btn-add__icon" ✉
+              span class="btn-add__label" Invited
+          - else
+            = link_to new_user_invitation_path(user_id: partner.id, type: "partner", related_user_id: node_user.id), class: "btn-add btn-add--invite btn-add--dynamic", title: "Invite to app", data: { turbo_frame: "modal" } do
+              span class="btn-add__icon" ✉
+              span class="btn-add__label" Invite
 
-          / --- INVITE ---
-          - if f_user != current_user && !f_user.login_enabled?
-            - if f_user.invitation_sent_at.present?
-              div.btn-add.btn-add--invite.btn-add--dynamic.btn-add--invited
-                span.btn-add__icon ✉
-                span.btn-add__label Invited
-            - else
-              = link_to new_user_invitation_path(user_id: f_user.id, type: "friend", related_user_id: current_user.id), class: "btn-add btn-add--invite btn-add--dynamic", title: "Invite to app", data: { turbo_frame: "modal" } do
-                span.btn-add__icon ✉
-                span.btn-add__label Invite
+    - if children.any?
+      div class="children-branch"
+        div class="children-row"
+          - children.each do |child_node|
+            div class="child-column"
+              = render "family_tree_node", node: child_node, depth: depth + 1, family: active_family
