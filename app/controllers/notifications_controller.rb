@@ -18,6 +18,24 @@ class NotificationsController < ApplicationController
     redirect_back fallback_location: root_path 
   end
   
+  def invite_to_chat
+    recipient = User.find(params[:recipient_id])
+
+    already_invited = recipient.noticed_notifications
+                              .where(read_at: nil)
+                              .joins(:event)
+                              .where(noticed_events: { type: "ChatInviteNotifier" })
+                              .where("noticed_notifications.created_at > ?", 10.minutes.ago)
+                              .exists?
+
+    unless already_invited
+      ::ChatInviteNotifier.with(
+        message: "#{current_user.full_name} invited you to a chatroom."
+      ).deliver(recipient)
+    end
+
+    redirect_back fallback_location: authenticated_root_path
+  end
   def destroy
     notification = current_user.noticed_notifications.find(params[:id])
     notification.destroy

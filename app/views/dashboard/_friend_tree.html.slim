@@ -81,6 +81,11 @@
             span.btn-add__icon +
             span.btn-add__label Friend
 
+          / --- CHAT INVITE ---
+          = button_to invite_to_chat_notifications_path(recipient_id: f_user.id), method: :post, class: "btn-add btn-add--chat btn-add--dynamic", title: "Invite to chat", form: { data: { turbo: false } } do
+            span.btn-add__icon 💬
+            span.btn-add__label Chat
+
           / --- INVITE (inside card-wrapper so hover works) ---
           - if f_user != current_user && !f_user.login_enabled?
             - if f_user.invitation_sent_at.present?

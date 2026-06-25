@@ -46,6 +46,12 @@ div class="tree-node" data-depth=depth data-user-id=node_user.id
             span class="btn-add__icon" +
             span class="btn-add__label" Child
 
+        / --- CHAT INVITE (main card) ---
+        - if node_user != current_user
+          = button_to invite_to_chat_notifications_path(recipient_id: node_user.id), method: :post, class: "btn-add btn-add--chat btn-add--dynamic", title: "Invite to chat", form: { data: { turbo: false } } do
+            span class="btn-add__icon" 💬
+            span class="btn-add__label" Chat
+
         / --- INVITE (main card) ---
         - if node_user != current_user && !node_user.login_enabled?
           - if node_user.invitation_sent_at.present?
@@ -66,40 +72,48 @@ div class="tree-node" data-depth=depth data-user-id=node_user.id
           div class="couple-line"
           div class="couple-heart" ♥
 
-        = link_to user_profile_path(partner), class: "card partner-card", id: "user_card_#{partner.id}", data: { turbo_frame: "modal" } do
+        div class="card-wrapper js-card-hover"
 
-          div class="avatar"
-            - if p_profile&.avatar&.attached?
-              = image_tag url_for(p_profile.avatar), class: "avatar-img"
-            - else
-              div class="avatar-initials"
-                = "#{partner&.first_name&.first}#{partner&.last_name&.first}"
+          = link_to user_profile_path(partner), class: "card partner-card", id: "user_card_#{partner.id}", data: { turbo_frame: "modal" } do
 
-          div class="card-name"
-            = "#{partner.first_name} #{partner.last_name}"
+            div class="avatar"
+              - if p_profile&.avatar&.attached?
+                = image_tag url_for(p_profile.avatar), class: "avatar-img"
+              - else
+                div class="avatar-initials"
+                  = "#{partner&.first_name&.first}#{partner&.last_name&.first}"
 
-          div class="card-role" Partner
-
-          - if p_profile&.birth_date
-            div class="card-age"
-              = "Age #{partner_age}"
-
-          div class="tooltip"
-            strong
+            div class="card-name"
               = "#{partner.first_name} #{partner.last_name}"
-            div
-              = p_profile&.occupation || "—"
 
-        / --- INVITE (partner card) ---
-        - if partner != current_user && !partner.login_enabled?
-          - if partner.invitation_sent_at.present?
-            div class="btn-add btn-add--invite btn-add--dynamic btn-add--invited"
-              span class="btn-add__icon" ✉
-              span class="btn-add__label" Invited
-          - else
-            = link_to new_user_invitation_path(user_id: partner.id, type: "partner", related_user_id: node_user.id), class: "btn-add btn-add--invite btn-add--dynamic", title: "Invite to app", data: { turbo_frame: "modal" } do
-              span class="btn-add__icon" ✉
-              span class="btn-add__label" Invite
+            div class="card-role" Partner
+
+            - if p_profile&.birth_date
+              div class="card-age"
+                = "Age #{partner_age}"
+
+            div class="tooltip"
+              strong
+                = "#{partner.first_name} #{partner.last_name}"
+              div
+                = p_profile&.occupation || "—"
+
+          / --- CHAT INVITE (partner card) ---
+          - if partner != current_user
+            = button_to invite_to_chat_notifications_path(recipient_id: partner.id), method: :post, class: "btn-add btn-add--chat btn-add--dynamic", title: "Invite to chat", form: { data: { turbo: false } } do
+              span class="btn-add__icon" 💬
+              span class="btn-add__label" Chat
+
+          / --- INVITE (partner card) ---
+          - if partner != current_user && !partner.login_enabled?
+            - if partner.invitation_sent_at.present?
+              div class="btn-add btn-add--invite btn-add--dynamic btn-add--invited"
+                span class="btn-add__icon" ✉
+                span class="btn-add__label" Invited
+            - else
+              = link_to new_user_invitation_path(user_id: partner.id, type: "partner", related_user_id: node_user.id), class: "btn-add btn-add--invite btn-add--dynamic", title: "Invite to app", data: { turbo_frame: "modal" } do
+                span class="btn-add__icon" ✉
+                span class="btn-add__label" Invite
 
     - if children.any?
       div class="children-branch"

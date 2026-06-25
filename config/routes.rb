@@ -38,6 +38,7 @@ Rails.application.routes.draw do
 
   resources :notifications, only: [:index, :destroy] do
     collection do
+      post :invite_to_chat
       patch :mark_all_read
     end
     member do

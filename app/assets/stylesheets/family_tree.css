@@ -1241,3 +1241,50 @@ body {
   pointer-events: auto !important;
   transform: translateX(-50%) scale(1);
 }
+
+/* Chat invite button */
+.btn-add--chat {
+  top: 50%;
+  left: 0;
+  transform: translateY(calc(-50% + 22px)) scale(.85);
+}
+
+.card-wrapper:hover .btn-add--chat,
+.card-wrapper:focus-within .btn-add--chat {
+  transform: translateY(calc(-50% + 22px)) scale(1);
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .btn-add--chat:not(.friend-circle *) {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(calc(-50% + 22px)) scale(1);
+  }
+}
+
+@media (max-width: 480px) {
+  .btn-add--chat:not(.friend-circle *) {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(calc(-50% + 22px)) scale(1);
+  }
+}
+
+/* Chat button in friend circle */
+.friend-circle .btn-add--chat.btn-add--dynamic {
+  position: absolute;
+  left: 50%;
+  right: auto;
+  top: auto;
+  bottom: 44px;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateX(-50%) scale(.85);
+}
+
+.friend-circle .card-wrapper:hover .btn-add--chat.btn-add--dynamic,
+.friend-circle .card-wrapper:focus-within .btn-add--chat.btn-add--dynamic {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: translateX(-50%) scale(1);
+}
