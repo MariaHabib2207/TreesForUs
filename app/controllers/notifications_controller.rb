@@ -30,12 +30,38 @@ class NotificationsController < ApplicationController
 
     unless already_invited
       ::ChatInviteNotifier.with(
-        message: "#{current_user.full_name} invited you to a chatroom."
+        message: "#{current_user.full_name} invited you to a chatroom.",
+        inviter_id: current_user.id
       ).deliver(recipient)
     end
 
     redirect_back fallback_location: authenticated_root_path
   end
+  def accept_chat_invite
+  notification = current_user.noticed_notifications.find(params[:notification_id])
+  notification.update!(read_at: Time.current)
+
+  inviter = User.find(params[:inviter_id])
+
+  ::ChatInviteAcceptedNotifier.with(
+    message: "#{current_user.full_name} accepted your chat invitation."
+  ).deliver(inviter)
+
+  redirect_back fallback_location: authenticated_root_path
+end
+
+def reject_chat_invite
+  notification = current_user.noticed_notifications.find(params[:notification_id])
+  notification.update!(read_at: Time.current)
+
+  inviter = User.find(params[:inviter_id])
+
+  ::ChatInviteRejectedNotifier.with(
+    message: "#{current_user.full_name} declined your chat invitation."
+  ).deliver(inviter)
+
+  redirect_back fallback_location: authenticated_root_path
+end
   def destroy
     notification = current_user.noticed_notifications.find(params[:id])
     notification.destroy
