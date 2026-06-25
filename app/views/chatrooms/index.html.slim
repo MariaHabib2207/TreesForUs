@@ -1,0 +1,46 @@
+div class="max-w-2xl mx-auto px-4 py-8"
+  div class="flex items-center justify-between mb-6"
+    h1 class="text-xl font-bold text-gray-800" Messages
+
+  - if @chatrooms.any?
+    div class="bg-white rounded-xl shadow border border-gray-100 divide-y overflow-hidden"
+      - @chatrooms.each do |chatroom|
+        - other = chatroom.members.find { |m| m.id != current_user.id }
+        - other_profile = other&.user_profile
+        - last_message = chatroom.messages.last
+
+        div class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition"
+          / Avatar
+          = link_to chatroom_path(chatroom), class: "flex items-center gap-3 flex-1 min-w-0" do
+            - if other_profile&.avatar&.attached?
+              = image_tag other_profile.avatar, class: "w-11 h-11 rounded-full object-cover border-2 border-green-100 flex-shrink-0"
+            - else
+              div class="w-11 h-11 rounded-full bg-gradient-to-br from-green-700 to-green-900 flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                = "#{other&.first_name&.first}#{other&.last_name&.first}"
+
+            div class="flex-1 min-w-0"
+              p class="font-semibold text-gray-800 text-sm truncate"
+                = other&.full_name || chatroom.name
+              - if last_message
+                p class="text-xs text-gray-400 truncate mt-0.5"
+                  - if last_message.user_id == current_user.id
+                    | You: #{last_message.body.presence || "Attachment"}
+                  - else
+                    = last_message.body.presence || "Attachment"
+              - else
+                p class="text-xs text-gray-400 mt-0.5" No messages yet
+
+            - if last_message
+              p class="text-xs text-gray-400 flex-shrink-0 ml-2"
+                = last_message.created_at.strftime("%b %d")
+
+          / Delete button
+          = button_to chatroom_path(chatroom), method: :delete, class: "text-gray-300 hover:text-red-500 transition bg-transparent border-none p-2 cursor-pointer flex-shrink-0", form: { data: { turbo_confirm: "Delete this conversation? This cannot be undone." } } do
+            svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+
+  - else
+    div class="text-center py-16 text-gray-400"
+      p class="text-4xl mb-3" 💬
+      p class="font-medium" No conversations yet
+      p class="text-sm mt-1" Accept a chat invite from your family tree to start messaging

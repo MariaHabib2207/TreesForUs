@@ -1,0 +1,121 @@
+= stylesheet_link_tag "chatroom", media: "all"
+
+div class="chatroom-page"
+  / Header
+  div class="chatroom-header"
+    div class="chatroom-header-left"
+      - other_profile = @other_member&.user_profile
+      - if other_profile&.avatar&.attached?
+        = image_tag other_profile.avatar, class: "chatroom-avatar"
+      - else
+        div class="chatroom-avatar-initials"
+          = "#{@other_member&.first_name&.first}#{@other_member&.last_name&.first}"
+      div
+        h1 class="chatroom-name" = @other_member&.full_name || @chatroom.name
+        p class="chatroom-status" Active now
+
+  / Messages
+  div class="chatroom-messages" id="messages-container"
+    - @messages.each do |message|
+      - is_mine = message.user_id == current_user.id
+      div class="message-row #{'message-row--mine' if is_mine}" data-message-id=message.id
+        - unless is_mine
+          - sender_profile = message.user.user_profile
+          - if sender_profile&.avatar&.attached?
+            = image_tag sender_profile.avatar, class: "message-avatar"
+          - else
+            div class="message-avatar-initials"
+              = "#{message.user.first_name.first}#{message.user.last_name.first}"
+
+        div class="message-bubble #{'message-bubble--mine' if is_mine}"
+          - if message.body.present?
+            p class="message-text" = message.body
+
+          / Images
+          - message.image_attachments.each do |attachment|
+            div class="message-attachment"
+              = image_tag url_for(attachment), class="message-image"
+
+          / Audio
+          - message.audio_attachments.each do |attachment|
+            div class="message-attachment"
+              audio controls class="message-audio"
+                source src=url_for(attachment) type=attachment.content_type
+
+          / Files
+          - message.file_attachments.each do |attachment|
+            div class="message-attachment"
+              a href=url_for(attachment) target="_blank" class="message-file"
+                span class="message-file-icon" 📎
+                span = attachment.filename.to_s
+
+          p class="message-time" = message.created_at.strftime("%H:%M")
+
+  / Input area
+  div class="chatroom-input-area"
+    = form_with url: chatroom_messages_path(@chatroom), method: :post, html: { multipart: true, id: "message-form" } do |f|
+      div class="chatroom-input-wrapper"
+
+        / Attachment preview
+        div id="attachment-preview" class="attachment-preview hidden"
+
+        div class="chatroom-input-row"
+          / Attach button
+          label for="file-input" class="attach-btn" title="Attach file"
+            svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.4 6.4a6 6 0 008.486 8.486L20.5 13"
+            = f.file_field :attachments, multiple: true, id: "file-input", class: "hidden", accept: "image/*,audio/*,.pdf,.doc,.docx,.txt,.zip"
+
+          / Text input
+          = f.text_area :body, placeholder: "Type a message...", class: "chatroom-textarea", id: "message-input", rows: 1
+
+          / Send button
+          button type="submit" class="send-btn"
+            svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+
+javascript:
+  // Auto-scroll to bottom
+  const container = document.getElementById('messages-container');
+  container.scrollTop = container.scrollHeight;
+
+  // Auto-resize textarea
+  const textarea = document.getElementById('message-input');
+  textarea.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+  });
+
+  // Send on Enter (Shift+Enter for newline)
+  textarea.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      document.getElementById('message-form').requestSubmit();
+    }
+  });
+
+  // Attachment preview
+  const fileInput = document.getElementById('file-input');
+  const preview = document.getElementById('attachment-preview');
+
+  fileInput.addEventListener('change', function() {
+    preview.innerHTML = '';
+    if (this.files.length === 0) {
+      preview.classList.add('hidden');
+      return;
+    }
+    preview.classList.remove('hidden');
+    Array.from(this.files).forEach(file => {
+      const chip = document.createElement('div');
+      chip.className = 'attachment-chip';
+      if (file.type.startsWith('image/')) {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        img.className = 'attachment-chip-img';
+        chip.appendChild(img);
+      } else {
+        chip.innerHTML = `<span>📎</span><span class="attachment-chip-name">${file.name}</span>`;
+      }
+      preview.appendChild(chip);
+    });
+  });

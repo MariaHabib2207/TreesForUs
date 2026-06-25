@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_06_22_235148) do
+ActiveRecord::Schema[8.0].define(version: 2026_06_25_000916) do
   create_table "active_admin_comments", force: :cascade do |t|
     t.string "namespace"
     t.text "body"
@@ -84,6 +84,20 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_22_235148) do
     t.index ["reset_password_token"], name: "index_admin_users_on_reset_password_token", unique: true
   end
 
+  create_table "chatroom_members", force: :cascade do |t|
+    t.integer "chatroom_id"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "chatrooms", force: :cascade do |t|
+    t.string "name"
+    t.integer "created_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "families", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
@@ -143,6 +157,14 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_22_235148) do
     t.index ["user_id", "occurred_on"], name: "index_life_activities_on_user_id_and_occurred_on"
     t.index ["user_id"], name: "index_life_activities_on_user_id"
     t.index ["visibility"], name: "index_life_activities_on_visibility"
+  end
+
+  create_table "messages", force: :cascade do |t|
+    t.integer "chatroom_id"
+    t.integer "user_id"
+    t.text "body"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "noticed_events", force: :cascade do |t|

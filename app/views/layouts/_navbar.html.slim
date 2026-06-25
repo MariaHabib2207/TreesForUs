@@ -35,13 +35,21 @@ nav class="bg-white shadow-md px-5 py-4"
           i class="ti ti-timeline" style="font-size: 16px;"
           | Timeline
 
+      - unless current_page?(chatrooms_path)
+        - unread_messages_count = Chatroom.joins(:chatroom_members).where(chatroom_members: { user_id: current_user.id }).joins(:messages).where(messages: { read_at: nil }).where.not(messages: { user_id: current_user.id }).count rescue 0
+        = link_to chatrooms_path, class: "relative text-sm font-medium text-white primary-btn hover:bg-green-700 px-4 py-2 rounded-lg transition flex items-center gap-1" do
+          i class="ti ti-messages" style="font-size: 16px;"
+          | Messages
+
       = link_to user_profile_path(current_user), class: "flex items-center" do
         - profile = current_user.user_profile
         - if profile&.avatar&.attached?
           = image_tag profile.avatar, class: "w-10 h-10 rounded-full border-2 border-green-700 object-cover"
         - else
           = image_tag "logo.png", class: "w-10 h-10 rounded-full border-2 border-gray-300 object-cover"
+
       = render partial: 'shared/notification_bell'
+
       = button_to destroy_user_session_path, method: :delete, class: "text-sm font-medium text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition" do
         | Logout
 
@@ -85,6 +93,13 @@ nav class="bg-white shadow-md px-5 py-4"
       = link_to user_life_activities_path(current_user), class: "text-sm font-medium text-white primary-btn hover:bg-green-700 px-4 py-2 rounded-lg transition flex items-center justify-center gap-1" do
         i class="ti ti-timeline" style="font-size: 16px;"
         | Timeline
+
+    - unless current_page?(chatrooms_path)
+      = link_to chatrooms_path, class: "text-sm font-medium text-white primary-btn hover:bg-green-700 px-4 py-2 rounded-lg transition flex items-center justify-center gap-1" do
+        i class="ti ti-messages" style="font-size: 16px;"
+        | Messages
+
+    = render partial: 'shared/notification_bell'
 
     = button_to destroy_user_session_path, method: :delete, class: "w-full text-sm font-medium text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition" do
       | Logout

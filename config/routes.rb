@@ -36,12 +36,16 @@ Rails.application.routes.draw do
     patch "accept", to: "accept_invitations#update", as: :update_invitation
   end
 
+  resources :chatrooms, only: [:show, :index, :destroy] do
+    resources :messages, only: [:create]
+  end
+
   resources :notifications, only: [:index, :destroy] do
     collection do
+      patch :mark_all_read
+      post :invite_to_chat
       post :accept_chat_invite
       post :reject_chat_invite
-      post :invite_to_chat
-      patch :mark_all_read
     end
     member do
       patch :mark_read

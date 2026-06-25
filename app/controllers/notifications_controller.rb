@@ -37,17 +37,29 @@ class NotificationsController < ApplicationController
 
     redirect_back fallback_location: authenticated_root_path
   end
-  def accept_chat_invite
+
+ def accept_chat_invite
   notification = current_user.noticed_notifications.find(params[:notification_id])
   notification.update!(read_at: Time.current)
 
   inviter = User.find(params[:inviter_id])
 
+  chatroom = Chatroom.between(current_user, inviter)
+  unless chatroom
+    chatroom = Chatroom.create!(
+      name: "#{inviter.full_name} & #{current_user.full_name}",
+      created_by: inviter
+    )
+    chatroom.members << inviter
+    chatroom.members << current_user
+  end
+
   ::ChatInviteAcceptedNotifier.with(
-    message: "#{current_user.full_name} accepted your chat invitation."
+    message: "#{current_user.full_name} accepted your chat invitation.",
+    chatroom_id: chatroom.id
   ).deliver(inviter)
 
-  redirect_back fallback_location: authenticated_root_path
+  redirect_to chatroom_path(chatroom)
 end
 
 def reject_chat_invite

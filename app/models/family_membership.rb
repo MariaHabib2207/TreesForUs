@@ -18,6 +18,9 @@
 #
 #  family_id  (family_id => families.id)
 #  user_id    (user_id => users.id)
+#
+#  family_id  (family_id => families.id)
+#  user_id    (user_id => users.id)
 
 class FamilyMembership < ApplicationRecord
   belongs_to :user
