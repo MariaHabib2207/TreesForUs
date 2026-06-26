@@ -2,6 +2,6 @@
 //= link_directory ../stylesheets .css
 //= link_directory ../javascripts .js
 //= link life_activities.css
- //= link logo.png
- //= link chatroom.css
- //= link family_tree.css
+//= link logo.png
+//= link chatroom.css
+//= link family_tree.css
