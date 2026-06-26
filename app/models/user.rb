@@ -418,9 +418,7 @@ has_many :user_sessions, dependent: :destroy
     last_active_at&.> 5.minutes.ago
   end
 
-  def full_name
-   "#{first_name} #{last_name}"
-  end
+  
   # ===================================================
   # PRIVATE METHODS
   # ===================================================

@@ -1,121 +1,188 @@
 = stylesheet_link_tag "chatroom", media: "all"
 
-div class="chatroom-page"
-  / Header
-  div class="chatroom-header"
-    div class="chatroom-header-left"
-      - other_profile = @other_member&.user_profile
-      - if other_profile&.avatar&.attached?
-        = image_tag other_profile.avatar, class: "chatroom-avatar"
-      - else
-        div class="chatroom-avatar-initials"
-          = "#{@other_member&.first_name&.first}#{@other_member&.last_name&.first}"
-      div
-        h1 class="chatroom-name" = @other_member&.full_name || @chatroom.name
-        p class="chatroom-status" Active now
+div class="chatroom-wrapper"
+  div class="chatroom-page"
+    / Header
+    div class="chatroom-header"
+      div class="chatroom-header-left"
+        = link_to chatrooms_path, class: "chatroom-back-btn" do
+          svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"
 
-  / Messages
-  div class="chatroom-messages" id="messages-container"
-    - @messages.each do |message|
-      - is_mine = message.user_id == current_user.id
-      div class="message-row #{'message-row--mine' if is_mine}" data-message-id=message.id
-        - unless is_mine
-          - sender_profile = message.user.user_profile
-          - if sender_profile&.avatar&.attached?
-            = image_tag sender_profile.avatar, class: "message-avatar"
-          - else
-            div class="message-avatar-initials"
-              = "#{message.user.first_name.first}#{message.user.last_name.first}"
+        - other_profile = @other_member&.user_profile
+        - if other_profile&.avatar&.attached?
+          = image_tag other_profile.avatar, class: "chatroom-avatar"
+        - else
+          div class="chatroom-avatar-initials"
+            = "#{@other_member&.first_name&.first}#{@other_member&.last_name&.first}"
 
-        div class="message-bubble #{'message-bubble--mine' if is_mine}"
-          - if message.body.present?
-            p class="message-text" = message.body
+        div
+          h1 class="chatroom-name" = @other_member&.full_name || @chatroom.name
+          div class="chatroom-status-row"
+            span class="chatroom-status-dot"
+            span class="chatroom-status-text" Active now
 
-          / Images
-          - message.image_attachments.each do |attachment|
-            div class="message-attachment"
-              = image_tag url_for(attachment), class="message-image"
+      = button_to chatroom_path(@chatroom), method: :delete, class: "chatroom-delete-btn", form: { data: { turbo_confirm: "Delete this conversation? This cannot be undone." } } do
+        svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
 
-          / Audio
-          - message.audio_attachments.each do |attachment|
-            div class="message-attachment"
-              audio controls class="message-audio"
-                source src=url_for(attachment) type=attachment.content_type
+    / Messages container
+    div class="chatroom-messages" id="messages-container" data-chatroom-id=@chatroom.id
+      - @messages.each do |message|
+        = render "messages/message", message: message, current_user: current_user
 
-          / Files
-          - message.file_attachments.each do |attachment|
-            div class="message-attachment"
-              a href=url_for(attachment) target="_blank" class="message-file"
-                span class="message-file-icon" 📎
-                span = attachment.filename.to_s
-
-          p class="message-time" = message.created_at.strftime("%H:%M")
-
-  / Input area
-  div class="chatroom-input-area"
-    = form_with url: chatroom_messages_path(@chatroom), method: :post, html: { multipart: true, id: "message-form" } do |f|
-      div class="chatroom-input-wrapper"
-
-        / Attachment preview
-        div id="attachment-preview" class="attachment-preview hidden"
-
-        div class="chatroom-input-row"
-          / Attach button
-          label for="file-input" class="attach-btn" title="Attach file"
-            svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-              path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.4 6.4a6 6 0 008.486 8.486L20.5 13"
-            = f.file_field :attachments, multiple: true, id: "file-input", class: "hidden", accept: "image/*,audio/*,.pdf,.doc,.docx,.txt,.zip"
-
-          / Text input
-          = f.text_area :body, placeholder: "Type a message...", class: "chatroom-textarea", id: "message-input", rows: 1
-
-          / Send button
-          button type="submit" class="send-btn"
-            svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-              path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+    / Input area
+    div class="chatroom-input-area"
+      = form_with url: chatroom_messages_path(@chatroom), method: :post, html: { multipart: true, id: "message-form", data: { turbo: "false" } } do |f|
+        div class="chatroom-input-wrapper"
+          div id="attachment-preview" class="attachment-preview hidden"
+          div class="chatroom-input-row"
+            label for="file-input" class="attach-btn" title="Attach file"
+              svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.4 6.4a6 6 0 008.486 8.486L20.5 13"
+              = f.file_field :attachments, multiple: true, id: "file-input", class: "hidden", accept: "image/*,audio/*,.pdf,.doc,.docx,.txt,.zip"
+            = f.text_area :body, placeholder: "Type a message...", class: "chatroom-textarea", id: "message-input", rows: 1
+            button type="submit" class="send-btn" id="send-btn"
+              svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
 
 javascript:
-  // Auto-scroll to bottom
-  const container = document.getElementById('messages-container');
-  container.scrollTop = container.scrollHeight;
+  (function() {
+    let subscription = null;
 
-  // Auto-resize textarea
-  const textarea = document.getElementById('message-input');
-  textarea.addEventListener('input', function() {
-    this.style.height = 'auto';
-    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-  });
-
-  // Send on Enter (Shift+Enter for newline)
-  textarea.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      document.getElementById('message-form').requestSubmit();
+    function scrollToBottom() {
+      const c = document.getElementById('messages-container');
+      if (c) c.scrollTop = c.scrollHeight;
     }
-  });
 
-  // Attachment preview
-  const fileInput = document.getElementById('file-input');
-  const preview = document.getElementById('attachment-preview');
+    function initActionCable() {
+      const container = document.getElementById('messages-container');
+      if (!container) return;
 
-  fileInput.addEventListener('change', function() {
-    preview.innerHTML = '';
-    if (this.files.length === 0) {
-      preview.classList.add('hidden');
-      return;
-    }
-    preview.classList.remove('hidden');
-    Array.from(this.files).forEach(file => {
-      const chip = document.createElement('div');
-      chip.className = 'attachment-chip';
-      if (file.type.startsWith('image/')) {
-        const img = document.createElement('img');
-        img.src = URL.createObjectURL(file);
-        img.className = 'attachment-chip-img';
-        chip.appendChild(img);
-      } else {
-        chip.innerHTML = `<span>📎</span><span class="attachment-chip-name">${file.name}</span>`;
+      const chatroomId = container.dataset.chatroomId;
+
+      if (!window.ActionCable) {
+        setTimeout(initActionCable, 100);
+        return;
       }
-      preview.appendChild(chip);
+
+      if (subscription) {
+        subscription.unsubscribe();
+        subscription = null;
+      }
+
+      const consumer = window.ActionCable.createConsumer('/cable');
+      subscription = consumer.subscriptions.create(
+        { channel: "ChatroomChannel", chatroom_id: chatroomId },
+        {
+          connected() {
+            console.log('[ActionCable] Connected to ChatroomChannel', chatroomId);
+          },
+          disconnected() {
+            console.log('[ActionCable] Disconnected');
+          },
+          received(data) {
+            console.log('[ActionCable] Message received');
+            const c = document.getElementById('messages-container');
+            if (c) {
+              c.insertAdjacentHTML('beforeend', data.message_html);
+              scrollToBottom();
+            }
+          }
+        }
+      );
+    }
+
+    function initForm() {
+      const messageForm = document.getElementById('message-form');
+      if (!messageForm) return;
+
+      const newForm = messageForm.cloneNode(true);
+      messageForm.parentNode.replaceChild(newForm, messageForm);
+
+      const newInput = document.getElementById('message-input');
+      const newFileInput = document.getElementById('file-input');
+      const newPreview = document.getElementById('attachment-preview');
+      const newSendBtn = document.getElementById('send-btn');
+
+      newForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const body = newInput.value.trim();
+        if (!body && newFileInput.files.length === 0) return;
+
+        newSendBtn.disabled = true;
+
+        const formData = new FormData(newForm);
+
+        try {
+          const response = await fetch(newForm.action, {
+            method: 'POST',
+            headers: { 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content },
+            body: formData
+          });
+
+          if (response.ok) {
+            newInput.value = '';
+            newInput.style.height = 'auto';
+            newFileInput.value = '';
+            newPreview.innerHTML = '';
+            newPreview.classList.add('hidden');
+          } else {
+            console.error('Send failed, status:', response.status);
+          }
+        } catch(err) {
+          console.error('Send error:', err);
+        } finally {
+          newSendBtn.disabled = false;
+          newInput.focus();
+        }
+      });
+
+      newInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+      });
+
+      newInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          newForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+        }
+      });
+
+      newFileInput.addEventListener('change', function() {
+        newPreview.innerHTML = '';
+        if (this.files.length === 0) { newPreview.classList.add('hidden'); return; }
+        newPreview.classList.remove('hidden');
+        Array.from(this.files).forEach(file => {
+          const chip = document.createElement('div');
+          chip.className = 'attachment-chip';
+          if (file.type.startsWith('image/')) {
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            img.className = 'attachment-chip-img';
+            chip.appendChild(img);
+          } else {
+            chip.innerHTML = `<span>📎</span><span class="attachment-chip-name">${file.name}</span>`;
+          }
+          newPreview.appendChild(chip);
+        });
+      });
+    }
+
+    function init() {
+      if (!document.getElementById('messages-container')) return;
+      scrollToBottom();
+      initActionCable();
+      initForm();
+    }
+
+    document.addEventListener('turbo:load', init);
+    document.addEventListener('DOMContentLoaded', init);
+
+    document.addEventListener('turbo:before-cache', function() {
+      if (subscription) { subscription.unsubscribe(); subscription = null; }
     });
-  });
+  })();

@@ -1,0 +1,37 @@
+- is_mine = message.user_id == current_user.id
+div class="message-row #{'message-row--mine' if is_mine}" data-message-id=message.id
+  - unless is_mine
+    - sender_profile = message.user.user_profile
+    - if sender_profile&.avatar&.attached?
+      = image_tag sender_profile.avatar, class: "message-avatar"
+    - else
+      div class="message-avatar-initials"
+        = "#{message.user.first_name.first}#{message.user.last_name.first}"
+
+  div class="message-bubble #{'message-bubble--mine' if is_mine}"
+    - begin
+      - body = message.body
+    - rescue ActiveRecord::Encryption::Errors::Decryption
+      - body = nil
+    - if body.present?
+      p class="message-text" = body
+
+    / Images
+    - message.image_attachments.each do |attachment|
+      div class="message-attachment"
+        = image_tag url_for(attachment), class: "message-image"
+
+    / Audio
+    - message.audio_attachments.each do |attachment|
+      div class="message-attachment"
+        audio controls class="message-audio"
+          source src=url_for(attachment) type=attachment.content_type
+
+    / Files
+    - message.file_attachments.each do |attachment|
+      div class="message-attachment"
+        a href=url_for(attachment) target="_blank" class="message-file"
+          span class="message-file-icon" 📎
+          span = attachment.filename.to_s
+
+    p class="message-time" = message.created_at.strftime("%H:%M")

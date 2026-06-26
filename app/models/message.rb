@@ -3,6 +3,8 @@ class Message < ApplicationRecord
   belongs_to :user
   has_many_attached :attachments
 
+  encrypts :body
+
   scope :ordered, -> { order(created_at: :asc) }
 
   def image_attachments
