@@ -2,6 +2,6 @@
 Mailjet.configure do |config|
   config.api_key = '08bd1f726b464fd36d8398301ca86ec2'
   config.secret_key = '481bddc824f4e86baebd0000b36ca661'
-  config.default_from = 'maria.usama9211@gmail.com'
+  config.default_from = 'support@tree-of-us.com'
   config.api_version = 'v3.1'
 end
