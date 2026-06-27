@@ -18,26 +18,26 @@ class NotificationsController < ApplicationController
     redirect_back fallback_location: root_path 
   end
   
-  def invite_to_chat
-    recipient = User.find(params[:recipient_id])
+def invite_to_chat
+  recipient = User.find(params[:recipient_id])
 
-    already_invited = recipient.noticed_notifications
-                              .where(read_at: nil)
-                              .joins(:event)
-                              .where(noticed_events: { type: "ChatInviteNotifier" })
-                              .where("noticed_notifications.created_at > ?", 10.minutes.ago)
-                              .exists?
+  already_invited = recipient.noticed_notifications
+                             .where(read_at: nil)
+                             .joins(:event)
+                             .where(noticed_events: { type: "ChatInviteNotifier" })
+                             .where("noticed_notifications.created_at > ?", 10.minutes.ago)
+                             .exists?
 
-    unless already_invited
-      ::ChatInviteNotifier.with(
-        message: "#{current_user.full_name} invited you to a chatroom.",
-        inviter_id: current_user.id
-      ).deliver(recipient)
-    end
-
-    redirect_back fallback_location: authenticated_root_path
+  if already_invited
+    redirect_back fallback_location: authenticated_root_path, notice: "Chat invite already sent to #{recipient.first_name}."
+  else
+    ::ChatInviteNotifier.with(
+      message: "#{current_user.full_name} invited you to a chatroom.",
+      inviter_id: current_user.id
+    ).deliver(recipient)
+    redirect_back fallback_location: authenticated_root_path, notice: "Chat invite sent to #{recipient.first_name}!"
   end
-
+end
  def accept_chat_invite
   notification = current_user.noticed_notifications.find(params[:notification_id])
   notification.update!(read_at: Time.current)

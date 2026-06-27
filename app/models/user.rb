@@ -213,6 +213,14 @@ class User < ApplicationRecord
       end
     end
   end
+def pending_chat_invite_from?(inviter)
+  noticed_notifications
+    .joins(:event)
+    .where(noticed_events: { type: "ChatInviteNotifier" })
+    .where(read_at: nil)
+    .where("noticed_events.params LIKE ?", "%inviter_id%#{inviter.id}%")
+    .exists?
+end
   # ===================================================
   # DEVISE OVERRIDES
   # ===================================================
@@ -418,7 +426,7 @@ has_many :user_sessions, dependent: :destroy
     last_active_at&.> 5.minutes.ago
   end
 
-  
+ 
   # ===================================================
   # PRIVATE METHODS
   # ===================================================

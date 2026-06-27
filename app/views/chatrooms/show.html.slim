@@ -21,12 +21,10 @@ div class="chatroom-wrapper"
           div class="chatroom-status-row"
             span class="chatroom-status-dot"
             span class="chatroom-status-text" Active now
-
-      = button_to chatroom_path(@chatroom), method: :delete, class: "chatroom-delete-btn", form: { data: { turbo_confirm: "Delete this conversation? This cannot be undone." } } do
+      = link_to chatrooms_path, class: "chatroom-delete-btn", title: "Close chat" do
         svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-          path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-
-    / Messages container
+          path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"
+          / Messages container
     div class="chatroom-messages" id="messages-container" data-chatroom-id=@chatroom.id
       - @messages.each do |message|
         = render "messages/message", message: message, current_user: current_user

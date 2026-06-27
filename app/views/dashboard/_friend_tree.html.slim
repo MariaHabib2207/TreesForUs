@@ -81,12 +81,25 @@
             span.btn-add__icon +
             span.btn-add__label Friend
 
-          / --- CHAT INVITE ---
-          = button_to invite_to_chat_notifications_path(recipient_id: f_user.id), method: :post, class: "btn-add btn-add--chat btn-add--dynamic", title: "Invite to chat", form: { data: { turbo: false } } do
-            span.btn-add__icon 💬
-            span.btn-add__label Chat
+          / --- CHAT BUTTON ---
+          - if f_user.login_enabled?
+            - existing_chatroom = Chatroom.between(current_user, f_user)
+            - if existing_chatroom
+              = link_to chatroom_path(existing_chatroom), class: "btn-add btn-add--chat btn-add--dynamic", title: "Go to chat" do
+                span.btn-add__icon 💬
+                span.btn-add__label Go to Chat
+            - else
+              - pending_invite = f_user.pending_chat_invite_from?(current_user)
+              - if pending_invite
+                div.btn-add.btn-add--chat.btn-add--dynamic.btn-add--invited title="Invite pending"
+                  span.btn-add__icon ⏳
+                  span.btn-add__label Pending
+              - else
+                = button_to invite_to_chat_notifications_path(recipient_id: f_user.id), method: :post, class: "btn-add btn-add--chat btn-add--dynamic", title: "Send chat invite", form: { data: { turbo: false } } do
+                  span.btn-add__icon 💬
+                  span.btn-add__label Chat Invite
 
-          / --- INVITE (inside card-wrapper so hover works) ---
+          / --- INVITE ---
           - if f_user != current_user && !f_user.login_enabled?
             - if f_user.invitation_sent_at.present?
               div.btn-add.btn-add--invite.btn-add--dynamic.btn-add--invited

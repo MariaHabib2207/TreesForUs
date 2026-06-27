@@ -4,10 +4,15 @@
 #
 #  id          :integer          not null, primary key
 #  body        :text
+#  read_at     :datetime
 #  created_at  :datetime         not null
 #  updated_at  :datetime         not null
 #  chatroom_id :integer
 #  user_id     :integer
+#
+# Indexes
+#
+#  index_messages_on_id  (id) UNIQUE
 #
 class Message < ApplicationRecord
   belongs_to :chatroom

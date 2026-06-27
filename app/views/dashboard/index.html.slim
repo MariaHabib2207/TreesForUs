@@ -1,9 +1,40 @@
 body.login-bg
 
-  / = render "layouts/notification_bell"
+  .dashboard-layout style="padding-top:64px;"
 
-  .dashboard-page style="padding-top:64px;"
-    - if @active_family.friend_family?
-      = render "friend_tree", members: @friend_members
-    - else
-      = render "family_tree", node: @family_tree, depth: 0
+    / MAIN TREE AREA
+    .dashboard-main
+      - if @active_family.friend_family?
+        = render "friend_tree", members: @friend_members
+      - else
+        = render "family_tree", node: @family_tree, depth: 0
+
+    / CHAT SIDEBAR
+    .chat-sidebar
+      .chat-sidebar__header
+        span.chat-sidebar__title 💬 Messages
+        = link_to chatrooms_path, class: "chat-sidebar__see-all" do
+          | See all
+
+      .chat-sidebar__list
+        - @chatrooms = Chatroom.joins(:chatroom_members).where(chatroom_members: { user_id: current_user.id }).includes(:members, :messages).order(updated_at: :desc).limit(10)
+        - if @chatrooms.any?
+          - @chatrooms.each do |chatroom|
+            - other = chatroom.members.where.not(id: current_user.id).first
+            - last_msg = chatroom.messages.ordered.last
+            - unread = chatroom.messages.where(read_at: nil).where.not(user_id: current_user.id).count
+            = link_to chatroom_path(chatroom), class: "chat-sidebar__item #{'chat-sidebar__item--unread' if unread > 0}" do
+              - other_profile = other&.user_profile
+              - if other_profile&.avatar&.attached?
+                = image_tag other_profile.avatar, class: "chat-sidebar__avatar"
+              - else
+                .chat-sidebar__avatar-initials
+                  = "#{other&.first_name&.first}#{other&.last_name&.first}"
+              .chat-sidebar__info
+                .chat-sidebar__name = other&.full_name || chatroom.name
+                .chat-sidebar__preview = last_msg&.body&.truncate(30) || "No messages yet"
+              - if unread > 0
+                .chat-sidebar__badge = unread
+        - else
+          .chat-sidebar__empty
+            | No conversations yet
