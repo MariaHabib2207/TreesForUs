@@ -5,3 +5,4 @@
 //= link family_tree.css
 //= link logo.png
 //= link application.js
+//= link logo.png
