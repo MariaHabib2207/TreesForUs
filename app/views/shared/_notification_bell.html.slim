@@ -25,32 +25,27 @@ div class="relative" id="notification_bell_wrapper"
 
 javascript:
   function initNotificationBell() {
-    const wrapper = document.getElementById('notification_bell_wrapper');
     const btn = document.getElementById('bell-btn');
     const dropdown = document.getElementById('notif-dropdown');
 
-    if (!btn || !dropdown || !wrapper) return;
+    if (!btn || !dropdown) return;
 
-    btn.addEventListener('click', function(e) {
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+
+    newBtn.addEventListener('click', function(e) {
       e.stopPropagation();
-      e.preventDefault();
-      dropdown.classList.toggle('hidden');
+      document.getElementById('notif-dropdown').classList.toggle('hidden');
     });
 
     document.addEventListener('click', function(e) {
-      if (!wrapper.contains(e.target)) {
-        dropdown.classList.add('hidden');
+      const d = document.getElementById('notif-dropdown');
+      const b = document.getElementById('bell-btn');
+      if (d && b && !d.contains(e.target) && !b.contains(e.target)) {
+        d.classList.add('hidden');
       }
     });
-
-    dropdown.addEventListener('click', function(e) {
-      e.stopPropagation();
-    });
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initNotificationBell);
-  } else {
-    initNotificationBell();
-  }
   document.addEventListener('turbo:load', initNotificationBell);
+  document.addEventListener('DOMContentLoaded', initNotificationBell);
