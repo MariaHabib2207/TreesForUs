@@ -87,6 +87,7 @@ gem 'device_detector'
 group :development, :test do
   gem 'sqlite3', '~> 2.0'
   gem "letter_opener", group: :development
+  gem "sitemap_generator"
 
   
 end
