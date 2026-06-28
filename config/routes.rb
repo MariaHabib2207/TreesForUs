@@ -65,4 +65,5 @@ Rails.application.routes.draw do
 
   get "up" => "rails/health#show", as: :rails_health_check
   mount ActionCable.server => '/cable'
+  get '/sitemap.xml', to: 'sitemaps#show', defaults: { format: 'xml' }
 end
