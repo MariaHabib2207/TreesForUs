@@ -38,9 +38,6 @@ nav class="bg-white shadow-md px-5 py-4"
         = link_to chatrooms_path, class: "relative text-sm font-medium text-white primary-btn hover:bg-green-700 px-4 py-2 rounded-lg transition flex items-center gap-1" do
           div class="relative inline-flex items-center"
             i class="ti ti-messages" style="font-size: 16px;"
-            - if unread_count > 0
-              span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center leading-none font-bold"
-                = unread_count > 9 ? "9+" : unread_count.to_s
           span class="ml-1" Messages
 
       = link_to user_profile_path(current_user), class: "flex items-center" do
