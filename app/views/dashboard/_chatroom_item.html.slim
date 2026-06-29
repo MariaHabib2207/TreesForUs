@@ -1,0 +1,17 @@
+- other_member = chatroom.members.where.not(id: current_user.id).first
+- last_message = chatroom.messages.ordered.last
+- display_name = [other_member&.first_name, other_member&.last_name].compact.join(" ")
+- display_name = "Unknown" if display_name.blank?
+- initials = display_name.split(" ").map(&:first).first(2).join.upcase
+
+a href=chatroom_path(chatroom) style="display:flex; flex-direction:row; align-items:center; gap:12px; padding:12px 20px 12px 28px; text-decoration:none; width:100%; box-sizing:border-box;"
+  div style="display:flex; align-items:center; justify-content:center; width:44px; height:44px; min-width:44px; border-radius:50%; background:#1D4D3A; color:#fff; font-weight:600;"
+    = initials
+
+  div style="display:flex; flex-direction:column; flex:1; min-width:0;"
+    div style="display:flex; flex-direction:row; align-items:baseline; justify-content:space-between; gap:8px;"
+      span style="font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" = display_name
+      - if last_message
+        span style="font-size:12px;  flex-shrink:0;" = time_ago_in_words(last_message.created_at)
+    - if last_message
+      span style="font-size:13px;  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" = truncate(last_message.body.to_s, length: 45)

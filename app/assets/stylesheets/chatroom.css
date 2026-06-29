@@ -1,98 +1,8 @@
 /* ============================================================
-   TREEOFUS — PREMIUM BOTANICAL THEME
-   Full stylesheet — layout, components, responsive
-   FIX: removed stacked `min-height: 100vh` on nested containers
-        (.dashboard-page, .dashboard-layout, .family-tree-scroll
-        were each forcing a full extra screen of height, which
-        is what was causing the page to scroll vertically far
-        past its actual content)
+   CHATROOM — Full stylesheet
    ============================================================ */
 
-/* ============================================================
-   CSS CUSTOM PROPERTIES
-   ============================================================ */
-
-:root {
-  /* Tree card geometry */
-  --card-w:      150px;
-  --card-radius: 22px;
-
-  /* Connectors */
-  --wire:    rgb(201, 189, 170);
-  --wire-px: 2px;
-
-  /* Branch spacing */
-  --stem-h: 42px;
-  --arm-h:  28px;
-  --col-gap: 42px;
-
-  /* Surfaces */
-  --bg:           rgb(244, 241, 234);
-  --card-bg:      rgb(255, 255, 255);
-  --card-border:  rgb(229, 221, 208);
-
-  /* Shadows */
-  --card-shadow:
-    0 4px 14px rgba(0, 0, 0, .04),
-    0 1px 3px  rgba(0, 0, 0, .03);
-  --card-hover:
-    0 12px 32px rgba(0, 0, 0, .08);
-
-  /* Root / child cards */
-  --root-bg:   rgb(62, 107, 87);
-  --root-text: rgb(255, 255, 255);
-  --root-sub:  rgba(255, 255, 255, .72);
-
-  /* Partner cards */
-  --partner-bg:  rgb(255, 255, 255);
-  --partner-bdr: rgb(229, 221, 208);
-
-  /* Avatar */
-  --avatar-bg:   rgba(255, 255, 255, .88);
-  --avatar-size: 50px;
-
-  /* Typography */
-  --text-name: rgb(28, 28, 28);
-  --text-role: rgb(107, 114, 128);
-  --text-age:  rgb(156, 163, 175);
-
-  /* Brand colours */
-  --accent:     rgb(184, 155, 94);
-  --dark-green: rgb(29, 77, 58);
-}
-
-/* ============================================================
-   RESET
-   ============================================================ */
-
-*, *::before, *::after {
-  box-sizing: border-box;
-}
-
-/* ============================================================
-   BASE
-   ============================================================ */
-
-html, body {
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  background: linear-gradient(
-    180deg,
-    rgb(248, 246, 241) 0%,
-    rgb(244, 241, 234) 100%
-  );
-  font-family: "Plus Jakarta Sans", Inter, ui-sans-serif, system-ui, sans-serif;
-  color: var(--text-name);
-}
-
-/* ============================================================
-   BACKGROUND VARIANTS
-   ============================================================ */
-
-.login-bg {
+.chatroom-wrapper {
   min-height: 100vh;
   width: 100%;
   background-image: url("/assets/background-img.png");
@@ -101,1415 +11,506 @@ body {
   background-repeat: no-repeat;
   background-attachment: fixed;
   overflow-x: hidden;
-}
 
-/* ============================================================
-   DASHBOARD PAGE WRAPPER
-   FIX: this is the ONE place that should claim a full screen
-   minimum — nested children below no longer also claim 100vh,
-   so the page height now tracks actual content instead of
-   stacking multiple "at least one screen" blocks.
-   ============================================================ */
-
-.dashboard-page {
-  padding: 24px 20px 80px;
-  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
   box-sizing: border-box;
 }
 
-/* ============================================================
-   FAMILY BAR
-   ============================================================ */
-
-.dashboard-family-bar {
+.chatroom-page {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  width: 100%;
+  max-width: 780px;
+  height: calc(100vh - 112px);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 24px;
+  border: 1px solid rgba(229, 221, 208, 0.6);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.12),
+    0 4px 16px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+/* ── Header ── */
+.chatroom-header {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.98);
+  border-bottom: 1px solid rgba(229, 221, 208, 0.8);
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+.chatroom-header-left {
+  display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 28px;
-  border-radius: 18px;
-}
-
-.family-bar-left {
-  flex: 1 1 auto;
   min-width: 0;
+  flex: 1;
 }
 
-.current-family-label {
-  font-size: 22px;
-  font-weight: 800;
-  color: #111827;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.family-bar-right {
+.chatroom-back-btn {
+  color: #9ca3af;
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
+  padding: 6px;
+  border-radius: 10px;
+  transition: color 0.15s, background 0.15s;
   flex-shrink: 0;
+  text-decoration: none;
 }
 
-/* Family switcher */
-.family-switcher-form {
-  display: flex;
-  align-items: center;
-  width: 100%;
-}
-
-.family-select {
-  width: 100%;
-  max-width: 260px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  background: #1D4D3A;
-  color: #f0edff;
-  border: 1px solid #bbf7d0;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
-  cursor: pointer;
-  transition: all .2s ease;
-}
-
-.family-select:focus {
-  outline: none;
-  border-color: #4ade80;
-  box-shadow: 0 0 0 3px rgba(74, 222, 128, .3);
-}
-
-.family-select:hover {
-  border-color: #86efac;
-}
-
-/* Single-family badge */
-.single-family-badge {
-  padding: 8px 14px;
-  border-radius: 14px;
+.chatroom-back-btn:hover {
+  color: #1D4D3A;
   background: #f0fdf4;
-  border: 1px solid #bbf7d0;
-  white-space: nowrap;
 }
 
-.badge-label {
-  display: block;
-  font-size: 12px;
-  color: #166534;
-}
-
-.badge-name {
-  font-weight: 700;
-  color: #14532d;
-}
-
-/* Create-family buttons */
-.btn-create-family,
-.btn-create-first-family {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 18px;
-  border-radius: 12px;
-  background: #14532d;
-  color: white;
-  text-decoration: none;
-  font-weight: 600;
-  white-space: nowrap;
-  transition: background .15s;
-}
-
-.btn-create-family:hover,
-.btn-create-first-family:hover {
-  background: #166534;
-}
-
-/* ============================================================
-   FAMILY HEADER BADGE  (centred pill variant)
-   ============================================================ */
-
-.family-header {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 24px;
-}
-
-.family-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 24px;
-  background: linear-gradient(135deg, #14532d, #166534);
-  color: white;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, .08);
-  box-shadow:
-    0 10px 25px rgba(0, 0, 0, .12),
-    inset 0 1px 0 rgba(255, 255, 255, .08);
-  animation: fadeInDown .4s ease;
-}
-
-.family-icon {
-  font-size: 22px;
-}
-
-.family-title {
-  font-size: 18px;
-  font-weight: 700;
-  letter-spacing: .4px;
-}
-
-@keyframes fadeInDown {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0);    }
-}
-
-/* ============================================================
-   EMPTY STATE
-   ============================================================ */
-
-.empty-family-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 60px 20px;
-}
-
-.empty-icon {
-  font-size: 56px;
-  margin-bottom: 16px;
-}
-
-.empty-family-state h2 {
-  font-size: 22px;
-  font-weight: 700;
-  color: #1a2e1c;
-  margin: 0 0 8px;
-}
-
-.empty-family-state p {
-  font-size: 14px;
-  color: #6b7280;
-  max-width: 320px;
-  line-height: 1.6;
-  margin: 0 0 24px;
-}
-
-/* ============================================================
-   SCROLL HINT STRIP  (mobile-only, above tree)
-   ============================================================ */
-
-.tree-scroll-hint {
-  display: none;
-}
-
-/* ============================================================
-   FAMILY TREE SCROLL CONTAINER
-   FIX: removed `min-height: 100vh`. This container only needs
-   to be as tall as the tree itself — it was previously forcing
-   an extra full screen of empty height regardless of how many
-   people were in the tree.
-   ============================================================ */
-
-.family-tree-scroll {
-  width: 100%;
-  overflow-x: auto;
-  overflow-y: visible;
-  -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
-  padding: 48px 40px 90px;
-  position: relative;
-  box-sizing: border-box;
-  touch-action: pan-x pan-y;
-  mask-image: linear-gradient(
-    to right,
-    black calc(100% - 32px),
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    to right,
-    black calc(100% - 32px),
-    transparent 100%
-  );
-}
-
-.family-tree-scroll.scrolled-end {
-  mask-image: none;
-  -webkit-mask-image: none;
-}
-
-/* ============================================================
-   MAIN TREE WRAPPER
-   ============================================================ */
-
-.family-tree {
-  display: flex;
-  justify-content: center;
-  min-width: max-content;
-  padding: 0 40px;
-}
-
-/* ============================================================
-   CONNECTOR SVG
-   ============================================================ */
-
-#tree-connectors {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  overflow: visible;
-  z-index: 0;
-}
-
-#tree-connectors path,
-#tree-connectors line {
-  stroke: var(--wire);
-  stroke-width: var(--wire-px);
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-/* ============================================================
-   TREE STRUCTURE
-   ============================================================ */
-
-.tree-node,
-.children-row,
-.child-column,
-.couple-row,
-.card {
-  position: relative;
-  z-index: 1;
-}
-
-.tree-node {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.couple-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* ============================================================
-   COUPLE CONNECTOR
-   ============================================================ */
-
-.couple-connector {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.couple-line {
-  width: 24px;
-  height: 2px;
-  background: var(--wire);
-}
-
-.couple-heart {
-  font-size: 12px;
-  line-height: 1;
-  color: var(--accent);
-  padding: 0 5px;
-  user-select: none;
-}
-
-/* ============================================================
-   CARD WRAPPER  (hover trigger zone for add buttons)
-   ============================================================ */
-
-.card-wrapper {
-  position: relative;
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0 48px 44px;
-  margin: 0 -48px -44px;
-}
-
-/* ============================================================
-   CARD
-   ============================================================ */
-
-.card {
-  width: var(--card-w);
-  background: rgba(255, 255, 255, .92);
-  border: 1px solid var(--card-border);
-  border-radius: var(--card-radius);
-  box-shadow: var(--card-shadow);
-  backdrop-filter: blur(12px);
-  padding: 18px 12px 14px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  position: relative;
-  overflow: hidden;
-  flex-shrink: 0;
-  text-decoration: none;
-  transition:
-    transform .22s ease,
-    box-shadow .22s ease,
-    border-color .22s ease;
-}
-
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--card-hover);
-}
-
-/* Root & child cards — green */
-.card.root,
-.card.child-card {
-  background: linear-gradient(145deg, rgb(74, 118, 98), rgb(62, 107, 87));
-  border: 1px solid rgba(255, 255, 255, .12);
-}
-
-.card.root .card-name,
-.card.child-card .card-name {
-  color: var(--root-text);
-}
-
-.card.root .card-role,
-.card.root .card-age,
-.card.child-card .card-role,
-.card.child-card .card-age {
-  color: var(--root-sub);
-}
-
-.card.root .avatar-initials,
-.card.child-card .avatar-initials {
-  background: rgba(255, 255, 255, .92);
-  color: var(--dark-green);
-}
-
-/* Partner card — white */
-.card.partner-card {
-  background: rgba(255, 255, 255, .95);
-  border: 1px solid var(--partner-bdr);
-}
-
-/* ============================================================
-   AVATAR
-   ============================================================ */
-
-.avatar {
-  width: var(--avatar-size);
-  height: var(--avatar-size);
-  border-radius: 999px;
-  overflow: hidden;
-  flex-shrink: 0;
-  border: 3px solid rgba(255, 255, 255, .8);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, .08);
-}
-
-.avatar-img {
-  width: 100%;
-  height: 100%;
+.chatroom-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
   object-fit: cover;
+  border: 2px solid #d1fae5;
+  flex-shrink: 0;
 }
 
-.avatar-initials {
-  width: 100%;
-  height: 100%;
+.chatroom-avatar-initials {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, rgb(74, 118, 98), rgb(62, 107, 87));
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
-  background: var(--avatar-bg);
-  font-size: 14px;
   font-weight: 700;
-  color: var(--text-role);
-  text-transform: uppercase;
+  font-size: 15px;
+  flex-shrink: 0;
 }
 
-/* ============================================================
-   CARD TEXT
-   ============================================================ */
-
-.card-name {
-  max-width: 100%;
-  font-size: 14px;
+.chatroom-name {
+  font-size: 15px;
   font-weight: 700;
-  line-height: 1.25;
-  letter-spacing: -.02em;
-  color: var(--text-name);
-  text-align: center;
+  color: #111827;
+  margin: 0;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.card-role {
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--text-role);
-  text-align: center;
-}
-
-.card-age {
-  font-size: 10px;
-  color: var(--text-age);
-}
-
-/* ============================================================
-   TOOLTIP
-   ============================================================ */
-
-.tooltip {
-  position: absolute;
-  bottom: calc(100% + 12px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(29, 77, 58, .96);
-  color: white;
-  padding: 10px 14px;
-  border-radius: 12px;
-  font-size: 11px;
-  line-height: 1.45;
-  white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  z-index: 1000;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, .16);
-  transition:
-    opacity .18s ease,
-    transform .18s ease;
-}
-
-.tooltip::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 5px solid transparent;
-  border-top-color: rgba(29, 77, 58, .96);
-}
-
-.card:hover .tooltip {
-  opacity: 1;
-  visibility: visible;
-  transform: translateX(-50%) translateY(-2px);
-}
-
-@media (hover: none) {
-  .tooltip {
-    display: none;
-  }
-}
-
-/* ============================================================
-   ADD BUTTONS
-   ============================================================ */
-
-.btn-add {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 10px;
-  background: rgba(255, 255, 255, .94);
-  border: 1px solid rgba(201, 189, 170, .6);
-  border-radius: 999px;
-  color: var(--dark-green);
-  font-size: 10px;
-  font-weight: 600;
-  font-family: inherit;
-  text-decoration: none;
-  white-space: nowrap;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, .05);
-  transition: all .18s ease;
-}
-
-.btn-add:hover {
-  background: rgb(248, 246, 241);
-  border-color: var(--accent);
-  color: var(--dark-green);
-  transform: translateY(-1px);
-}
-
-.btn-add__icon {
-  font-size: 13px;
-  line-height: 1;
-}
-
-/* Dynamic (hover-reveal) buttons */
-.btn-add--dynamic {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 10;
-  transition:
-    opacity .18s ease,
-    transform .18s ease;
-}
-
-.btn-add--spouse {
-  top: 50%;
-  right: 0;
-  transform: translateY(calc(-50% - 22px)) scale(.85);
-}
-
-.btn-add--child {
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%) scale(.85);
-}
-
-.card-wrapper:hover .btn-add--dynamic,
-.card-wrapper:focus-within .btn-add--dynamic {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.card-wrapper:hover .btn-add--spouse,
-.card-wrapper:focus-within .btn-add--spouse {
-  transform: translateY(calc(-50% - 22px)) scale(1);
-}
-
-.card-wrapper:hover .btn-add--child,
-.card-wrapper:focus-within .btn-add--child {
-  transform: translateX(-50%) scale(1);
-}
-
-/* Invite button */
-.btn-add--invite {
-  --btn-color: #6366f1;
-  border-color: var(--btn-color);
-  color: var(--btn-color);
-}
-
-.btn-add--invite:hover {
-  background: var(--btn-color);
-  color: #fff;
-}
-
-/* Invited (static, no pointer) */
-.btn-add--invited {
-  --btn-color: #9ca3af;
-  border-color: var(--btn-color);
-  border-style: solid;
-  color: var(--btn-color);
-  cursor: default;
-}
-
-/* Delete button */
-.btn-add--delete {
-  background: #fef2f2;
-  color: #dc2626;
-  border-color: #dc2626;
-}
-
-.btn-add--delete:hover {
-  background: #dc2626;
-  color: white;
-}
-
-/* ============================================================
-   CHILDREN BRANCH
-   ============================================================ */
-
-.children-branch {
+.chatroom-status-row {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: var(--stem-h);
-}
-
-.children-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  gap: var(--col-gap);
-  position: relative;
-}
-
-.child-column {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: var(--card-w);
-  padding-top: var(--arm-h);
-  position: relative;
-}
-
-/* ============================================================
-   CSS CONNECTOR LINES
-   ============================================================ */
-
-.child-column::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: 2px;
-  height: var(--arm-h);
-  background: var(--wire);
-  transform: translateX(-50%);
-}
-
-.children-row::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: calc(var(--card-w) / 2);
-  width: calc(100% - var(--card-w));
-  height: 2px;
-  background: var(--wire);
-}
-
-/* ============================================================
-   INVITE ROW (inside card)
-   ============================================================ */
-
-.card-invite-row {
-  margin-top: 8px;
-  display: flex;
-  justify-content: center;
-}
-
-.btn-invite {
-  display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 4px 12px;
-  border-radius: 20px;
-  border: 1.5px dashed var(--accent);
-  background: transparent;
-  color: var(--dark-green);
-  font-size: .7rem;
-  font-weight: 600;
-  cursor: pointer;
-  text-decoration: none;
-  transition: background .15s, color .15s;
-}
-
-.btn-invite:hover {
-  background: var(--accent);
-  color: #fff;
-}
-
-.badge-invited {
-  font-size: .68rem;
-  color: #6b7280;
-  background: #f3f4f6;
-  padding: 3px 10px;
-  border-radius: 20px;
-  border: 1px solid #e5e7eb;
-}
-
-/* ============================================================
-   PRIMARY BUTTON
-   ============================================================ */
-
-.primary-btn {
-  background-color: #1D4D3A;
-  border-color: #1D4D3A;
-  color: #fff;
-}
-
-.primary-btn:hover {
-  background-color: #16392b;
-  border-color: #1D4D3A;
-  color: #fff;
-}
-
-/* ============================================================
-   ACTIVITY FEED
-   ============================================================ */
-
-.feed-wrap {
-  background: rgb(244, 241, 234);
-  padding: 24px;
-  border-radius: 18px;
-}
-
-.feed-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.live-badge {
-  background: #1D4D3A;
-  color: #fff;
-  padding: 8px 14px;
-  border-radius: 10px;
-  font-size: 12px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.stats-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin-bottom: 18px;
-}
-
-.stat-card {
-  background: rgba(255, 255, 255, .8);
-  border: 1px solid rgb(229, 221, 208);
-  border-radius: 12px;
-  padding: 12px 14px;
-}
-
-.stat-num        { font-size: 22px; font-weight: 700; color: #1D4D3A; }
-.stat-num.green  { color: #166534; }
-.stat-num.amber  { color: #92400e; }
-.stat-num.blue   { color: #1e40af; }
-.stat-label      { font-size: 11px; color: #6b7280; margin-top: 2px; }
-
-.filter-row {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 18px;
-}
-
-.filter-btn {
-  padding: 5px 14px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
-  border: 1px solid #d1d5db;
-  background: #fff;
-  color: #374151;
-  text-decoration: none;
-  transition: all .15s;
-}
-
-.filter-btn.active,
-.filter-btn:hover {
-  background: #1D4D3A;
-  color: #fff;
-  border-color: #1D4D3A;
-}
-
-.feed-item {
-  background: rgba(255, 255, 255, .92);
-  border: 1px solid rgb(229, 221, 208);
-  border-radius: 16px;
-  padding: 14px 16px;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 10px;
-  transition: transform .2s, box-shadow .2s;
-}
-
-.feed-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, .07);
-}
-
-.avatar-circle {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 700;
-  flex-shrink: 0;
-  border: 2px solid rgba(255, 255, 255, .8);
-}
-
-.avatar-green { background: linear-gradient(145deg, rgb(74, 118, 98), rgb(62, 107, 87)); color: #fff; }
-.avatar-cream { background: rgb(248, 246, 241); color: #1D4D3A; }
-.avatar-amber { background: #fef3c7; color: #92400e; }
-.avatar-rose  { background: #fce7f3; color: #9d174d; }
-
-.item-top    { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.item-user   { font-size: 13px; font-weight: 700; color: #111827; }
-.item-action { font-size: 13px; color: #4b5563; }
-.item-target { font-size: 13px; font-weight: 600; color: #1D4D3A; }
-.item-time   { font-size: 11px; color: #9ca3af; margin-left: auto; white-space: nowrap; }
-.item-desc   { font-size: 12px; color: #6b7280; margin-top: 4px; line-height: 1.5; }
-
-.icon-dot   { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.dot-green  { background: #22c55e; }
-.dot-amber  { background: #f59e0b; }
-.dot-red    { background: #ef4444; }
-.dot-blue   { background: #3b82f6; }
-.dot-purple { background: #8b5cf6; }
-
-.item-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 9px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 600;
-  margin-top: 6px;
-}
-
-.badge-created { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
-.badge-updated { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
-.badge-deleted { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
-.badge-login   { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
-.badge-comment { background: #f5f3ff; color: #5b21b6; border: 1px solid #ddd6fe; }
-
-/* ============================================================
-   INVITATION ACCEPT PAGE
-   ============================================================ */
-
-.invitation-accept-page {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background: #f9fafb;
-}
-
-.invitation-box {
-  background: #fff;
-  border-radius: 16px;
-  padding: 40px;
-  width: 100%;
-  max-width: 420px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, .08);
-  text-align: center;
-}
-
-.invitation-box h1        { font-size: 1.5rem; margin: 16px 0 4px; }
-.invitation-box .subtitle { color: #6b7280; margin-bottom: 28px; }
-.invitation-box .field    { text-align: left; margin-bottom: 16px; }
-.invitation-box .btn--full { width: 100%; margin-top: 8px; }
-
-/* ============================================================
-   RESPONSIVE BREAKPOINTS
-   ============================================================ */
-
-/* ── 900 px ── */
-@media (max-width: 900px) {
-  :root {
-    --card-w:  132px;
-    --col-gap: 24px;
-  }
-}
-
-/* ── 640 px ── */
-@media (max-width: 640px) {
-  :root {
-    --card-w:      116px;
-    --col-gap:     18px;
-    --stem-h:      28px;
-    --arm-h:       18px;
-    --avatar-size: 40px;
-  }
-
-  .dashboard-page { padding: 16px 12px 80px; }
-
-  .card {
-    padding: 10px 8px;
-    border-radius: 12px;
-  }
-
-  .card-name { font-size: 11px; }
-  .card-role,
-  .card-age  { font-size: 9px; }
-
-  .card-wrapper {
-    padding: 0 36px 36px;
-    margin: 0 -36px -36px;
-  }
-
-  .stats-row { grid-template-columns: repeat(2, 1fr); }
-
-  .family-tree-scroll { padding: 32px 0 60px; }
-
-  .feed-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .feed-item { padding: 12px; gap: 10px; }
-
-  .item-time {
-    margin-left: 0;
-    display: block;
-    width: 100%;
-    margin-top: 4px;
-  }
-
-  .family-badge  { padding: 10px 16px; }
-  .family-title  { font-size: 15px; }
-}
-
-/* ── 480 px ── */
-@media (max-width: 480px) {
-  :root {
-    --card-w:      108px;
-    --col-gap:     14px;
-    --stem-h:      24px;
-    --arm-h:       16px;
-    --avatar-size: 36px;
-    --card-radius: 14px;
-  }
-
-  .card {
-    padding: 8px 6px 10px;
-    gap: 4px;
-  }
-
-  .card-name { font-size: 10px; }
-  .card-role,
-  .card-age  { font-size: 9px; }
-
-  .card-wrapper {
-    padding: 0 28px 32px;
-    margin: 0 -28px -32px;
-  }
-
-  .couple-heart { font-size: 10px; }
-  .couple-line  { width: 14px; }
-
-  /* Always-visible add buttons on touch — but NOT inside friend-circle */
-  .btn-add--dynamic:not(.friend-circle *) {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .btn-add--spouse { transform: translateY(calc(-50% - 22px)) scale(1); }
-  .btn-add--child  { transform: translateX(-50%) scale(1); }
-
-  .btn-add__label { display: none; }
-
-  .btn-add {
-    padding: 5px 7px;
-    font-size: 11px;
-  }
-
-  .btn-add__icon { font-size: 12px; }
-
-  .dashboard-family-bar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .family-bar-right {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .family-select,
-  .family-switcher-form {
-    max-width: 100%;
-    width: 100%;
-  }
-
-  .btn-create-family {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .single-family-badge {
-    width: 100%;
-    text-align: center;
-  }
-
-  .empty-family-state { padding: 40px 16px; }
-  .empty-icon         { font-size: 44px; }
-  .empty-family-state h2 { font-size: 19px; }
-
-  .tree-scroll-hint {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    margin-bottom: 12px;
-    font-size: 11px;
-    color: #9ca3af;
-    font-weight: 500;
-  }
-
-  .tree-scroll-hint svg {
-    width: 14px;
-    height: 14px;
-    opacity: .6;
-  }
-
-  .stats-row { grid-template-columns: repeat(2, 1fr); }
-
-  .invitation-box { padding: 28px 20px; }
-}
-
-/* ── 360 px ── */
-@media (max-width: 360px) {
-  :root {
-    --card-w:      96px;
-    --col-gap:     10px;
-    --avatar-size: 32px;
-  }
-
-  .btn-create-family,
-  .btn-create-first-family {
-    font-size: 13px;
-    padding: 10px 14px;
-  }
-
-  .current-family-label { font-size: 18px; }
-  .card-name            { font-size: 9px; }
-}
-
-/* ── Touch devices ── */
-@media (hover: none) and (pointer: coarse) {
-  /* Always show add buttons — but NOT inside friend-circle */
-  .btn-add--dynamic:not(.friend-circle *) {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .btn-add--spouse { transform: translateY(calc(-50% - 22px)) scale(1); }
-  .btn-add--child  { transform: translateX(-50%) scale(1); }
-
-  .card:hover {
-    transform: none;
-    box-shadow: var(--card-shadow);
-  }
-
-  .feed-item:hover {
-    transform: none;
-    box-shadow: none;
-  }
-}
-
-/* ============================================================
-   FRIEND CARD — current user style
-   ============================================================ */
-
-.card.friend-card--current {
-  background: linear-gradient(145deg, rgb(74, 118, 98), rgb(62, 107, 87));
-  border: 1px solid rgba(255, 255, 255, .12);
-}
-
-.card.friend-card--current .card-name  { color: var(--root-text); }
-.card.friend-card--current .card-role,
-.card.friend-card--current .card-age   { color: var(--root-sub); }
-.card.friend-card--current .avatar-initials {
-  background: rgba(255, 255, 255, .92);
-  color: var(--dark-green);
-}
-
-/* ============================================================
-   FRIEND CIRCLE — card-wrapper & button positioning
-   ============================================================ */
-
-.friend-circle .card-wrapper {
-  margin: 0;
-  padding: 44px 8px;
-  position: relative;
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Both buttons hidden by default — explicit override beats media queries */
-.friend-circle .btn-add--friend.btn-add--dynamic,
-.friend-circle .btn-add--invite.btn-add--dynamic {
-  position: absolute;
-  left: 50%;
-  right: auto;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  z-index: 10;
-  transform: translateX(-50%) scale(.85);
-  transition: opacity .18s ease, transform .18s ease;
-}
-
-/* Add Friend → top */
-.friend-circle .btn-add--friend.btn-add--dynamic {
-  top: 0;
-  bottom: auto;
-}
-
-/* Invite → bottom */
-.friend-circle .btn-add--invite.btn-add--dynamic {
-  bottom: 0;
-  top: auto;
-}
-
-/* Reveal on hover / focus */
-.friend-circle .card-wrapper:hover .btn-add--friend.btn-add--dynamic,
-.friend-circle .card-wrapper:hover .btn-add--invite.btn-add--dynamic,
-.friend-circle .card-wrapper:focus-within .btn-add--friend.btn-add--dynamic,
-.friend-circle .card-wrapper:focus-within .btn-add--invite.btn-add--dynamic {
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  transform: translateX(-50%) scale(1);
-}
-
-/* Chat invite button */
-.btn-add--chat {
-  top: 50%;
-  left: 0;
-  transform: translateY(calc(-50% + 22px)) scale(.85);
-}
-
-.card-wrapper:hover .btn-add--chat,
-.card-wrapper:focus-within .btn-add--chat {
-  transform: translateY(calc(-50% + 22px)) scale(1);
-}
-
-@media (hover: none) and (pointer: coarse) {
-  .btn-add--chat:not(.friend-circle *) {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(calc(-50% + 22px)) scale(1);
-  }
-}
-
-@media (max-width: 480px) {
-  .btn-add--chat:not(.friend-circle *) {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(calc(-50% + 22px)) scale(1);
-  }
-}
-
-/* Chat button in friend circle */
-.friend-circle .btn-add--chat.btn-add--dynamic {
-  position: absolute;
-  left: 50%;
-  right: auto;
-  top: auto;
-  bottom: 44px;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  transform: translateX(-50%) scale(.85);
-}
-
-.friend-circle .card-wrapper:hover .btn-add--chat.btn-add--dynamic,
-.friend-circle .card-wrapper:focus-within .btn-add--chat.btn-add--dynamic {
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  transform: translateX(-50%) scale(1);
-}
-
-/* ============================================================
-   DASHBOARD LAYOUT WITH CHAT SIDEBAR
-   FIX: removed `min-height: 100vh` here too — this was the
-   third stacked full-screen block. The sticky sidebar still
-   works fine without it, since `position: sticky` only needs
-   an ancestor tall enough to scroll, not an explicit min-height.
-   ============================================================ */
-
-.dashboard-layout {
-  display: flex;
-  align-items: flex-start;
-  position: relative;
-}
-
-.dashboard-main {
-  flex: 1;
-  min-width: 0;
-  padding: 24px 20px 80px;
-}
-
-/* ── Chat Sidebar ── */
-.chat-sidebar {
-  width: 260px;
-  flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-right: 1px solid rgba(229, 221, 208, 0.6);
-  height: calc(100vh - 64px);
-  position: sticky;
-  top: 64px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.04);
-  order: -1;
-}
-
-.chat-sidebar__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 16px 14px;
-  border-bottom: 1px solid rgba(229, 221, 208, 0.6);
-  flex-shrink: 0;
-}
-
-.chat-sidebar__title {
-  font-size: 13px;
-  font-weight: 700;
-  color: #1D4D3A;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-}
-
-.chat-sidebar__see-all {
-  font-size: 11px;
-  color: #6b7280;
-  font-weight: 500;
-  text-decoration: none;
-  padding: 3px 8px;
-  border-radius: 6px;
-  transition: background 0.15s, color 0.15s;
-}
-
-.chat-sidebar__see-all:hover {
-  background: rgba(29, 77, 58, 0.08);
-  color: #1D4D3A;
-}
-
-.chat-sidebar__list {
-  overflow-y: auto;
-  flex: 1;
-  padding: 6px 0;
-}
-
-.chat-sidebar__list::-webkit-scrollbar {
-  width: 3px;
-}
-
-.chat-sidebar__list::-webkit-scrollbar-thumb {
-  background: rgba(201, 189, 170, 0.4);
-  border-radius: 4px;
-}
-
-.chat-sidebar__item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  text-decoration: none;
-  transition: background 0.15s;
-  position: relative;
-  border-left: 3px solid transparent;
-}
-
-.chat-sidebar__item:hover {
-  background: rgba(244, 241, 234, 0.9);
-  border-left-color: rgba(29, 77, 58, 0.3);
-}
-
-.chat-sidebar__item--unread {
-  background: rgba(209, 250, 229, 0.2);
-  border-left-color: #1D4D3A;
-}
-
-.chat-sidebar__item--unread:hover {
-  background: rgba(209, 250, 229, 0.35);
-}
-
-.chat-sidebar__avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-  border: 2px solid rgba(209, 250, 229, 0.8);
-}
-
-.chat-sidebar__avatar-initials {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: linear-gradient(145deg, #2d6a52, #1D4D3A);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 700;
-  flex-shrink: 0;
-  letter-spacing: 0.3px;
-}
-
-.chat-sidebar__info {
-  flex: 1;
-  min-width: 0;
-}
-
-.chat-sidebar__name {
-  font-size: 13px;
-  font-weight: 600;
-  color: #111827;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.chat-sidebar__item--unread .chat-sidebar__name {
-  color: #1D4D3A;
-}
-
-.chat-sidebar__preview {
-  font-size: 11px;
-  color: #b0b7c3;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   margin-top: 2px;
 }
 
-.chat-sidebar__item--unread .chat-sidebar__preview {
-  color: #6b7280;
+.chatroom-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  flex-shrink: 0;
+}
+
+.chatroom-status-text {
+  font-size: 11px;
+  color: #22c55e;
   font-weight: 500;
 }
 
-.chat-sidebar__badge {
-  background: #ef4444;
+.chatroom-delete-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #d1d5db;
+  padding: 8px;
+  border-radius: 10px;
+  transition: color 0.15s, background 0.15s;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.chatroom-delete-btn:hover {
+  color: #ef4444;
+  background: #fef2f2;
+}
+
+/* ── Messages ── */
+.chatroom-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: rgba(244, 241, 234, 0.4);
+  scroll-behavior: smooth;
+}
+
+.chatroom-messages::-webkit-scrollbar {
+  width: 4px;
+}
+
+.chatroom-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chatroom-messages::-webkit-scrollbar-thumb {
+  background: rgba(201, 189, 170, 0.6);
+  border-radius: 4px;
+}
+
+.message-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  animation: fadeInUp 0.2s ease;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.message-row--mine {
+  flex-direction: row-reverse;
+}
+
+.message-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid #e5e7eb;
+}
+
+.message-avatar-initials {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, rgb(74, 118, 98), rgb(62, 107, 87));
   color: #fff;
-  font-size: 10px;
-  font-weight: 700;
-  border-radius: 999px;
-  min-width: 18px;
-  height: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 4px;
+  font-size: 11px;
+  font-weight: 700;
   flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
 }
 
-.chat-sidebar__empty {
-  padding: 40px 16px;
-  text-align: center;
+.message-bubble {
+  max-width: 68%;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px 18px 18px 4px;
+  padding: 10px 14px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.message-bubble--mine {
+  background: linear-gradient(135deg, #1D4D3A, #2d6a52);
+  border: none;
+  border-radius: 18px 18px 4px 18px;
+  box-shadow: 0 2px 8px rgba(29, 77, 58, 0.25);
+}
+
+.message-text {
+  font-size: 14px;
+  line-height: 1.55;
+  margin: 0 0 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: #111827;
+}
+
+.message-bubble--mine .message-text {
+  color: #ffffff;
+}
+
+.message-time {
+  font-size: 10px;
+  color: #9ca3af;
+  margin: 2px 0 0;
+  text-align: right;
+}
+
+.message-bubble--mine .message-time {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.message-attachment {
+  margin-top: 6px;
+}
+
+.message-image {
+  max-width: 220px;
+  max-height: 200px;
+  border-radius: 12px;
+  object-fit: cover;
+  display: block;
+}
+
+.message-audio {
+  width: 100%;
+  max-width: 260px;
+  height: 36px;
+}
+
+.message-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 8px;
   font-size: 12px;
-  color: #b0b7c3;
-  line-height: 1.6;
+  color: inherit;
+  text-decoration: none;
+  transition: background 0.15s;
 }
 
-.chat-sidebar__empty-icon {
-  font-size: 28px;
-  margin-bottom: 8px;
+.message-file:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* ── Input area ── */
+.chatroom-input-area {
+  padding: 12px 16px 16px;
+  background: rgba(255, 255, 255, 0.98);
+  border-top: 1px solid rgba(229, 221, 208, 0.8);
+  flex-shrink: 0;
+}
+
+.chatroom-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chatroom-input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  background: #f3f4f6;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 20px;
+  padding: 8px 8px 8px 14px;
+  transition: border-color 0.15s;
+}
+
+.chatroom-input-row:focus-within {
+  border-color: #1D4D3A;
+  background: #fff;
+}
+
+.attach-btn {
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 8px;
+  transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.attach-btn:hover {
+  color: #1D4D3A;
+  background: #e5e7eb;
+}
+
+.chatroom-textarea {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  font-size: 14px;
+  font-family: inherit;
+  color: #111827;
+  line-height: 1.5;
+  max-height: 120px;
+  overflow-y: auto;
+  padding: 2px 0;
+}
+
+.chatroom-textarea::placeholder {
+  color: #9ca3af;
+}
+
+.send-btn {
+  background: linear-gradient(135deg, #1D4D3A, #2d6a52);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity 0.15s, transform 0.15s;
+  box-shadow: 0 2px 8px rgba(29, 77, 58, 0.3);
+}
+
+.send-btn:hover {
+  opacity: 0.9;
+  transform: scale(1.05);
+}
+
+.send-btn:disabled {
   opacity: 0.5;
+  transform: none;
+  cursor: not-allowed;
 }
 
-@media (max-width: 768px) {
-  .dashboard-layout {
-    display: block;
+/* ── Attachment preview ── */
+.attachment-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.attachment-preview.hidden {
+  display: none;
+}
+
+.attachment-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #e5e7eb;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: #374151;
+  max-width: 160px;
+}
+
+.attachment-chip-img {
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.attachment-chip-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Mobile responsive ── */
+@media (max-width: 640px) {
+  .chatroom-wrapper {
+    padding: 0;
+    align-items: stretch;
   }
 
-  .dashboard-main {
-    padding: 16px 12px 80px;
+  .chatroom-page {
+    max-width: 100%;
+    height: calc(100vh - 64px);
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
   }
 
-  .chat-sidebar {
-    display: none;
+  .chatroom-header {
+    padding: 12px 14px;
   }
+
+  .chatroom-name {
+    font-size: 14px;
+  }
+
+  .message-bubble {
+    max-width: 80%;
+  }
+
+  .message-image {
+    max-width: 180px;
+  }
+
+  .chatroom-input-area {
+    padding: 10px 12px 12px;
+  }
+
+  .chatroom-messages {
+    padding: 14px 12px;
+  }
+}
+
+@media (max-width: 380px) {
+  .chatroom-avatar,
+  .chatroom-avatar-initials {
+    width: 36px;
+    height: 36px;
+  }
+
+  .chatroom-name {
+    font-size: 13px;
+  }
+
+  .message-bubble {
+    max-width: 85%;
+    padding: 8px 11px;
+  }
+
+  .message-text {
+    font-size: 13px;
+  }
+}
+
+/* ============================================================
+   NOTE: The dashboard chat sidebar (#chatSidebar) styling has
+   been moved to treeofus.css, where the rest of the dashboard
+   layout lives. Keeping a second, conflicting copy of
+   `.chat-sidebar` here (scoped only to the chatroom page) was
+   the root cause of the sidebar not opening/closing correctly
+   on the dashboard — whichever stylesheet loaded second/with
+   higher specificity won, and the JS toggle had nothing
+   reliable to attach to. Do not re-add #chatSidebar rules to
+   this file; edit treeofus.css instead.
+   ============================================================ */
+
+.chat-sidebar__close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  color: inherit;
+  padding: 4px 6px;
+  position: relative;
+  z-index: 1001;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.chat-sidebar__close:hover {
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+}
+.chat-sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.chat-sidebar-backdrop--visible {
+  display: block;
 }

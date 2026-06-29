@@ -1,40 +1,344 @@
 body.login-bg
 
+  / MESSAGES TOGGLE BUTTON (floating, bottom-left)
+  button.messages-btn type="button" aria-label="Open conversations" aria-controls="chat-sidebar" aria-expanded="false" onclick="toggleChatSidebar()"
+    svg.messages-icon viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+      path d="M21 11.5C21.0034 12.8199 20.6951 14.1219 20.1 15.3C19.3944 16.7118 18.3098 17.8992 16.9674 18.7293C15.6251 19.5594 14.0782 19.9994 12.5 20C11.1801 20.0035 9.87812 19.6951 8.7 19.1L3 21L4.9 15.3C4.30493 14.1219 3.99656 12.8199 4 11.5C4.00061 9.92179 4.44061 8.37488 5.27072 7.03258C6.10083 5.69028 7.28825 4.6056 8.7 3.90003C9.87812 3.30496 11.1801 2.99659 12.5 3.00003H13C15.0843 3.11502 17.053 3.99479 18.5291 5.47089C20.0052 6.94699 20.885 8.91568 21 11V11.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+    - if @total_unread_count.to_i > 0
+      span.messages-btn-badge = @total_unread_count > 9 ? "9+" : @total_unread_count
+
+  / OVERLAY (mobile backdrop, click to close)
+  .sidebar-overlay id="sidebar-overlay" onclick="closeChatSidebar()"
+
+  / CHATROOMS SIDEBAR
+  aside.chat-sidebar id="chat-sidebar" aria-hidden="true"
+    .chat-sidebar-header
+      h2.chat-sidebar-title Conversations
+      button.chat-sidebar-close type="button" aria-label="Close conversations" onclick="closeChatSidebar()"
+        | &times;
+
+    .chat-sidebar-list
+      - if @chatrooms.present?
+        - @chatrooms.each do |chatroom|
+          = render "dashboard/chatroom_item", chatroom: chatroom
+      - else
+        .chat-empty-state
+          p No conversations yet.
+          p.chat-empty-sub Start a chat from a family member's profile.
+
   .dashboard-layout style="padding-top:64px;"
 
     / MAIN TREE AREA
     .dashboard-main
-      - if @active_family.friend_family?
+      - if @active_family&.friend_family?
         = render "friend_tree", members: @friend_members
       - else
         = render "family_tree", node: @family_tree, depth: 0
 
-    / CHAT SIDEBAR
-    .chat-sidebar
-      .chat-sidebar__header
-        span.chat-sidebar__title 💬 Messages
-        = link_to chatrooms_path, class: "chat-sidebar__see-all" do
-          | See all
+css:
+  .messages-btn {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    overflow: visible;
+    z-index: 1100;
+    width: 56px;
+    height: 56px;
+    border: none;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
 
-      .chat-sidebar__list
-        - @chatrooms = Chatroom.joins(:chatroom_members).where(chatroom_members: { user_id: current_user.id }).includes(:members, :messages).order(updated_at: :desc).limit(10)
-        - if @chatrooms.any?
-          - @chatrooms.each do |chatroom|
-            - other = chatroom.members.where.not(id: current_user.id).first
-            - last_msg = chatroom.messages.ordered.last
-            - unread = chatroom.messages.where(read_at: nil).where.not(user_id: current_user.id).count
-            = link_to chatroom_path(chatroom), class: "chat-sidebar__item #{'chat-sidebar__item--unread' if unread > 0}" do
-              - other_profile = other&.user_profile
-              - if other_profile&.avatar&.attached?
-                = image_tag other_profile.avatar, class: "chat-sidebar__avatar"
-              - else
-                .chat-sidebar__avatar-initials
-                  = "#{other&.first_name&.first}#{other&.last_name&.first}"
-              .chat-sidebar__info
-                .chat-sidebar__name = other&.full_name || chatroom.name
-                .chat-sidebar__preview = last_msg&.body&.truncate(30) || "No messages yet"
-              - if unread > 0
-                .chat-sidebar__badge = unread
-        - else
-          .chat-sidebar__empty
-            | No conversations yet
+  .messages-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+  }
+
+  .messages-btn:focus-visible {
+    outline: 2px solid #1D4D3A;
+    outline-offset: 2px;
+  }
+
+  .messages-icon {
+    width: 26px;
+    height: 26px;
+    color: #1D4D3A;
+  }
+
+  .messages-btn-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #e74c3c;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+    border: 2px solid #fff;
+  }
+
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 1050;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+
+  .sidebar-overlay.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  #chat-sidebar.chat-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 340px;
+    max-width: 85vw;
+    background: #f5f1e8;
+    box-shadow: 2px 0 16px rgba(0, 0, 0, 0.12);
+    z-index: 1101;
+    transform: translateX(-100%);
+    transition: transform 0.28s ease;
+    display: flex !important;
+    flex-direction: column !important;
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  #chat-sidebar.chat-sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  #chat-sidebar.chat-sidebar .chat-sidebar-header {
+    background-color: #1D4D3A !important;
+    text-color: #e0dac9 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 18px 20px 18px 28px;
+    border-bottom: 1px solid #e0dac9;
+    flex-shrink: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .chat-sidebar-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #e0dac9;
+    margin: 0;
+  }
+
+  .chat-sidebar-close {
+    background: none;
+    border: none;
+    font-size: 26px;
+    line-height: 1;
+    color: #8a8473;
+    cursor: pointer;
+    padding: 0 4px;
+  }
+
+  .chat-sidebar-close:hover {
+    color: #2c2c2c;
+  }
+
+  #chat-sidebar.chat-sidebar .chat-sidebar-list {
+    flex: 1 1 auto !important;
+    overflow-y: auto;
+    padding: 8px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  #chat-sidebar.chat-sidebar .chat-item {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 12px;
+    padding: 12px 20px 12px 28px;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.15s ease;
+    border: none;
+    background: none;
+    width: 100%;
+    box-sizing: border-box;
+    cursor: pointer;
+  }
+
+  #chat-sidebar.chat-sidebar .chat-item:hover {
+    background: #ece6d6;
+  }
+
+  #chat-sidebar.chat-sidebar .chat-item-avatar {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    border-radius: 50%;
+    background: #1D4D3A;
+    color: #fff;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 16px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  #chat-sidebar.chat-sidebar .chat-item-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  #chat-sidebar.chat-sidebar .chat-item-body {
+    display: block;
+    flex: 1 1 auto !important;
+    min-width: 0;
+    width: auto;
+    text-align: left;
+  }
+
+  #chat-sidebar.chat-sidebar .chat-item-top {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: baseline !important;
+    justify-content: space-between !important;
+    gap: 8px;
+    width: 100%;
+  }
+
+  #chat-sidebar.chat-sidebar .chat-item-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1c1c1c;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+  }
+
+  #chat-sidebar.chat-sidebar .chat-item-time {
+    font-size: 12px;
+    color: #999;
+    flex-shrink: 0;
+    margin: 0;
+  }
+
+  #chat-sidebar.chat-sidebar .chat-item-preview {
+    font-size: 13px;
+    color: #777;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 2px 0 0 0;
+    width: 100%;
+  }
+
+  #chat-sidebar.chat-sidebar .chat-item.has-unread .chat-item-preview {
+    color: #333;
+    font-weight: 500;
+  }
+
+  #chat-sidebar.chat-sidebar .chat-item-unread-badge {
+    flex-shrink: 0;
+    background: #1D4D3A;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6px;
+    margin-left: 8px;
+  }
+
+  .chat-empty-state {
+    padding: 40px 24px 40px 28px;
+    text-align: center;
+    color: #8a8473;
+  }
+
+  .chat-empty-sub {
+    font-size: 13px;
+    margin-top: 6px;
+  }
+
+  @media (min-width: 1024px) {
+    .chat-sidebar {
+      width: 360px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .chat-sidebar {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .messages-btn {
+      bottom: 16px;
+      left: 16px;
+      width: 50px;
+      height: 50px;
+    }
+  }
+
+javascript:
+  function toggleChatSidebar() {
+    var sidebar = document.getElementById('chat-sidebar');
+    var overlay = document.getElementById('sidebar-overlay');
+    var btn = document.querySelector('.messages-btn');
+    var isOpen = sidebar.classList.contains('is-open');
+
+    if (isOpen) {
+      closeChatSidebar();
+    } else {
+      sidebar.classList.add('is-open');
+      overlay.classList.add('is-visible');
+      sidebar.setAttribute('aria-hidden', 'false');
+      btn.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeChatSidebar() {
+    var sidebar = document.getElementById('chat-sidebar');
+    var overlay = document.getElementById('sidebar-overlay');
+    var btn = document.querySelector('.messages-btn');
+
+    sidebar.classList.remove('is-open');
+    overlay.classList.remove('is-visible');
+    sidebar.setAttribute('aria-hidden', 'true');
+    btn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      closeChatSidebar();
+    }
+  });

@@ -5,6 +5,23 @@ def index
   @user = current_user
   @user_profile = @user.user_profile
 
+ @chatrooms = Chatroom.joins(:chatroom_members)
+                      .where(chatroom_members: { user_id: current_user.id })
+                      .includes(:messages, members: :user_profile)
+                      .distinct
+                      .sort_by { |c| c.messages.maximum(:created_at) || c.created_at }
+                      .reverse
+
+# Single query for the badge count on the floating messages button
+# (avoids looping @chatrooms.sum { ... } in the view, which would be one query per room)
+@total_unread_count = Message.joins(:chatroom)
+                              .joins("INNER JOIN chatroom_members ON chatroom_members.chatroom_id = messages.chatroom_id")
+                              .where(chatroom_members: { user_id: current_user.id })
+                              .where(read_at: nil)
+                              .where.not(user_id: current_user.id)
+                              .distinct
+                              .count
+
 
   @active_family = resolve_active_family
   return unless @active_family.present?
@@ -17,6 +34,12 @@ def index
     return
   end
 
+  preload_family_relationships
+
+  @family_user_ids = @preloaded_users.map(&:id)
+
+  @root_member = find_root_member_in_family(@active_family)
+  @family_tree = @root_member.present? ? build_family_tree(@root_member) : nil
 
   preload_family_relationships
 
