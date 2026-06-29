@@ -218,7 +218,7 @@ def pending_chat_invite_from?(inviter)
     .joins(:event)
     .where(noticed_events: { type: "ChatInviteNotifier" })
     .where(read_at: nil)
-    .where("noticed_events.params LIKE ?", "%inviter_id%#{inviter.id}%")
+    .where("(noticed_events.params::jsonb ->> 'inviter_id') = ?", inviter.id.to_s)
     .exists?
 end
   # ===================================================
