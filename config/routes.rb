@@ -59,9 +59,9 @@ Rails.application.routes.draw do
   #                           add :index  ^^^^
   end
 
-  unauthenticated do
-    root to: redirect("/users/sign_in")
-  end
+    unauthenticated do
+      root to: redirect("/users/sign_in")
+    end
 
   get "up" => "rails/health#show", as: :rails_health_check
   mount ActionCable.server => '/cable'
