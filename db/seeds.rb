@@ -20,6 +20,7 @@ puts "\n🧹 Clearing existing data..."
 PublicActivity::Activity.destroy_all if ActiveRecord::Base.connection.table_exists?(:activities)
 UserPartner.destroy_all
 UserParentRelationship.destroy_all
+FamilyCode.destroy_all
 FamilyMembership.destroy_all
 UserProfile.destroy_all
 Family.destroy_all
