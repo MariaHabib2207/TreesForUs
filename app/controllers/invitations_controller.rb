@@ -1,6 +1,7 @@
 class InvitationsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_invitee
+  before_action :set_target_family
 
   def new
     # Derive membership_type and related_user from URL params set by the tree
@@ -30,7 +31,7 @@ class InvitationsController < ApplicationController
     end
 
     family_code = FamilyCode.create!(
-      family:          current_user.families.first,
+      family:          @target_family,
       created_by:      current_user,
       membership_type: membership_type,
       email:           email,
@@ -51,7 +52,16 @@ class InvitationsController < ApplicationController
 
   def set_invitee
     @invitee = User.find(params[:user_id])
-    unless current_user.admin? || current_user.family_manager?
+  end
+
+  def set_target_family
+    related_user   = User.find_by(id: params[:related_user_id])
+    invitee_family = @invitee.families.first
+    related_family = related_user&.families&.first
+
+    @target_family = related_family || invitee_family
+
+    unless @target_family && current_user.families.include?(@target_family)
       redirect_to root_path, alert: "Not authorized."
     end
   end
