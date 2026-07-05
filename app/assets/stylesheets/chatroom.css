@@ -4,6 +4,7 @@
 
 .chatroom-wrapper {
   min-height: 100vh;
+  min-height: 100dvh; /* dynamic viewport height, avoids mobile browser chrome jump */
   width: 100%;
   background-image: url("/assets/background-img.png");
   background-size: cover;
@@ -25,6 +26,7 @@
   width: 100%;
   max-width: 780px;
   height: calc(100vh - 112px);
+  height: calc(100dvh - 112px);
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -148,6 +150,7 @@
 .chatroom-messages {
   flex: 1;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 20px 16px;
   display: flex;
   flex-direction: column;
@@ -174,6 +177,7 @@
   align-items: flex-end;
   gap: 8px;
   animation: fadeInUp 0.2s ease;
+  max-width: 100%;
 }
 
 @keyframes fadeInUp {
@@ -215,6 +219,7 @@
   border-radius: 18px 18px 18px 4px;
   padding: 10px 14px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  min-width: 0; /* allow flex child to shrink and wrap instead of overflowing */
 }
 
 .message-bubble--mine {
@@ -230,6 +235,7 @@
   margin: 0 0 4px;
   white-space: pre-wrap;
   word-break: break-word;
+  overflow-wrap: anywhere;
   color: #111827;
 }
 
@@ -255,6 +261,8 @@
 .message-image {
   max-width: 220px;
   max-height: 200px;
+  width: 100%;
+  height: auto;
   border-radius: 12px;
   object-fit: cover;
   display: block;
@@ -277,6 +285,9 @@
   color: inherit;
   text-decoration: none;
   transition: background 0.15s;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .message-file:hover {
@@ -286,6 +297,7 @@
 /* ── Input area ── */
 .chatroom-input-area {
   padding: 12px 16px 16px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
   background: rgba(255, 255, 255, 0.98);
   border-top: 1px solid rgba(229, 221, 208, 0.8);
   flex-shrink: 0;
@@ -335,7 +347,8 @@
   border: none;
   outline: none;
   resize: none;
-  font-size: 14px;
+  /* 16px minimum prevents iOS Safari from auto-zooming the page on focus */
+  font-size: 16px;
   font-family: inherit;
   color: #111827;
   line-height: 1.5;
@@ -417,11 +430,13 @@
   .chatroom-wrapper {
     padding: 0;
     align-items: stretch;
+    background-attachment: scroll; /* "fixed" is unreliable/janky on iOS Safari */
   }
 
   .chatroom-page {
     max-width: 100%;
-    height: calc(100vh - 64px);
+    height: 100vh;
+    height: 100dvh;
     border-radius: 0;
     border: none;
     box-shadow: none;
@@ -436,7 +451,7 @@
   }
 
   .message-bubble {
-    max-width: 80%;
+    max-width: 82%;
   }
 
   .message-image {
@@ -445,6 +460,7 @@
 
   .chatroom-input-area {
     padding: 10px 12px 12px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
   }
 
   .chatroom-messages {
@@ -464,12 +480,16 @@
   }
 
   .message-bubble {
-    max-width: 85%;
+    max-width: 88%;
     padding: 8px 11px;
   }
 
   .message-text {
     font-size: 13px;
+  }
+
+  .attachment-chip {
+    max-width: 120px;
   }
 }
 

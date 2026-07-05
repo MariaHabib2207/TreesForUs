@@ -83,12 +83,16 @@ gem 'geocoder'
 gem 'user_agent_parser'
 gem 'httparty'
 gem 'device_detector'
-gem "sitemap_generator"
+
 
 
 group :development, :test do
   gem 'sqlite3', '~> 2.0'
   gem "letter_opener", group: :development
+  gem 'rspec-rails'
+  gem 'factory_bot_rails'
+  gem 'faker'
+  gem 'shoulda-matchers'
  
   
 end
