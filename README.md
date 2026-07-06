@@ -1,184 +1,308 @@
-# 🌳 TreeOfUs (https://tree-of-us.up.railway.app/)
+# 🌳 TreesForUs
 
-A **Family Hierarchy Management System** built with Ruby on Rails. TreeOfUs allows families to map, manage, and visualize their family trees — tracking members, relationships, generational hierarchies, and access roles all in one place.
+**Live Demo:** https://tree-of-us.up.railway.app/
+
+TreesForUs is a modern **Ruby on Rails 8** social networking application that helps families stay connected by building interactive family trees, preserving memories, and communicating in real time. Users can create multi-generational family hierarchies, maintain a personal friends network, share life activities, and chat instantly using Rails Action Cable.
+
 ---
-Detailed Documentation At : (https://docs.google.com/document/d/1FRlTcXSPeLLuZU8SQGo2VLqj871elEDubcBH2bjOLlk/edit?tab=t.0)
 
-<img width="1678" height="889" alt="Screenshot 2026-06-05 at 8 57 27 AM" src="https://github.com/user-attachments/assets/78c503f8-1e5e-4d17-819a-9c7a9e7a36e5" />
-<img width="1449" height="740" alt="Screenshot 2026-06-05 at 8 58 13 AM" src="https://github.com/user-attachments/assets/79afba43-18ef-4103-be9b-fee5f8c9b30e" />
+## 📖 Documentation
 
+**Detailed Documentation:**  
+https://docs.google.com/document/d/1FRlTcXSPeLLuZU8SQGo2VLqj871elEDubcBH2bjOLlk/edit?tab=t.0
 
-## Table of Contents
+---
+
+## 📸 Screenshots
+
+<img width="1678" height="889" alt="Home" src="https://github.com/user-attachments/assets/78c503f8-1e5e-4d17-819a-9c7a9e7a36e5" />
+
+<img width="1449" height="740" alt="Family Tree" src="https://github.com/user-attachments/assets/79afba43-18ef-4103-be9b-fee5f8c9b30e" />
+
+---
+
+# Table of Contents
 
 - [Overview](#overview)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
+- [Architecture Highlights](#architecture-highlights)
 - [Prerequisites](#prerequisites)
-- [Getting Started](#getting-started)
+- [Installation](#installation)
 - [Environment Variables](#environment-variables)
 - [Database Setup](#database-setup)
-- [Running the App](#running-the-app)
-- [Running Tests](#running-tests)
-- [User Roles](#user-roles)
-- [Key Models](#key-models)
+- [Running the Application](#running-the-application)
+- [Testing](#testing)
+- [Core Models](#core-models)
+- [Roadmap](#roadmap)
 - [Contributing](#contributing)
+- [License](#license)
 
 ---
 
-## Overview
+# Overview
 
-TreeOfUs is a web application that lets families build and manage their family hierarchy. Users can be added as tree-only members (without login access) or as full login-enabled members. The system supports parent-child relationships, spouse/partner links, and family group memberships, all with role-based access control.
+TreesForUs is a full-stack **Ruby on Rails 8** application designed to strengthen family connections through an interactive digital platform.
 
----
+Users can securely register using **Google OAuth** or email authentication, create multiple family trees, add family members, define parent-child and partner relationships, and visualize complex family hierarchies spanning multiple generations.
 
-## Features
+Beyond genealogy, TreesForUs provides a private social experience where users can:
 
-- **Family Tree Management** — Add, view, and manage family members across multiple generations
-- **Parent / Child Relationships** — Link members in parent-child hierarchies
-- **Partner Relationships** — Track spousal and partner connections bidirectionally
-- **Family Groups** — Organize members into family units (up to 2 families per user)
-- **Role-Based Access** — Admin, Family Manager, and Viewer roles
-- **Two Member Types** — Login-enabled users and tree-only members
-- **User Invitation System** — Invite tree members to create a login account via tokenized email links
-- **Google OAuth** — Sign in with Google via OmniAuth
-- **User Profiles** — Store personal details including birthdate, nationality, occupation, address, and more
-- **Activity Feed** — Track model changes via `public_activity`
-- **Admin Dashboard** — Powered by ActiveAdmin
-- **Pagination** — Via Kaminari
-- **Identification Validation** — Supports NRIC, Passport, Driving License, and Birth Certificate formats
-- **Responsive UI** — Built with Tailwind CSS
+- Share life activities and milestones with family
+- Build a personal Friends Tree
+- Chat with family members and friends in real time
+- Preserve family history in one secure platform
+
+The project demonstrates modern Rails development using **Hotwire, Turbo, Stimulus, Action Cable, Tailwind CSS, PostgreSQL, Redis, and Devise**.
 
 ---
 
-## Tech Stack
+# Features
 
-| Layer | Technology |
-|---|---|
+## 🌳 Family Tree
+
+- Multi-generational family trees
+- Interactive relationship visualization
+- Parent-child relationships
+- Partner/Spouse relationships
+- Multiple family support
+- Tree-only members
+- Login-enabled members
+
+---
+
+## 👤 User Profiles
+
+- Detailed personal profiles
+- Profile pictures
+- Birth information
+- Nationality
+- Occupation
+- Contact information
+- Biography
+- Relationship information
+
+---
+
+## 📅 Life Activities
+
+Users can share important moments with their family including:
+
+- Birthdays
+- Weddings
+- Graduations
+- Career achievements
+- Family events
+- Photos
+- Memories
+- Personal milestones
+
+Activities are shared privately with family members and appear in their activity feed.
+
+---
+
+## 👥 Friends Tree
+
+Beyond family relationships, users can:
+
+- Add friends
+- Organize personal social connections
+- View friend profiles
+- Build a separate friendship network
+
+---
+
+## 💬 Real-Time Chat
+
+Built using **Rails Action Cable**.
+
+Features include:
+
+- Real-time messaging
+- Private conversations
+- Group chats
+- Instant message delivery
+- Live updates without page refresh
+- Online collaboration
+
+---
+
+## 🔐 Authentication & Security
+
+- Devise Authentication
+- Google OAuth
+- Email invitations
+- Secure sessions
+- Authorization
+- Role-based access
+
+---
+
+## ⚙️ Administration
+
+- ActiveAdmin dashboard
+- User management
+- Family management
+- Activity monitoring
+
+---
+
+## 🎨 Modern UI
+
+- Fully responsive
+- Mobile friendly
+- Tailwind CSS
+- Hotwire Turbo
+- StimulusJS
+- Fast page navigation
+
+---
+
+# Tech Stack
+
+| Category | Technology |
+|------------|------------|
 | Language | Ruby 3.3.5 |
-| Framework | Rails 8.0.5 |
-| Database | SQLite (development) / PostgreSQL (production) |
-| Frontend | Tailwind CSS, Stimulus, Turbo (Hotwire) |
+| Framework | Ruby on Rails 8 |
+| Database | PostgreSQL / SQLite |
+| Frontend | Tailwind CSS |
 | Templating | Slim |
-| Authentication | Devise + OmniAuth (Google OAuth2) |
-| Admin | ActiveAdmin |
-| Email | Resend / Mailjet |
-| Activity | public_activity |
+| JavaScript | Stimulus |
+| SPA Experience | Hotwire Turbo |
+| Authentication | Devise |
+| OAuth | Google OAuth |
+| Real-Time | Rails Action Cable |
+| Background Communication | Redis |
+| Email | Resend |
+| Admin Panel | ActiveAdmin |
 | Pagination | Kaminari |
-| Deployment | Kamal / Render / Docker |
+| Activity Tracking | PublicActivity |
+| Deployment | Railway / Docker |
 
 ---
 
-## Prerequisites
+# Architecture Highlights
 
-Before you begin, make sure you have the following installed:
-
-- Ruby `3.3.5` (use [rbenv](https://github.com/rbenv/rbenv) or [asdf](https://asdf-vm.com/))
-- Bundler (`gem install bundler`)
-- Node.js and Yarn
-- SQLite3 (development)
-- PostgreSQL (production)
+- MVC Architecture
+- RESTful Design
+- Self-referential family relationships
+- Real-time WebSocket communication
+- Hotwire-first frontend
+- Secure authentication
+- Role-based authorization
+- Optimized relational database design
 
 ---
 
-## Getting Started
+# Prerequisites
 
-### 1. Clone the repository
+Install the following before running the project.
+
+- Ruby 3.3.5
+- Rails 8
+- PostgreSQL
+- Redis
+- Node.js
+- Yarn
+- Bundler
+
+---
+
+# Installation
+
+Clone the repository.
 
 ```bash
 git clone https://github.com/MariaHabib2207/TreeOfUs.git
+
 cd TreeOfUs
 ```
 
-### 2. Install Ruby dependencies
+Install dependencies.
 
 ```bash
 bundle install
 ```
 
-### 3. Install JavaScript dependencies
-
 ```bash
 yarn install
 ```
 
-### 4. Set up environment variables
-
-Copy the example env file and fill in your values:
+Create environment variables.
 
 ```bash
 cp .env.example .env
 ```
 
-See [Environment Variables](#environment-variables) for the full list of required keys.
-
 ---
 
-## Environment Variables
-
-Create a `.env` file in the project root with the following variables:
+# Environment Variables
 
 ```env
-# Google OAuth
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_CLIENT_ID=
 
-# Email (Resend or Mailjet)
-RESEND_API_KEY=your_resend_api_key
-MAILJET_API_KEY=your_mailjet_api_key
-MAILJET_SECRET_KEY=your_mailjet_secret_key
+GOOGLE_CLIENT_SECRET=
 
-# Rails
-RAILS_MASTER_KEY=your_master_key
+RESEND_API_KEY=
 
-# Database (production only)
-DATABASE_URL=postgresql://user:password@host/dbname
+RAILS_MASTER_KEY=
+
+DATABASE_URL=
+
+REDIS_URL=
 ```
 
 ---
 
-## Database Setup
+# Database Setup
+
+Create and migrate the database.
 
 ```bash
-# Create the database
 rails db:create
 
-# Run migrations
 rails db:migrate
 
-# (Optional) Seed initial data
 rails db:seed
 ```
 
 ---
 
-## Running the App
+# Running the Application
 
-### Development
+Start the development server.
 
 ```bash
 bin/dev
 ```
 
-This starts Rails + Tailwind CSS in watch mode via `Procfile.dev`.
+Application will be available at:
 
-Then visit: [http://localhost:3000](http://localhost:3000)
-
-### With Docker
-
-```bash
-docker build -t trees_for_us .
-docker run -p 3000:3000 trees_for_us
+```
+http://localhost:3000
 ```
 
 ---
 
-## Running Tests
+## Docker
+
+```bash
+docker build -t treesforus .
+
+docker run -p 3000:3000 treesforus
+```
+
+---
+
+# Testing
+
+Run all tests.
 
 ```bash
 rails test
 ```
 
-For system tests (requires Chrome/Selenium):
+Run system tests.
 
 ```bash
 rails test:system
@@ -186,46 +310,131 @@ rails test:system
 
 ---
 
-## User Roles
+# Core Models
 
-| Role | Description |
-|---|---|
-| `admin` | Full access — manage all users, families, and settings |
-| `family_manager` | Can manage their own family members and relationships |
-| `viewer` | Read-only access to the family tree |
+## User
 
-Users can also be **tree-only members** (`login_enabled: false`) — they appear in the family tree but cannot log in until invited.
+Authentication, authorization, friendships, family memberships, invitations, and messaging.
 
 ---
 
-## Key Models
+## UserProfile
 
-### User
-Central model representing a person in the system. Supports login-enabled users and tree-only members, with Devise authentication, role management, and identification validation.
+Stores user information including biography, occupation, nationality, profile image, and birth information.
 
-### UserProfile
-Stores personal details (birthdate, gender, nationality, occupation, address, etc.) associated 1:1 with a user.
+---
 
-### Family & FamilyMembership
-Organizes users into family groups. Each user can belong to a maximum of 2 families.
+## Family
 
-### UserParentRelationship
-Tracks parent-child links between users (self-referential through `child_id` and `parent_id`).
+Represents a family unit.
 
-### UserPartner
-Tracks partner/spousal relationships between users bidirectionally.
+---
 
+## FamilyMembership
 
-## Contributing
+Connects users with families and manages permissions.
+
+---
+
+## ParentRelationship
+
+Defines parent-child relationships.
+
+---
+
+## PartnerRelationship
+
+Represents spouse and partner connections.
+
+---
+
+## Friend
+
+Maintains friendship relationships between users.
+
+---
+
+## ChatRoom
+
+Represents one-to-one and group conversations.
+
+---
+
+## Message
+
+Stores chat messages delivered through Action Cable.
+
+---
+
+## LifeActivity
+
+Stores milestones, achievements, memories, and family updates shared by users.
+
+---
+
+# Future Roadmap
+
+- 📹 Audio Calling
+- 🎥 Video Calling
+- 📱 Progressive Web App (PWA)
+- 🔔 Push Notifications
+- 📍 Family Event Calendar
+- 🗂️ Shared Family Documents
+- 📷 Shared Photo Albums
+- 🤖 AI-powered Family Story Generator
+
+---
+
+# Contributing
+
+Contributions are welcome.
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/your-feature`)
-3. Commit your changes (`git commit -m 'Add your feature'`)
-4. Push to the branch (`git push origin feature/your-feature`)
+
+2. Create a feature branch
+
+```bash
+git checkout -b feature/new-feature
+```
+
+3. Commit changes
+
+```bash
+git commit -m "Add new feature"
+```
+
+4. Push changes
+
+```bash
+git push origin feature/new-feature
+```
+
 5. Open a Pull Request
 
 ---
 
-## License
+# License
 
-This project is private. All rights reserved.
+This project is private.
+
+All Rights Reserved.
+
+---
+
+## ⭐ Highlights
+
+- ✅ Ruby on Rails 8
+- ✅ Hotwire
+- ✅ Tailwind CSS
+- ✅ Devise Authentication
+- ✅ Google OAuth
+- ✅ Rails Action Cable
+- ✅ Redis
+- ✅ PostgreSQL
+- ✅ Real-Time Chat
+- ✅ Interactive Family Tree
+- ✅ Friends Network
+- ✅ Life Activity Sharing
+- ✅ Responsive Design
+- ✅ Docker Ready
+- ✅ Production Deployment
