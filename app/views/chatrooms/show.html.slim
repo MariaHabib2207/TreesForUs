@@ -1,56 +1,106 @@
-= stylesheet_link_tag "chatroom", media: "all"
+div class="flex justify-center"
+  div class="flex flex-col w-full max-w-2xl h-[88vh] bg-[#efeae2] shadow-xl md:my-4 md:rounded-xl overflow-hidden"
 
-div class="chatroom-wrapper"
-  div class="chatroom-page"
     / Header
-    div class="chatroom-header"
-      div class="chatroom-header-left"
-        = link_to chatrooms_path, class: "chatroom-back-btn" do
+    div class="flex items-center justify-between gap-3 px-3 sm:px-4 py-2.5 bg-[#1D4D3A] text-white shrink-0 z-10"
+      div class="flex items-center gap-3 min-w-0"
+        = link_to chatrooms_path, class: "shrink-0 p-1.5 -ml-1.5 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors" do
           svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
             path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"
 
         - other_profile = @other_member&.user_profile
         - if other_profile&.avatar&.attached?
-          = image_tag other_profile.avatar, class: "chatroom-avatar"
+          = image_tag other_profile.avatar, class: "w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover shrink-0 ring-2 ring-white/20"
         - else
-          div class="chatroom-avatar-initials"
+          div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/15 flex items-center justify-center text-sm font-semibold shrink-0 ring-2 ring-white/20"
             = "#{@other_member&.first_name&.first}#{@other_member&.last_name&.first}"
 
-        div
-          h1 class="chatroom-name" = @other_member&.full_name || @chatroom.name
-          div class="chatroom-status-row"
-            span class="chatroom-status-dot"
-            span class="chatroom-status-text" Active now
-      = link_to chatrooms_path, class: "chatroom-delete-btn", title: "Close chat" do
+        div class="min-w-0"
+          h1 class="text-sm sm:text-base font-semibold truncate" = @other_member&.full_name || @chatroom.name
+          div class="flex items-center gap-1.5"
+            span class="w-2 h-2 rounded-full bg-green-400 shrink-0"
+            span class="text-xs text-white/70 truncate" Active now
+
+      = link_to chatrooms_path, class: "shrink-0 p-1.5 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors", title: "Close chat" do
         svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
           path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"
-          / Messages container
-    div class="chatroom-messages" id="messages-container" data-chatroom-id=@chatroom.id
+
+    / Messages container — WhatsApp-style scrollable pane
+    div class="flex-1 min-h-0 overflow-y-auto overscroll-contain px-2 sm:px-4 py-3 flex flex-col gap-1.5 bg-no-repeat bg-center" style="background-image: linear-gradient(rgba(239,234,226,0.75), rgba(239,234,226,0.75)), url(#{image_path('watermark.png')}); background-size: cover, 420px 420px;" id="messages-container" data-chatroom-id=@chatroom.id data-current-user-id=current_user.id
       - @messages.each do |message|
-        = render "messages/message", message: message, current_user: current_user
+        = render "messages/message", message: message, current_user_id: current_user.id
 
     / Input area
-    div class="chatroom-input-area"
-      = form_with url: chatroom_messages_path(@chatroom), method: :post, html: { multipart: true, id: "message-form", data: { turbo: "false" } } do |f|
-        div class="chatroom-input-wrapper"
-          div id="attachment-preview" class="attachment-preview hidden"
-          div class="chatroom-input-row"
-            label for="file-input" class="attach-btn" title="Attach file"
+    div class="shrink-0 bg-[#f0f2f5] px-2 sm:px-3 py-2 border-t border-black/5"
+      = form_with url: chatroom_messages_path(@chatroom), scope: :message, method: :post, html: { multipart: true, id: "message-form", data: { turbo: "false" } } do |f|
+        div class="relative"
+          div id="attachment-preview" class="hidden flex-wrap gap-2 mb-2 px-1"
+          = f.hidden_field :duration_in_seconds, id: "duration-input", value: ""
+
+          / Normal input row
+          div class="flex items-end gap-1.5 sm:gap-2" id="normal-input-row"
+            label for="file-input" class="shrink-0 p-2.5 rounded-full text-gray-500 hover:bg-black/5 active:bg-black/10 cursor-pointer transition-colors" title="Attach file"
               svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                 path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.4 6.4a6 6 0 008.486 8.486L20.5 13"
               = f.file_field :attachments, multiple: true, id: "file-input", class: "hidden", accept: "image/*,audio/*,.pdf,.doc,.docx,.txt,.zip"
-            = f.text_area :body, placeholder: "Type a message...", class: "chatroom-textarea", id: "message-input", rows: 1
-            button type="submit" class="send-btn" id="send-btn"
+
+            = f.text_area :body, placeholder: "Type a message...", id: "message-input", rows: 1, class: "flex-1 min-w-0 resize-none max-h-32 bg-white rounded-2xl px-4 py-2.5 text-sm sm:text-[15px] leading-5 text-gray-800 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1D4D3A]/30"
+
+            button type="button" id="voice-btn" title="Record voice message" class="shrink-0 p-2.5 rounded-full text-gray-500 hover:bg-black/5 active:bg-black/10 transition-colors"
+              svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"
+                path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 10v2a7 7 0 01-14 0v-2M12 19v4"
+
+            button type="submit" id="send-btn" class="shrink-0 p-2.5 sm:p-3 rounded-full bg-[#1D4D3A] text-white hover:bg-[#183f2f] active:bg-[#132f24] shadow-sm transition-colors disabled:opacity-50 disabled:pointer-events-none"
               svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                 path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+
+          / Recording row
+          div class="hidden items-center gap-2 sm:gap-3 bg-white rounded-2xl px-3 py-2 shadow-sm" id="recording-row"
+            button type="button" id="cancel-recording-btn" title="Cancel" class="shrink-0 p-2 rounded-full text-gray-500 hover:bg-black/5 active:bg-black/10 transition-colors"
+              svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"
+
+            div class="flex-1 flex items-center gap-2 min-w-0"
+              span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shrink-0"
+              span id="recording-timer" class="text-sm font-medium text-gray-700 tabular-nums" 0:00
+
+            button type="button" id="stop-recording-btn" title="Stop recording" class="shrink-0 p-2.5 rounded-full bg-[#1D4D3A] text-white hover:bg-[#183f2f] active:bg-[#132f24] transition-colors"
+              svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"
+                rect x="6" y="6" width="12" height="12" rx="2"
 
 javascript:
   (function() {
     let subscription = null;
+    let mediaRecorder = null;
+    let mediaStream = null;
+    let chunks = [];
+    let recordSeconds = 0;
+    let recordTimerInterval = null;
+    let mimeType = null;
+    let recordedFile = null;
+    let recordingFinished = false;
+    let isSending = false;
+    let activeVoiceAudio = null;
+    let activeVoicePlayer = null;
+
+    const MAX_RECORD_SECONDS = 120;
 
     function scrollToBottom() {
       const c = document.getElementById('messages-container');
       if (c) c.scrollTop = c.scrollHeight;
+    }
+
+    function isNearBottom(c, threshold = 120) {
+      return c.scrollHeight - c.scrollTop - c.clientHeight < threshold;
+    }
+
+    function markMineIfNeeded(row, senderId, currentUserId) {
+      if (Number(senderId) === Number(currentUserId)) {
+        row.classList.add('message-row--mine');
+        const bubble = row.querySelector('.message-bubble');
+        if (bubble) bubble.classList.add('message-bubble--mine');
+      }
     }
 
     function initActionCable() {
@@ -58,6 +108,7 @@ javascript:
       if (!container) return;
 
       const chatroomId = container.dataset.chatroomId;
+      const currentUserId = container.dataset.currentUserId;
 
       if (!window.ActionCable) {
         setTimeout(initActionCable, 100);
@@ -80,15 +131,40 @@ javascript:
             console.log('[ActionCable] Disconnected');
           },
           received(data) {
-            console.log('[ActionCable] Message received');
             const c = document.getElementById('messages-container');
-            if (c) {
-              c.insertAdjacentHTML('beforeend', data.message_html);
-              scrollToBottom();
-            }
+            if (!c) return;
+            const shouldStick = isNearBottom(c);
+            c.insertAdjacentHTML('beforeend', data.message_html);
+            const row = c.lastElementChild;
+            if (row) markMineIfNeeded(row, data.sender_id, currentUserId);
+            if (shouldStick) scrollToBottom();
           }
         }
       );
+    }
+
+    function formatTime(s) {
+      const m = Math.floor(s / 60);
+      const sec = String(s % 60).padStart(2, "0");
+      return `${m}:${sec}`;
+    }
+
+    function showSendError(msg) {
+      let el = document.getElementById('send-error');
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'send-error';
+        el.className = 'text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-1.5 mb-2';
+        const wrapper = document.getElementById('message-form')?.firstElementChild;
+        if (wrapper) wrapper.prepend(el);
+      }
+      el.textContent = msg;
+      el.classList.remove('hidden');
+    }
+
+    function clearSendError() {
+      const el = document.getElementById('send-error');
+      if (el) el.classList.add('hidden');
     }
 
     function initForm() {
@@ -102,15 +178,111 @@ javascript:
       const newFileInput = document.getElementById('file-input');
       const newPreview = document.getElementById('attachment-preview');
       const newSendBtn = document.getElementById('send-btn');
+      const durationInput = document.getElementById('duration-input');
+      const voiceBtn = document.getElementById('voice-btn');
+      const normalRow = document.getElementById('normal-input-row');
+      const recordingRow = document.getElementById('recording-row');
+      const stopBtn = document.getElementById('stop-recording-btn');
+      const cancelBtn = document.getElementById('cancel-recording-btn');
+      const recordingTimer = document.getElementById('recording-timer');
+
+      function setControlsDisabled(disabled) {
+        newSendBtn.disabled = disabled;
+        voiceBtn.disabled = disabled;
+        stopBtn.disabled = disabled;
+        cancelBtn.disabled = disabled;
+      }
+
+      async function startRecording() {
+        try {
+          mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        } catch (err) {
+          alert('Microphone access is required to record a voice message.');
+          return;
+        }
+
+        mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+        mediaRecorder = new MediaRecorder(mediaStream, { mimeType });
+        chunks = [];
+        recordingFinished = false;
+
+        mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+        mediaRecorder.onstop = finishRecording;
+        mediaRecorder.start();
+
+        recordSeconds = 0;
+        recordingTimer.textContent = formatTime(recordSeconds);
+        recordTimerInterval = setInterval(() => {
+          recordSeconds++;
+          recordingTimer.textContent = formatTime(recordSeconds);
+          if (recordSeconds >= MAX_RECORD_SECONDS) stopRecording();
+        }, 1000);
+
+        clearSendError();
+        normalRow.classList.add('hidden');
+        normalRow.classList.remove('flex');
+        recordingRow.classList.remove('hidden');
+        recordingRow.classList.add('flex');
+      }
+
+      function stopRecording() {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+        if (mediaStream) mediaStream.getTracks().forEach((t) => t.stop());
+        clearInterval(recordTimerInterval);
+      }
+
+      function cancelRecording() {
+        recordingFinished = true;
+        stopRecording();
+        chunks = [];
+        recordedFile = null;
+        resetRecordingUI();
+      }
+
+      function resetRecordingUI() {
+        recordSeconds = 0;
+        recordingTimer.textContent = '0:00';
+        recordingRow.classList.add('hidden');
+        recordingRow.classList.remove('flex');
+        normalRow.classList.remove('hidden');
+        normalRow.classList.add('flex');
+      }
+
+      function finishRecording() {
+        if (recordingFinished) return;
+        recordingFinished = true;
+
+        if (chunks.length === 0) { resetRecordingUI(); return; }
+
+        const ext = mimeType.includes('mp4') ? 'm4a' : 'webm';
+        const blob = new Blob(chunks, { type: mimeType });
+        recordedFile = new File([blob], `voice-${Date.now()}.${ext}`, { type: mimeType });
+
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(recordedFile);
+        newFileInput.files = dataTransfer.files;
+        durationInput.value = recordSeconds;
+
+        resetRecordingUI();
+        newForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+      }
+
+      voiceBtn.addEventListener('click', startRecording);
+      stopBtn.addEventListener('click', stopRecording);
+      cancelBtn.addEventListener('click', cancelRecording);
 
       newForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         e.stopPropagation();
 
+        if (isSending) return;
+
         const body = newInput.value.trim();
         if (!body && newFileInput.files.length === 0) return;
 
-        newSendBtn.disabled = true;
+        isSending = true;
+        setControlsDisabled(true);
+        clearSendError();
 
         const formData = new FormData(newForm);
 
@@ -125,22 +297,28 @@ javascript:
             newInput.value = '';
             newInput.style.height = 'auto';
             newFileInput.value = '';
+            durationInput.value = '';
             newPreview.innerHTML = '';
             newPreview.classList.add('hidden');
+            newPreview.classList.remove('flex');
+            recordedFile = null;
           } else {
             console.error('Send failed, status:', response.status);
+            showSendError('Message failed to send. Tap send to try again.');
           }
         } catch(err) {
           console.error('Send error:', err);
+          showSendError('Message failed to send. Check your connection and try again.');
         } finally {
-          newSendBtn.disabled = false;
+          isSending = false;
+          setControlsDisabled(false);
           newInput.focus();
         }
       });
 
       newInput.addEventListener('input', function() {
         this.style.height = 'auto';
-        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        this.style.height = Math.min(this.scrollHeight, 128) + 'px';
       });
 
       newInput.addEventListener('keydown', function(e) {
@@ -151,22 +329,159 @@ javascript:
       });
 
       newFileInput.addEventListener('change', function() {
+        if (recordedFile) return;
         newPreview.innerHTML = '';
-        if (this.files.length === 0) { newPreview.classList.add('hidden'); return; }
+        if (this.files.length === 0) {
+          newPreview.classList.add('hidden');
+          newPreview.classList.remove('flex');
+          return;
+        }
         newPreview.classList.remove('hidden');
+        newPreview.classList.add('flex');
         Array.from(this.files).forEach(file => {
           const chip = document.createElement('div');
-          chip.className = 'attachment-chip';
+          chip.className = 'flex items-center gap-1.5 bg-white rounded-full pl-1 pr-3 py-1 shadow-sm text-xs text-gray-600 max-w-[160px]';
           if (file.type.startsWith('image/')) {
             const img = document.createElement('img');
             img.src = URL.createObjectURL(file);
-            img.className = 'attachment-chip-img';
+            img.className = 'w-6 h-6 rounded-full object-cover shrink-0';
             chip.appendChild(img);
+            const name = document.createElement('span');
+            name.className = 'truncate';
+            name.textContent = file.name;
+            chip.appendChild(name);
           } else {
-            chip.innerHTML = `<span>📎</span><span class="attachment-chip-name">${file.name}</span>`;
+            chip.innerHTML = `<span>📎</span><span class="truncate">${file.name}</span>`;
           }
           newPreview.appendChild(chip);
         });
+      });
+    }
+
+    // ── Voice note player (custom, no native download UI) ──
+    function formatDuration(seconds) {
+      const s = Math.max(0, Math.floor(seconds || 0));
+      const m = Math.floor(s / 60);
+      const sec = String(s % 60).padStart(2, '0');
+      return `${m}:${sec}`;
+    }
+
+    function resetPlayerUI(player) {
+      const playIcon = player.querySelector('.icon-play');
+      const pauseIcon = player.querySelector('.icon-pause');
+      const fill = player.querySelector('.voice-note-progress-fill');
+      const handle = player.querySelector('.voice-note-progress-handle');
+      if (playIcon) playIcon.classList.remove('hidden');
+      if (pauseIcon) pauseIcon.classList.add('hidden');
+      if (fill) fill.style.width = '0%';
+      if (handle) handle.style.left = '0%';
+    }
+
+    function stopActiveVoiceAudio() {
+      if (activeVoiceAudio) {
+        activeVoiceAudio.pause();
+      }
+      if (activeVoicePlayer) {
+        resetPlayerUI(activeVoicePlayer);
+      }
+      activeVoiceAudio = null;
+      activeVoicePlayer = null;
+    }
+
+    function getOrCreateAudio(player) {
+      let audio = player._audioEl;
+      if (audio) return audio;
+
+      audio = new Audio(player.dataset.audioSrc);
+      audio.preload = 'metadata';
+      player._audioEl = audio;
+
+      const durationEl = player.querySelector('.voice-note-duration');
+      const fill = player.querySelector('.voice-note-progress-fill');
+      const handle = player.querySelector('.voice-note-progress-handle');
+      const playIcon = player.querySelector('.icon-play');
+      const pauseIcon = player.querySelector('.icon-pause');
+
+      audio.addEventListener('loadedmetadata', () => {
+        if (durationEl && durationEl.dataset.hasServerDuration !== 'true' && isFinite(audio.duration)) {
+          durationEl.textContent = formatDuration(audio.duration);
+        }
+      });
+
+      audio.addEventListener('timeupdate', () => {
+        if (!audio.duration || !isFinite(audio.duration)) return;
+        const pct = (audio.currentTime / audio.duration) * 100;
+        if (fill) fill.style.width = `${pct}%`;
+        if (handle) handle.style.left = `${pct}%`;
+        if (durationEl) durationEl.textContent = formatDuration(audio.duration - audio.currentTime);
+      });
+
+      audio.addEventListener('ended', () => {
+        resetPlayerUI(player);
+        if (durationEl && isFinite(audio.duration)) {
+          durationEl.textContent = formatDuration(audio.duration);
+        }
+        if (activeVoiceAudio === audio) {
+          activeVoiceAudio = null;
+          activeVoicePlayer = null;
+        }
+      });
+
+      audio.addEventListener('play', () => {
+        if (playIcon) playIcon.classList.add('hidden');
+        if (pauseIcon) pauseIcon.classList.remove('hidden');
+      });
+
+      audio.addEventListener('pause', () => {
+        if (playIcon) playIcon.classList.remove('hidden');
+        if (pauseIcon) pauseIcon.classList.add('hidden');
+      });
+
+      return audio;
+    }
+
+    function initVoicePlayers() {
+      const container = document.getElementById('messages-container');
+      if (!container || container._voicePlayersInit) return;
+      container._voicePlayersInit = true;
+
+      container.addEventListener('click', function(e) {
+        const playBtn = e.target.closest('.voice-play-btn');
+        const track = e.target.closest('.voice-note-progress');
+
+        if (playBtn) {
+          const player = playBtn.closest('.voice-note-player');
+          if (!player) return;
+          const audio = getOrCreateAudio(player);
+
+          if (activeVoiceAudio && activeVoiceAudio !== audio) {
+            stopActiveVoiceAudio();
+          }
+
+          if (audio.paused) {
+            audio.play();
+            activeVoiceAudio = audio;
+            activeVoicePlayer = player;
+          } else {
+            audio.pause();
+            if (activeVoiceAudio === audio) {
+              activeVoiceAudio = null;
+              activeVoicePlayer = null;
+            }
+          }
+          return;
+        }
+
+        if (track) {
+          const player = track.closest('.voice-note-player');
+          if (!player) return;
+          const audio = getOrCreateAudio(player);
+          if (!audio.duration || !isFinite(audio.duration)) return;
+
+          const rect = track.getBoundingClientRect();
+          const ratio = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
+          audio.currentTime = ratio * audio.duration;
+        }
       });
     }
 
@@ -175,6 +490,7 @@ javascript:
       scrollToBottom();
       initActionCable();
       initForm();
+      initVoicePlayers();
     }
 
     document.addEventListener('turbo:load', init);
@@ -182,5 +498,10 @@ javascript:
 
     document.addEventListener('turbo:before-cache', function() {
       if (subscription) { subscription.unsubscribe(); subscription = null; }
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        if (mediaStream) mediaStream.getTracks().forEach((t) => t.stop());
+      }
+      stopActiveVoiceAudio();
     });
   })();

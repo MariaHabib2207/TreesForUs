@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_06_27_004511) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_05_094246) do
   create_table "active_admin_comments", force: :cascade do |t|
     t.string "namespace"
     t.text "body"
@@ -166,7 +166,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_27_004511) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "read_at"
+    t.string "message_type", default: "text", null: false
+    t.integer "duration_in_seconds"
     t.index ["id"], name: "index_messages_on_id", unique: true
+    t.index ["message_type"], name: "index_messages_on_message_type"
   end
 
   create_table "noticed_events", force: :cascade do |t|

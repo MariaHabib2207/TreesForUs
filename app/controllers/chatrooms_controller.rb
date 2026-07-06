@@ -12,9 +12,11 @@ def show
   @chatroom = Chatroom.joins(:chatroom_members)
                       .where(chatroom_members: { user_id: current_user.id })
                       .find(params[:id])
-  @messages = @chatroom.messages.includes(:user, attachments_blobs: :blob).ordered
 
-  # Mark messages as read
+  @messages = @chatroom.messages
+                        .includes(:user, attachments_attachments: :blob)
+                        .ordered
+
   @chatroom.messages.where(read_at: nil).where.not(user: current_user).update_all(read_at: Time.current)
 
   @other_member = @chatroom.members.where.not(id: current_user.id).first

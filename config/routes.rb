@@ -38,7 +38,8 @@ Rails.application.routes.draw do
 
   resources :chatrooms, only: [:show, :index, :destroy] do
     resources :messages, only: [:create]
-  end
+end
+
 
   resources :notifications, only: [:index, :destroy] do
     collection do

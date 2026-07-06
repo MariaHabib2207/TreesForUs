@@ -1,19 +1,3 @@
-# == Schema Information
-#
-# Table name: messages
-#
-#  id          :integer          not null, primary key
-#  body        :text
-#  read_at     :datetime
-#  created_at  :datetime         not null
-#  updated_at  :datetime         not null
-#  chatroom_id :integer
-#  user_id     :integer
-#
-# Indexes
-#
-#  index_messages_on_id  (id) UNIQUE
-#
 class Message < ApplicationRecord
   belongs_to :chatroom
   belongs_to :user
@@ -21,7 +5,12 @@ class Message < ApplicationRecord
 
   encrypts :body
 
+  enum :message_type, { text: "text", voice: "voice", image: "image", file: "file" }
+
   scope :ordered, -> { order(created_at: :asc) }
+
+  validate :body_or_attachments_present
+  validate :voice_note_size_limit
 
   def image_attachments
     attachments.select { |a| a.content_type.start_with?("image/") }
@@ -33,5 +22,17 @@ class Message < ApplicationRecord
 
   def file_attachments
     attachments.reject { |a| a.content_type.start_with?("image/", "audio/") }
+  end
+
+  private
+
+  def body_or_attachments_present
+    errors.add(:base, "Message must have text or an attachment") if body.blank? && attachments.blank?
+  end
+
+  def voice_note_size_limit
+    audio_attachments.each do |a|
+      errors.add(:attachments, "voice note is too large (max 10MB)") if a.byte_size > 10.megabytes
+    end
   end
 end

@@ -1,6 +1,10 @@
 /* ============================================================
-   CHATROOM — Full stylesheet
+   CHATROOM — Full stylesheet (mobile-responsive rewrite)
    ============================================================ */
+
+* {
+  box-sizing: border-box;
+}
 
 .chatroom-wrapper {
   min-height: 100vh;
@@ -25,7 +29,7 @@
   flex-direction: column;
   width: 100%;
   max-width: 780px;
-  height: 100%;
+  height: min(100%, 900px);
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -61,14 +65,19 @@
   color: #9ca3af;
   display: flex;
   align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  min-height: 40px;
   padding: 6px;
   border-radius: 10px;
   transition: color 0.15s, background 0.15s;
   flex-shrink: 0;
   text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.chatroom-back-btn:hover {
+.chatroom-back-btn:hover,
+.chatroom-back-btn:active {
   color: #1D4D3A;
   background: #f0fdf4;
 }
@@ -132,15 +141,20 @@
   border: none;
   cursor: pointer;
   color: #d1d5db;
+  min-width: 40px;
+  min-height: 40px;
   padding: 8px;
   border-radius: 10px;
   transition: color 0.15s, background 0.15s;
   display: flex;
   align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.chatroom-delete-btn:hover {
+.chatroom-delete-btn:hover,
+.chatroom-delete-btn:active {
   color: #ef4444;
   background: #fef2f2;
 }
@@ -149,7 +163,9 @@
 .chatroom-messages {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain; /* stop scroll chaining to the page on mobile */
   padding: 20px 16px;
   display: flex;
   flex-direction: column;
@@ -267,12 +283,6 @@
   display: block;
 }
 
-.message-audio {
-  width: 100%;
-  max-width: 260px;
-  height: 36px;
-}
-
 .message-file {
   display: inline-flex;
   align-items: center;
@@ -293,6 +303,154 @@
   background: rgba(0, 0, 0, 0.1);
 }
 
+/* ============================================================
+   VOICE NOTE PLAYER — bold, high-contrast, hard to miss
+   ============================================================ */
+
+.voice-note-player {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 220px;
+  max-width: 270px;
+  padding: 6px 4px;
+}
+
+.voice-play-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  border: none;
+  border-radius: 50%;
+  background: #1D4D3A;
+  color: #fff;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(29, 77, 58, 0.45);
+  transition: background-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.message-bubble--mine .voice-play-btn {
+  background: #ffffff;
+  color: #1D4D3A;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+}
+
+.voice-play-btn:hover {
+  background: #2d6a52;
+  box-shadow: 0 4px 14px rgba(29, 77, 58, 0.55);
+}
+
+.message-bubble--mine .voice-play-btn:hover {
+  background: #f0fdf4;
+}
+
+.voice-play-btn:active {
+  transform: scale(0.9);
+}
+
+.voice-play-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* Nudge the "play" triangle so it looks visually centered inside the circle */
+.voice-play-btn svg.icon-play {
+  margin-left: 2px;
+}
+
+.voice-play-btn svg.hidden {
+  display: none;
+}
+
+.voice-note-track {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.voice-note-progress {
+  position: relative;
+  width: 100%;
+  height: 5px;
+  border-radius: 4px;
+  background: rgba(29, 77, 58, 0.18);
+  cursor: pointer;
+}
+
+.message-bubble--mine .voice-note-progress {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.voice-note-progress-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  border-radius: 4px;
+  background: #1D4D3A;
+  pointer-events: none;
+}
+
+.message-bubble--mine .voice-note-progress-fill {
+  background: #fff;
+}
+
+.voice-note-progress-handle {
+  position: absolute;
+  top: 50%;
+  left: 0%;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #1D4D3A;
+  border: 2px solid #fff;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.message-bubble--mine .voice-note-progress-handle {
+  background: #fff;
+  border-color: #1D4D3A;
+}
+
+.voice-note-duration {
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #1D4D3A;
+  flex-shrink: 0;
+  min-width: 36px;
+  text-align: right;
+}
+
+.message-bubble--mine .voice-note-duration {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+@media (max-width: 380px) {
+  .voice-note-player {
+    min-width: 170px;
+    gap: 10px;
+  }
+  .voice-play-btn {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+  }
+  .voice-play-btn svg {
+    width: 19px;
+    height: 19px;
+  }
+}
+
 /* ── Input area ── */
 .chatroom-input-area {
   padding: 12px 16px 16px;
@@ -300,6 +458,7 @@
   background: rgba(255, 255, 255, 0.98);
   border-top: 1px solid rgba(229, 221, 208, 0.8);
   flex-shrink: 0;
+  transition: transform 0.15s ease;
 }
 
 .chatroom-input-wrapper {
@@ -308,14 +467,24 @@
   gap: 8px;
 }
 
+.chatroom-send-error {
+  font-size: 12px;
+  color: #ef4444;
+  padding: 2px 4px;
+}
+
+.chatroom-send-error.hidden {
+  display: none;
+}
+
 .chatroom-input-row {
   display: flex;
   align-items: flex-end;
-  gap: 10px;
+  gap: 8px;
   background: #f3f4f6;
   border: 1.5px solid #e5e7eb;
   border-radius: 20px;
-  padding: 8px 8px 8px 14px;
+  padding: 6px 6px 6px 14px;
   transition: border-color 0.15s;
 }
 
@@ -327,15 +496,20 @@
 .attach-btn {
   color: #9ca3af;
   cursor: pointer;
+  min-width: 36px;
+  min-height: 36px;
   padding: 4px;
   border-radius: 8px;
   transition: color 0.15s, background 0.15s;
   flex-shrink: 0;
   display: flex;
   align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.attach-btn:hover {
+.attach-btn:hover,
+.attach-btn:active {
   color: #1D4D3A;
   background: #e5e7eb;
 }
@@ -346,27 +520,29 @@
   border: none;
   outline: none;
   resize: none;
-  /* 16px minimum prevents iOS Safari from auto-zooming the page on focus */
   font-size: 16px;
   font-family: inherit;
   color: #111827;
   line-height: 1.5;
   max-height: 120px;
   overflow-y: auto;
-  padding: 2px 0;
+  padding: 6px 0;
+  min-width: 0;
 }
 
 .chatroom-textarea::placeholder {
   color: #9ca3af;
 }
 
-.send-btn {
+.send-btn,
+.voice-btn {
   background: linear-gradient(135deg, #1D4D3A, #2d6a52);
   color: #fff;
   border: none;
   border-radius: 50%;
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -374,6 +550,19 @@
   flex-shrink: 0;
   transition: opacity 0.15s, transform 0.15s;
   box-shadow: 0 2px 8px rgba(29, 77, 58, 0.3);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.voice-btn {
+  background: transparent;
+  color: #54656f;
+  box-shadow: none;
+}
+
+.voice-btn:hover,
+.voice-btn:active {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #1D4D3A;
 }
 
 .send-btn:hover {
@@ -381,7 +570,13 @@
   transform: scale(1.05);
 }
 
-.send-btn:disabled {
+.send-btn:active,
+.voice-btn:active {
+  transform: scale(0.92);
+}
+
+.send-btn:disabled,
+.voice-btn:disabled {
   opacity: 0.5;
   transform: none;
   cursor: not-allowed;
@@ -424,46 +619,160 @@
   white-space: nowrap;
 }
 
-/* ── Mobile responsive ── */
+/* Voice recording UI */
+#recording-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 10px;
+  width: 100%;
+}
+
+#recording-row.hidden {
+  display: none;
+}
+
+.recording-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+  color: #111b21;
+}
+
+.recording-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #f15c6d;
+  animation: recording-pulse 1.2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes recording-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+#recording-timer {
+  min-width: 36px;
+}
+
+.cancel-recording-btn,
+.stop-recording-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cancel-recording-btn {
+  background: transparent;
+  color: #8696a0;
+}
+
+.cancel-recording-btn:hover,
+.cancel-recording-btn:active {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #54656f;
+}
+
+.stop-recording-btn {
+  background-color: #1D4D3A;
+  color: #fff;
+}
+
+.stop-recording-btn:hover {
+  background-color: #2d6a52;
+}
+
+.stop-recording-btn:active,
+.cancel-recording-btn:active {
+  transform: scale(0.92);
+}
+
+/* ============================================================
+   MOBILE BREAKPOINTS
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .chatroom-page {
+    max-width: 100%;
+  }
+}
+
 @media (max-width: 640px) {
   .chatroom-wrapper {
     padding: 0;
     align-items: stretch;
-    background-attachment: scroll; /* "fixed" is unreliable/janky on iOS Safari */
+    background-attachment: scroll;
   }
 
   .chatroom-page {
     max-width: 100%;
     height: 100%;
-
+    height: 100dvh;
     border-radius: 0;
     border: none;
     box-shadow: none;
   }
 
   .chatroom-header {
-    padding: 12px 14px;
+    padding: 10px 12px;
   }
 
   .chatroom-name {
     font-size: 14px;
   }
 
+  .chatroom-status-text {
+    font-size: 10px;
+  }
+
   .message-bubble {
     max-width: 82%;
+    padding: 9px 12px;
   }
 
   .message-image {
-    max-width: 180px;
+    max-width: 200px;
   }
 
   .chatroom-input-area {
-    padding: 10px 12px 12px;
-    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    padding: 8px 10px 10px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .chatroom-input-row {
+    padding: 5px 5px 5px 12px;
+    border-radius: 22px;
   }
 
   .chatroom-messages {
-    padding: 14px 12px;
+    padding: 12px 10px;
+    gap: 8px;
+  }
+
+  .attach-btn,
+  .voice-btn {
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .send-btn {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
   }
 }
 
@@ -476,6 +785,7 @@
 
   .chatroom-name {
     font-size: 13px;
+    max-width: 140px;
   }
 
   .message-bubble {
@@ -487,21 +797,79 @@
     font-size: 13px;
   }
 
+  .message-image {
+    max-width: 160px;
+  }
+
   .attachment-chip {
-    max-width: 120px;
+    max-width: 110px;
+  }
+
+  .chatroom-input-row {
+    gap: 6px;
+    padding: 4px 4px 4px 10px;
+  }
+
+  .attach-btn,
+  .voice-btn,
+  .send-btn {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+  }
+
+  #recording-row {
+    padding: 4px 6px;
+    gap: 6px;
+  }
+
+  .recording-indicator {
+    font-size: 12px;
+  }
+
+  .cancel-recording-btn,
+  .stop-recording-btn {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+  }
+}
+
+/* Landscape phones */
+@media (max-height: 420px) and (orientation: landscape) {
+  .chatroom-header {
+    padding: 6px 12px;
+  }
+
+  .chatroom-avatar,
+  .chatroom-avatar-initials {
+    width: 32px;
+    height: 32px;
+  }
+
+  .chatroom-messages {
+    padding: 8px 12px;
+  }
+
+  .chatroom-input-area {
+    padding: 6px 10px 6px;
+    padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .message-row {
+    animation: none;
+  }
+  .recording-dot {
+    animation: none;
   }
 }
 
 /* ============================================================
    NOTE: The dashboard chat sidebar (#chatSidebar) styling has
-   been moved to treeofus.css, where the rest of the dashboard
-   layout lives. Keeping a second, conflicting copy of
-   `.chat-sidebar` here (scoped only to the chatroom page) was
-   the root cause of the sidebar not opening/closing correctly
-   on the dashboard — whichever stylesheet loaded second/with
-   higher specificity won, and the JS toggle had nothing
-   reliable to attach to. Do not re-add #chatSidebar rules to
-   this file; edit treeofus.css instead.
+   been moved to treeofus.css. Do not re-add #chatSidebar rules
+   to this file; edit treeofus.css instead.
    ============================================================ */
 
 .chat-sidebar__close {

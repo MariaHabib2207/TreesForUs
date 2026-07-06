@@ -1,23 +1,22 @@
 doctype html
-html
+html class="h-screen overflow-hidden"
   head
     meta charset="utf-8"
     meta name="viewport" content="width=device-width,initial-scale=1"
     = turbo_frame_tag "modal"
     = stylesheet_link_tag "family_tree", media: "all"
     = stylesheet_link_tag "life_activities", media: "all"
-    meta name="viewport" content="width=device-width, initial-scale=1"
-    script src="https://cdn.jsdelivr.net/npm/@rails/actioncable@7.1.3/app/assets/javascripts/actioncable.js"
-    script src="https://cdn.jsdelivr.net/npm/@rails/actioncable@7.1.3/app/assets/javascripts/actioncable.esm.js" type="module"
+    script src="https://cdn.tailwindcss.com"
+
     = favicon_link_tag "/favicon.ico"
     = csrf_meta_tags
     = csp_meta_tag
-    script src="https://cdn.tailwindcss.com"
 
-  body
+  body class="min-h-screen md:h-screen md:overflow-hidden flex flex-col bg-cover bg-center bg-no-repeat bg-fixed" style="background-image: url(#{image_path('background-img.png')})"
+
     - if user_signed_in?
       = render "layouts/navbar"
-      - if notice
+
       - if notice
         .mb-4.rounded-xl.border.border-green-200.bg-green-50.p-4.text-green-800.shadow-sm
           = notice
@@ -25,6 +24,6 @@ html
       - if alert
         .mb-4.rounded-xl.border.border-red-200.bg-red-50.p-4.text-red-800.shadow-sm
           = alert
-    = yield
 
-      
+    main class="flex-1 min-h-0 md:overflow-hidden overflow-y-auto"
+      = yield
