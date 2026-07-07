@@ -1,5 +1,5 @@
 doctype html
-html class="h-screen overflow-hidden"
+html class="min-h-screen"
   head
     meta charset="utf-8"
     meta name="viewport" content="width=device-width,initial-scale=1"
@@ -12,7 +12,7 @@ html class="h-screen overflow-hidden"
     = csrf_meta_tags
     = csp_meta_tag
 
-  body class="min-h-screen md:h-screen md:overflow-hidden flex flex-col bg-cover bg-center bg-no-repeat bg-fixed" style="background-image: url(#{image_path('background-img.png')})"
+  body class="min-h-screen flex flex-col bg-cover bg-center bg-no-repeat bg-fixed" style="background-image: url(#{image_path('background-img.png')})"
 
     - if user_signed_in?
       = render "layouts/navbar"
@@ -25,5 +25,5 @@ html class="h-screen overflow-hidden"
         .mb-4.rounded-xl.border.border-red-200.bg-red-50.p-4.text-red-800.shadow-sm
           = alert
 
-    main class="flex-1 min-h-0 md:overflow-hidden overflow-y-auto"
+    main class="flex-1"
       = yield
