@@ -307,14 +307,17 @@ body {
   position: relative;
   box-sizing: border-box;
   touch-action: pan-x pan-y;
+  /* FIX: linear-gradient() containing calc(% - px) confuses libsass —
+     wrap the whole calc() in a string interpolation so SassC treats it
+     as an opaque literal and hands it to the browser untouched. */
   mask-image: linear-gradient(
     to right,
-    black calc(100% - 32px),
+    black #{"calc(100% - 32px)"},
     transparent 100%
   );
   -webkit-mask-image: linear-gradient(
     to right,
-    black calc(100% - 32px),
+    black #{"calc(100% - 32px)"},
     transparent 100%
   );
 }
@@ -749,7 +752,10 @@ body {
   position: absolute;
   top: 0;
   left: calc(var(--card-w) / 2);
-  width: calc(100% - var(--card-w));
+  /* FIX: mixing a %-based Sass calc with a custom property that resolves
+     to px (--card-w) is the other libsass calc()-unit trap. Interpolate
+     it to a literal string so SassC leaves it alone for the browser. */
+  width: #{"calc(100% - var(--card-w))"};
   height: 2px;
   background: var(--wire);
 }

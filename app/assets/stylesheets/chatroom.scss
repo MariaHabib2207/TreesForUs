@@ -29,7 +29,11 @@
   flex-direction: column;
   width: 100%;
   max-width: 780px;
-  height: min(100%, 900px);
+  /* FIX: Sass's built-in min() tries to statically resolve its args and
+     chokes on mixed % / px units the same way calc() does. Interpolate
+     it to a literal string so SassC leaves it for the browser to handle
+     natively (all modern browsers support CSS min()). */
+  height: #{"min(100%, 900px)"};
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
