@@ -25,11 +25,10 @@ div class="flex justify-center"
             span class="text-xs text-white/70 truncate" Active now
 
       div class="flex items-center gap-1 shrink-0"
-        button type="button" id="add-people-btn" title="Add people" class="p-1.5 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors"
+        button type="button" id="add-people-btn" title="Group" class="flex items-center gap-1 pl-2 pr-2.5 py-1.5 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors"
           svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
             path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15"
-            circle cx="8" cy="8" r="3" stroke-width="2" fill="none"
-
+          span class="text-xs font-medium" Group
         = link_to chatrooms_path, class: "p-1.5 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors", title: "Close chat" do
           svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
             path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"
