@@ -175,16 +175,6 @@ javascript:
     );
   }
 
-  // Polling fallback.
-  // Runs alongside ActionCable as a safety net. Only touches the messages
-  // pane (append-only, dedup by data message id) -- never reloads the page,
-  // so it will not clobber an in-progress draft or voice recording.
-  //
-  // Backend needed: GET /chatrooms/ID/messages/poll?after=LAST_MESSAGE_ID
-  // returning JSON like { messages_html: "rendered new rows" }.
-  // Each message row in the partial must carry a data-message-id attribute
-  // set to that message's id, and a data-sender-id attribute set to the
-  // sending user's id.
   function getLastMessageId(container) {
     const rows = container.querySelectorAll('[data-message-id]');
     if (rows.length === 0) return null;
