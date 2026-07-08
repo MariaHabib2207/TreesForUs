@@ -5,7 +5,7 @@ class Message < ApplicationRecord
 
   encrypts :body
 
-  enum :message_type, { text: "text", voice: "voice", image: "image", file: "file" }
+  enum :message_type, { text: "text", voice: "voice", image: "image", file: "file", system: "system"  }
 
   scope :ordered, -> { order(created_at: :asc) }
 

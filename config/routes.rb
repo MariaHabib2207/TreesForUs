@@ -38,8 +38,11 @@ Rails.application.routes.draw do
 
   resources :chatrooms, only: [:show, :index, :destroy] do
     resources :messages, only: [:create]
-end
+    member { post :invite_member }
+  end
 
+  post "notifications/accept_chatroom_invite", to: "notifications#accept_chatroom_invite", as: :accept_chatroom_invite_notifications
+  post "notifications/reject_chatroom_invite", to: "notifications#reject_chatroom_invite", as: :reject_chatroom_invite_notifications
 
   resources :notifications, only: [:index, :destroy] do
     collection do

@@ -80,6 +80,34 @@ end
     redirect_back fallback_location: notifications_path
   end
 
+  def accept_chatroom_invite
+  notification = current_user.noticed_notifications.find(params[:notification_id])
+  notification.update!(read_at: Time.current)
+
+  chatroom = Chatroom.find(params[:chatroom_id])
+
+  unless chatroom.members.include?(current_user)
+    chatroom.chatroom_members.create!(user: current_user)
+    chatroom.broadcast_system_message(user: current_user, body: "#{current_user.full_name} joined the chat")
+  end
+
+  redirect_to chatroom_path(chatroom)
+end
+
+def reject_chatroom_invite
+  notification = current_user.noticed_notifications.find(params[:notification_id])
+  notification.update!(read_at: Time.current)
+
+  inviter  = User.find(params[:inviter_id])
+  chatroom = Chatroom.find(params[:chatroom_id])
+
+  ::ChatroomInviteRejectedNotifier.with(
+    message: "#{current_user.full_name} declined to join the chat."
+  ).deliver(inviter)
+
+  redirect_back fallback_location: authenticated_root_path
+end
+
   private
   def serialize(n)
     event_params = n.event.params
