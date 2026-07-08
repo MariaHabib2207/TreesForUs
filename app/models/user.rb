@@ -368,6 +368,10 @@ rescue ActiveRecord::RecordInvalid => e
   false
 end
 
+def set_chatroom
+  @chatroom = Chatroom.find(params[:chatroom_id])
+end
+
 private
 
 def redeem_family_code!(family_code)

@@ -37,7 +37,11 @@ Rails.application.routes.draw do
   end
 
   resources :chatrooms, only: [:show, :index, :destroy] do
-    resources :messages, only: [:create]
+    resources :messages, only: [:create, :index] do
+      collection do
+        get :poll
+      end
+    end
     member { post :invite_member }
   end
 
@@ -55,17 +59,14 @@ Rails.application.routes.draw do
       patch :mark_read
     end
   end
+
   authenticated :user do
     root to: "dashboard#index", as: :authenticated_root
   end
-  resources :chatrooms do
-    resources :messages, only: [:create, :index]
-  #                           add :index  ^^^^
-  end
 
-    unauthenticated do
-      root to: redirect("/users/sign_in")
-    end
+  unauthenticated do
+    root to: redirect("/users/sign_in")
+  end
 
   get "up" => "rails/health#show", as: :rails_health_check
   mount ActionCable.server => '/cable'

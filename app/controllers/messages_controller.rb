@@ -1,39 +1,70 @@
 class MessagesController < ApplicationController
   before_action :set_chatroom
 
- def create
-  @chatroom = Chatroom.find(params[:chatroom_id])
-  message = @chatroom.messages.build(message_params)
-  message.user = current_user
-
-  if message.save
-    ChatroomChannel.broadcast_to(
-      @chatroom,
-      message_html: render_to_string(
+  def index
+    @messages = @chatroom.messages.order(:created_at)
+    render json: {
+      messages_html: render_to_string(
         partial: "messages/message",
-        locals: { message: message, current_user_id: message.user_id }
-      ),
-      sender_id: message.user_id
-    )
-    head :ok
-  else
-    render json: { errors: message.errors.full_messages }, status: :unprocessable_entity
+        collection: @messages,
+        as: :message,
+        locals: { current_user_id: current_user.id },
+        formats: [:html],
+        layout: false
+      )
+    }
   end
-end
+
+  def create
+    @message = @chatroom.messages.build(message_params)
+    @message.user = current_user
+
+    if @message.save
+      fix_voice_note_content_types
+      @message.update_column(:message_type, infer_message_type(@message)) if @message.respond_to?(:message_type)
+
+      broadcast_message
+
+      render json: {
+        message_html: render_to_string(
+          partial: "messages/message",
+          locals: { message: @message, current_user_id: current_user.id },
+          formats: [:html],
+          layout: false
+        )
+      }, status: :ok
+    else
+      render json: { errors: @message.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
+  def poll
+    messages = @chatroom.messages.order(:created_at)
+    messages = messages.where("messages.id > ?", params[:after]) if params[:after].present?
+
+    render json: {
+      messages_html: render_to_string(
+        partial: "messages/message",
+        collection: messages,
+        as: :message,
+        locals: { current_user_id: current_user.id },
+        formats: [:html],
+        layout: false
+      )
+    }
+  end
 
   private
 
   def set_chatroom
-    @chatroom = Chatroom.find(params[:chatroom_id])
+    @chatroom = current_user.chatrooms.find(params[:chatroom_id])
   end
 
   def message_params
     params.require(:message).permit(:body, :duration_in_seconds, attachments: [])
   end
 
-  # duration_in_seconds is only ever set by the voice-recorder JS flow, so it's
-  # a more reliable signal than content_type sniffing (which can misidentify
-  # audio-only webm as "video/webm" — see fix_voice_note_content_types below).
+
   def infer_message_type(message)
     return "voice" if message.duration_in_seconds.present?
     return "image" if message.attachments.any? { |a| a.content_type.to_s.start_with?("image/") }
@@ -41,11 +72,6 @@ end
     "text"
   end
 
-  # The browser's MediaRecorder produces audio-only webm/mp4, but ActiveStorage's
-  # content-type sniffing sometimes tags ambiguous webm containers as "video/webm"
-  # since webm can hold video+audio. We know these are voice recordings (attached
-  # with duration_in_seconds and no body), so force the correct audio/* content_type
-  # rather than relying on sniffing.
   def fix_voice_note_content_types
     return unless @message.duration_in_seconds.present?
 
@@ -55,19 +81,16 @@ end
     end
   end
 
-  # Broadcasts raw data, NOT pre-rendered HTML with a baked-in current_user.
-  # Rendering once with the sender's perspective and blasting that same HTML
-  # to every subscriber is what caused the audio/"is_mine" bug — each client
-  # needs to decide "is this mine?" for itself.
-  #
-  # NOTE: ActionCable.server.broadcast takes two positional args (channel, message).
-  # Passing bare `key: value` pairs here (without literal braces) gets swallowed
-  # as Ruby keyword arguments instead of a single positional Hash, which raises
-  # "wrong number of arguments (given 1, expected 2)". The { } below is required.
+  def set_chatroom
+  @chatroom = Chatroom.find(params[:chatroom_id])
+end
+
   def broadcast_message
     html = ApplicationController.render(
       partial: "messages/message",
-      locals: { message: @message, current_user_id: nil }
+      locals: { message: @message, current_user_id: nil },
+      formats: [:html],
+      layout: false
     )
     ActionCable.server.broadcast(
       "chatroom_#{@chatroom.id}",

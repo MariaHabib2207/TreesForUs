@@ -133,6 +133,24 @@ javascript:
     }
   }
 
+  function appendMessageRow(html, currentUserId, { forceStick } = {}) {
+    const container = document.getElementById('messages-container');
+    if (!container) return;
+
+    const temp = document.createElement('div');
+    temp.innerHTML = html.trim();
+    const row = temp.firstElementChild;
+    if (!row) return;
+
+    const id = row.dataset.messageId;
+    if (id && container.querySelector(`[data-message-id="${id}"]`)) return;
+
+    const shouldStick = forceStick || isNearBottom(container);
+    container.appendChild(row);
+    markMineIfNeeded(row, row.dataset.senderId, currentUserId);
+    if (shouldStick) scrollToBottom();
+  }
+
   function initActionCable() {
     const container = document.getElementById('messages-container');
     if (!container) return;
@@ -163,13 +181,9 @@ javascript:
           cableConfirmedConnected = false;
         },
         received(data) {
-          const c = document.getElementById('messages-container');
-          if (!c) return;
-          const shouldStick = isNearBottom(c);
-          c.insertAdjacentHTML('beforeend', data.message_html);
-          const row = c.lastElementChild;
-          if (row) markMineIfNeeded(row, data.sender_id, currentUserId);
-          if (shouldStick) scrollToBottom();
+          // Skip echoes of messages we already inserted ourselves on send.
+          if (Number(data.sender_id) === Number(currentUserId)) return;
+          appendMessageRow(data.message_html, currentUserId);
         }
       }
     );
@@ -370,15 +384,24 @@ javascript:
       clearSendError();
 
       const formData = new FormData(newForm);
+      const currentUserId = document.getElementById('messages-container')?.dataset.currentUserId;
 
       try {
         const response = await fetch(newForm.action, {
           method: 'POST',
-          headers: { 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content },
+          headers: {
+            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+          },
           body: formData
         });
 
         if (response.ok) {
+          const data = await response.json();
+          if (data.message_html) {
+            appendMessageRow(data.message_html, currentUserId, { forceStick: true });
+          }
+
           newInput.value = '';
           newInput.style.height = 'auto';
           newFileInput.value = '';
