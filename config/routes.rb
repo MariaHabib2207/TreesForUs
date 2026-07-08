@@ -42,6 +42,7 @@ Rails.application.routes.draw do
         get :poll
       end
     end
+    resources :calls, only: [:create]
     member { post :invite_member }
   end
 

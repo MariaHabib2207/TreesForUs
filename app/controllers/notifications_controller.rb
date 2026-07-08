@@ -80,15 +80,15 @@ end
     redirect_back fallback_location: notifications_path
   end
 
-  def accept_chatroom_invite
+def accept_chatroom_invite
   notification = current_user.noticed_notifications.find(params[:notification_id])
   notification.update!(read_at: Time.current)
 
-  chatroom = Chatroom.find(params[:chatroom_id])
+  inviter = User.find(params[:inviter_id])
+  chatroom = Chatroom.between(current_user, inviter) || Chatroom.create!(created_by: current_user).tap do |c|
+    c.chatroom_members.create!(user: current_user)
+    c.chatroom_members.create!(user: inviter)
 
-  unless chatroom.members.include?(current_user)
-    chatroom.chatroom_members.create!(user: current_user)
-    chatroom.broadcast_system_message(user: current_user, body: "#{current_user.full_name} joined the chat")
   end
 
   redirect_to chatroom_path(chatroom)

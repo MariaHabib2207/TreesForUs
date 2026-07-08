@@ -8,11 +8,18 @@ div class="relative" id="notification_bell_wrapper"
       span class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 min-w-[16px] text-center leading-none"
         = unread_count
 
-  div id="notif-dropdown" class="hidden absolute right-0 mt-2 w-80 max-h-96 bg-white rounded-lg shadow-xl border border-gray-100 flex flex-col overflow-hidden z-50"
-    div class="flex items-center justify-between px-4 py-3 border-b border-gray-100"
+  / Backdrop — mobile only, click to close
+  div id="notif-backdrop" class="hidden fixed inset-0 bg-black/30 z-40 sm:hidden"
+
+  div id="notif-dropdown" class="hidden fixed inset-x-3 top-16 z-50 sm:absolute sm:inset-x-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-80 max-h-[75vh] sm:max-h-96 bg-white rounded-lg shadow-xl border border-gray-100 flex-col overflow-hidden"
+    div class="flex items-center justify-between px-4 py-3 border-b border-gray-100 shrink-0"
       span class="font-semibold text-gray-800 text-sm" Notifications
-      - if unread_count > 0
-        = button_to "Mark all as read", mark_all_read_notifications_path, method: :patch, form: { data: { turbo_stream: true } }, class: "text-xs text-green-700 hover:underline bg-transparent border-none p-0 cursor-pointer"
+      div class="flex items-center gap-3"
+        - if unread_count > 0
+          = button_to "Mark all as read", mark_all_read_notifications_path, method: :patch, form: { data: { turbo_stream: true } }, class: "text-xs text-green-700 hover:underline bg-transparent border-none p-0 cursor-pointer"
+        button type="button" id="notif-close-btn" class="sm:hidden text-gray-400 hover:text-gray-600 p-1 -mr-1"
+          svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"
 
     div class="overflow-y-auto flex-1"
       - recent = current_user.noticed_notifications.includes(:event).order(created_at: :desc).limit(8)
@@ -27,25 +34,48 @@ javascript:
   function initNotificationBell() {
     const btn = document.getElementById('bell-btn');
     const dropdown = document.getElementById('notif-dropdown');
+    const backdrop = document.getElementById('notif-backdrop');
+    const closeBtn = document.getElementById('notif-close-btn');
 
     if (!btn || !dropdown) return;
 
     const newBtn = btn.cloneNode(true);
     btn.parentNode.replaceChild(newBtn, btn);
 
+    function openDropdown() {
+      dropdown.classList.remove('hidden');
+      dropdown.classList.add('flex');
+      backdrop.classList.remove('hidden');
+    }
+
+    function closeDropdown() {
+      dropdown.classList.add('hidden');
+      dropdown.classList.remove('flex');
+      backdrop.classList.add('hidden');
+    }
+
     newBtn.addEventListener('click', function(e) {
       e.stopPropagation();
-      document.getElementById('notif-dropdown').classList.toggle('hidden');
+      if (dropdown.classList.contains('hidden')) {
+        openDropdown();
+      } else {
+        closeDropdown();
+      }
     });
 
+    closeBtn?.addEventListener('click', closeDropdown);
+    backdrop?.addEventListener('click', closeDropdown);
+
     document.addEventListener('click', function(e) {
-      const d = document.getElementById('notif-dropdown');
-      const b = document.getElementById('bell-btn');
-      if (d && b && !d.contains(e.target) && !b.contains(e.target)) {
-        d.classList.add('hidden');
+      if (!dropdown.contains(e.target) && !newBtn.contains(e.target)) {
+        closeDropdown();
       }
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeDropdown();
     });
   }
 
   document.addEventListener('turbo:load', initNotificationBell);
-  document.addEventListener('DOMContentLoaded', initNotificationBell);
+document.addEventListener('DOMContentLoaded', initNotificationBell);

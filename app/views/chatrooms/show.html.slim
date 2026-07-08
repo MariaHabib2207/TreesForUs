@@ -1,5 +1,5 @@
 div class="flex justify-center"
-  div class="flex flex-col w-full max-w-2xl h-[88vh] bg-[#efeae2] shadow-xl md:my-4 md:rounded-xl overflow-hidden"
+  div class="flex flex-col w-full max-w-2xl h-[88vh] bg-[#efeae2] shadow-xl md:my-4 md:rounded-xl overflow-hidden relative"
 
     / Header
     div class="flex items-center justify-between gap-3 px-3 sm:px-4 py-2.5 bg-[#1D4D3A] text-white shrink-0 z-10"
@@ -10,31 +10,58 @@ div class="flex justify-center"
 
         - other_profile = @other_member&.user_profile
         - if other_profile&.avatar&.attached?
-          = image_tag other_profile.avatar, class: "w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover shrink-0 ring-2 ring-white/20"
+          = image_tag other_profile.avatar, id: "other-member-avatar-img", class: "w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover shrink-0 ring-2 ring-white/20"
         - else
-          div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/15 flex items-center justify-center text-sm font-semibold shrink-0 ring-2 ring-white/20"
+          div id="other-member-avatar-fallback" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/15 flex items-center justify-center text-sm font-semibold shrink-0 ring-2 ring-white/20"
             = "#{@other_member&.first_name&.first}#{@other_member&.last_name&.first}"
 
         div class="min-w-0"
           - if @other_members && @other_members.size > 1
             h1 class="text-sm sm:text-base font-semibold truncate" = @other_members.map(&:first_name).join(", ")
           - else
-            h1 class="text-sm sm:text-base font-semibold truncate" = @other_member&.full_name || @chatroom.name
+            h1 id="other-member-name" class="text-sm sm:text-base font-semibold truncate" = @other_member&.full_name || @chatroom.name
           div class="flex items-center gap-1.5"
             span class="w-2 h-2 rounded-full bg-green-400 shrink-0"
             span class="text-xs text-white/70 truncate" Active now
 
       div class="flex items-center gap-1 shrink-0"
+        - if @other_member && (@other_members.nil? || @other_members.size <= 1)
+          button type="button" id="voice-call-btn" title="Call" data-recipient-id=@other_member.id class="p-1.5 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors"
+            svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 3h4l2 7-2.5 1.5a11 11 0 006 6L13 15l7 2v4a2 2 0 01-2 2A16 16 0 012 5a2 2 0 012-2z"
+
         button type="button" id="add-people-btn" title="Group" class="flex items-center gap-1 pl-2 pr-2.5 py-1.5 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors"
           svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
             path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15"
           span class="text-xs font-medium" Group
+
         = link_to chatrooms_path, class: "p-1.5 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors", title: "Close chat" do
           svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
             path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"
 
+    / In-call bar (shown while calling / ringing outbound / connected)
+    div id="call-bar" class="hidden items-center justify-between gap-3 px-3 sm:px-4 py-2 bg-[#123A2B] text-white shrink-0 z-10"
+      div class="flex items-center gap-2 min-w-0"
+        span class="relative flex h-2.5 w-2.5 shrink-0"
+          span id="call-bar-pulse" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"
+          span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-400"
+        span id="call-bar-status" class="text-sm font-medium truncate" Calling…
+        span id="call-timer" class="hidden text-sm text-white/70 tabular-nums" 00:00
+
+      div class="flex items-center gap-2 shrink-0"
+        button type="button" id="call-mute-btn" title="Mute" class="hidden p-2 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors"
+          svg id="mic-on-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"
+            path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 10v2a7 7 0 01-14 0v-2M12 19v4"
+          svg id="mic-off-icon" class="hidden w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3l18 18M12 1a3 3 0 00-3 3v5m6 3v-1M19 10v2a7 7 0 01-9.4 6.6M12 19v4"
+
+        button type="button" id="call-hangup-btn" title="End call" class="p-2 rounded-full bg-red-600 hover:bg-red-700 transition-colors"
+          svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" transform="rotate(135)"
+            path d="M2 3h4l2 7-2.5 1.5a11 11 0 006 6L13 15l7 2v4a2 2 0 01-2 2A16 16 0 012 5a2 2 0 012-2z"
+
     / Messages container — WhatsApp-style scrollable pane
-    div class="flex-1 min-h-0 overflow-y-auto overscroll-contain px-2 sm:px-4 py-3 flex flex-col gap-1.5 bg-no-repeat bg-center" style="background-image: linear-gradient(rgba(239,234,226,0.75), rgba(239,234,226,0.75)), url(#{image_path('watermark.png')}); background-size: cover, 420px 420px;" id="messages-container" data-chatroom-id=@chatroom.id data-current-user-id=current_user.id
+    div class="flex-1 min-h-0 overflow-y-auto overscroll-contain px-2 sm:px-4 py-3 flex flex-col gap-1.5 bg-no-repeat bg-center" style="background-image: linear-gradient(rgba(239,234,226,0.75), rgba(239,234,226,0.75)), url(#{image_path('watermark.png')}); background-size: cover, 420px 420px;" id="messages-container" data-chatroom-id=@chatroom.id data-current-user-id=current_user.id data-current-user-name=current_user.full_name
       - @messages.each do |message|
         = render "messages/message", message: message, current_user_id: current_user.id
 
@@ -95,6 +122,26 @@ div class="flex justify-center"
               span class="text-sm text-gray-800 truncate" = friend.full_name
               button type="button" data-recipient-id=friend.id class="invite-friend-btn shrink-0 text-xs font-medium px-3 py-1.5 rounded-full bg-[#1D4D3A] text-white hover:bg-[#183f2f]" Invite
 
+  / Incoming call modal
+  div id="incoming-call-modal" class="hidden fixed inset-0 z-30 items-center justify-center bg-black/50 px-4"
+    div class="bg-white rounded-2xl w-full max-w-xs overflow-hidden shadow-xl text-center py-8 px-6"
+      - if other_profile&.avatar&.attached?
+        = image_tag other_profile.avatar, class: "w-20 h-20 rounded-full object-cover mx-auto ring-4 ring-[#1D4D3A]/10"
+      - else
+        div class="w-20 h-20 rounded-full bg-[#1D4D3A]/10 flex items-center justify-center text-xl font-semibold text-[#1D4D3A] mx-auto ring-4 ring-[#1D4D3A]/10"
+          = "#{@other_member&.first_name&.first}#{@other_member&.last_name&.first}"
+
+      h2 id="incoming-caller-name" class="mt-4 text-base font-semibold text-gray-900"
+      p class="text-sm text-gray-500 mt-1" Incoming call…
+
+      div class="flex items-center justify-center gap-6 mt-6"
+        button type="button" id="decline-call-btn" title="Decline" class="p-4 rounded-full bg-red-600 hover:bg-red-700 text-white transition-colors"
+          svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" transform="rotate(135)"
+            path d="M2 3h4l2 7-2.5 1.5a11 11 0 006 6L13 15l7 2v4a2 2 0 01-2 2A16 16 0 012 5a2 2 0 012-2z"
+        button type="button" id="accept-call-btn" title="Accept" class="p-4 rounded-full bg-green-600 hover:bg-green-700 text-white transition-colors"
+          svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"
+            path d="M2 3h4l2 7-2.5 1.5a11 11 0 006 6L13 15l7 2v4a2 2 0 01-2 2A16 16 0 012 5a2 2 0 012-2z"
+
 javascript:
  (function() {
   let subscription = null;
@@ -114,6 +161,25 @@ javascript:
 
   const MAX_RECORD_SECONDS = 120;
   const POLL_MS = 3000;
+
+  // --- Calling state ---
+  let callSubscription = null;
+  let peerConnection = null;
+  let localStream = null;
+  let callState = 'idle'; // idle | calling | ringing | connected
+  let callTimerInterval = null;
+  let callSeconds = 0;
+  let callTimeoutHandle = null;
+  let pendingOffer = null;
+  let isMuted = false;
+  let ringAudioCtx = null;
+  let ringOscInterval = null;
+
+  const CALL_TIMEOUT_MS = 30000;
+  const ICE_SERVERS = [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' }
+  ];
 
   function scrollToBottom() {
     const c = document.getElementById('messages-container');
@@ -180,7 +246,6 @@ javascript:
           cableConfirmedConnected = false;
         },
         received(data) {
-          // Skip echoes of messages we already inserted ourselves on send.
           if (Number(data.sender_id) === Number(currentUserId)) return;
           appendMessageRow(data.message_html, currentUserId);
         }
@@ -650,6 +715,302 @@ javascript:
     });
   }
 
+  // ===== Calling =====
+
+  function playRingtone() {
+    stopRingtone();
+    try {
+      ringAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    } catch (e) { return; }
+
+    function ringOnce() {
+      if (!ringAudioCtx) return;
+      const now = ringAudioCtx.currentTime;
+      [0, 0.3].forEach((offset) => {
+        const osc = ringAudioCtx.createOscillator();
+        const gain = ringAudioCtx.createGain();
+        osc.frequency.value = 480;
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.0001, now + offset);
+        gain.gain.exponentialRampToValueAtTime(0.15, now + offset + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + offset + 0.28);
+        osc.connect(gain);
+        gain.connect(ringAudioCtx.destination);
+        osc.start(now + offset);
+        osc.stop(now + offset + 0.3);
+      });
+    }
+
+    ringOnce();
+    ringOscInterval = setInterval(ringOnce, 2000);
+  }
+
+  function stopRingtone() {
+    if (ringOscInterval) { clearInterval(ringOscInterval); ringOscInterval = null; }
+    if (ringAudioCtx) { ringAudioCtx.close().catch(() => {}); ringAudioCtx = null; }
+  }
+
+  function initCallChannel() {
+    const container = document.getElementById('messages-container');
+    if (!container) return;
+    const chatroomId = container.dataset.chatroomId;
+    const currentUserId = container.dataset.currentUserId;
+
+    if (!window.ActionCable) { setTimeout(initCallChannel, 100); return; }
+    if (callSubscription) { callSubscription.unsubscribe(); callSubscription = null; }
+
+    const consumer = window.ActionCable.createConsumer('/cable');
+    callSubscription = consumer.subscriptions.create(
+      { channel: "CallChannel", chatroom_id: chatroomId },
+      {
+        received(data) {
+          if (Number(data.sender_id) === Number(currentUserId)) return;
+          handleSignal(data);
+        }
+      }
+    );
+  }
+
+  function sendSignal(type, payload) {
+    if (!callSubscription) return;
+    callSubscription.perform('signal', { type, payload });
+  }
+
+  async function handleSignal(data) {
+    if (data.type === 'call-offer') {
+      if (callState !== 'idle') { sendSignal('call-busy', {}); return; }
+      pendingOffer = data.payload;
+      showIncomingCallModal();
+    } else if (data.type === 'call-answer') {
+      if (peerConnection) await peerConnection.setRemoteDescription(new RTCSessionDescription(data.payload));
+      onCallConnected();
+    } else if (data.type === 'ice-candidate') {
+      if (peerConnection) {
+        try { await peerConnection.addIceCandidate(new RTCIceCandidate(data.payload)); }
+        catch (err) { console.error('ICE add error:', err); }
+      }
+    } else if (data.type === 'call-end' || data.type === 'call-busy' || data.type === 'call-decline') {
+      teardownCall({ notifyRemote: false });
+    }
+  }
+
+  function createPeerConnection() {
+    const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+
+    pc.onicecandidate = (e) => {
+      if (e.candidate) sendSignal('ice-candidate', e.candidate);
+    };
+
+    pc.ontrack = (e) => {
+      let remoteAudio = document.getElementById('remote-audio');
+      if (!remoteAudio) {
+        remoteAudio = document.createElement('audio');
+        remoteAudio.id = 'remote-audio';
+        remoteAudio.autoplay = true;
+        document.body.appendChild(remoteAudio);
+      }
+      remoteAudio.srcObject = e.streams[0];
+    };
+
+    pc.onconnectionstatechange = () => {
+      if (['disconnected', 'failed', 'closed'].includes(pc.connectionState) && callState !== 'idle') {
+        teardownCall({ notifyRemote: false });
+      }
+    };
+
+    return pc;
+  }
+
+  function showCallBar(status, { showTimer, showMute } = {}) {
+    const bar = document.getElementById('call-bar');
+    const statusEl = document.getElementById('call-bar-status');
+    const timerEl = document.getElementById('call-timer');
+    const muteBtn = document.getElementById('call-mute-btn');
+
+    bar.classList.remove('hidden');
+    bar.classList.add('flex');
+    statusEl.textContent = status;
+    timerEl.classList.toggle('hidden', !showTimer);
+    muteBtn.classList.toggle('hidden', !showMute);
+  }
+
+  function hideCallBar() {
+    const bar = document.getElementById('call-bar');
+    bar.classList.add('hidden');
+    bar.classList.remove('flex');
+  }
+
+  function showIncomingCallModal() {
+    stopRingtone();
+    playRingtone();
+    const modal = document.getElementById('incoming-call-modal');
+    const nameEl = document.getElementById('incoming-caller-name');
+    nameEl.textContent = document.getElementById('other-member-name')?.textContent || 'Someone';
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    callState = 'ringing';
+
+    callTimeoutHandle = setTimeout(() => {
+      teardownCall({ notifyRemote: true, signalType: 'call-decline' });
+    }, CALL_TIMEOUT_MS);
+  }
+
+  function hideIncomingCallModal() {
+    const modal = document.getElementById('incoming-call-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+
+  function startCallTimer() {
+    callSeconds = 0;
+    const timerEl = document.getElementById('call-timer');
+    timerEl.textContent = '00:00';
+    callTimerInterval = setInterval(() => {
+      callSeconds++;
+      const m = String(Math.floor(callSeconds / 60)).padStart(2, '0');
+      const s = String(callSeconds % 60).padStart(2, '0');
+      timerEl.textContent = `${m}:${s}`;
+    }, 1000);
+  }
+
+  function stopCallTimer() {
+    if (callTimerInterval) { clearInterval(callTimerInterval); callTimerInterval = null; }
+  }
+
+  function onCallConnected() {
+    clearTimeout(callTimeoutHandle);
+    stopRingtone();
+    callState = 'connected';
+    const name = document.getElementById('other-member-name')?.textContent || 'call';
+    showCallBar(`In call with ${name}`, { showTimer: true, showMute: true });
+    startCallTimer();
+  }
+
+  async function recordMissedCall() {
+    const container = document.getElementById('messages-container');
+    const chatroomId = container?.dataset.chatroomId;
+    const recipientId = document.getElementById('voice-call-btn')?.dataset.recipientId;
+    if (!chatroomId || !recipientId) return;
+
+    try {
+      await fetch(`/chatrooms/${chatroomId}/calls`, {
+        method: 'POST',
+        headers: {
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ recipient_id: recipientId })
+      });
+    } catch (err) {
+      console.error('Missed call log error:', err);
+    }
+  }
+
+  function teardownCall({ notifyRemote, signalType } = {}) {
+    const wasCalling = callState === 'calling';
+    const wasConnected = callState === 'connected';
+
+    clearTimeout(callTimeoutHandle);
+    stopRingtone();
+    stopCallTimer();
+    hideIncomingCallModal();
+    hideCallBar();
+
+    if (peerConnection) { peerConnection.close(); peerConnection = null; }
+    if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+    const remoteAudio = document.getElementById('remote-audio');
+    if (remoteAudio) remoteAudio.remove();
+
+    if (notifyRemote) sendSignal(signalType || 'call-end', {});
+    if (wasCalling && !wasConnected) recordMissedCall();
+
+    isMuted = false;
+    resetMuteIcon();
+    pendingOffer = null;
+    callState = 'idle';
+  }
+
+  function resetMuteIcon() {
+    document.getElementById('mic-on-icon')?.classList.remove('hidden');
+    document.getElementById('mic-off-icon')?.classList.add('hidden');
+  }
+
+  async function startCall() {
+    if (callState !== 'idle') return;
+    const recipientId = document.getElementById('voice-call-btn')?.dataset.recipientId;
+
+    try {
+      localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (err) {
+      alert('Microphone access is required to make a call.');
+      return;
+    }
+
+    peerConnection = createPeerConnection();
+    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+    sendSignal('call-offer', offer);
+
+    callState = 'calling';
+    const name = document.getElementById('other-member-name')?.textContent || 'them';
+    showCallBar(`Calling ${name}…`, { showTimer: false, showMute: false });
+    playRingtone();
+
+    callTimeoutHandle = setTimeout(() => {
+      teardownCall({ notifyRemote: true, signalType: 'call-end' });
+    }, CALL_TIMEOUT_MS);
+  }
+
+  async function acceptCall() {
+    if (!pendingOffer) return;
+    clearTimeout(callTimeoutHandle);
+    stopRingtone();
+    hideIncomingCallModal();
+
+    try {
+      localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (err) {
+      alert('Microphone access is required to answer the call.');
+      teardownCall({ notifyRemote: true, signalType: 'call-decline' });
+      return;
+    }
+
+    peerConnection = createPeerConnection();
+    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+    await peerConnection.setRemoteDescription(new RTCSessionDescription(pendingOffer));
+    const answer = await peerConnection.createAnswer();
+    await peerConnection.setLocalDescription(answer);
+    sendSignal('call-answer', answer);
+
+    onCallConnected();
+  }
+
+  function declineCall() {
+    teardownCall({ notifyRemote: true, signalType: 'call-decline' });
+  }
+
+  function toggleMute() {
+    if (!localStream) return;
+    isMuted = !isMuted;
+    localStream.getAudioTracks().forEach(t => { t.enabled = !isMuted; });
+    document.getElementById('mic-on-icon')?.classList.toggle('hidden', isMuted);
+    document.getElementById('mic-off-icon')?.classList.toggle('hidden', !isMuted);
+  }
+
+  function initCalling() {
+    document.getElementById('voice-call-btn')?.addEventListener('click', startCall);
+    document.getElementById('accept-call-btn')?.addEventListener('click', acceptCall);
+    document.getElementById('decline-call-btn')?.addEventListener('click', declineCall);
+    document.getElementById('call-hangup-btn')?.addEventListener('click', () => teardownCall({ notifyRemote: true, signalType: 'call-end' }));
+    document.getElementById('call-mute-btn')?.addEventListener('click', toggleMute);
+
+    initCallChannel();
+  }
+
   function init() {
     if (!document.getElementById('messages-container')) return;
     scrollToBottom();
@@ -657,6 +1018,7 @@ javascript:
     initForm();
     initVoicePlayers();
     initAddPeople();
+    initCalling();
     startPolling();
   }
 
@@ -665,10 +1027,12 @@ javascript:
 
   document.addEventListener('turbo:before-cache', function() {
     if (subscription) { subscription.unsubscribe(); subscription = null; }
+    if (callSubscription) { callSubscription.unsubscribe(); callSubscription = null; }
     stopPolling();
     if (mediaRecorder && mediaRecorder.state === 'recording') {
       mediaRecorder.stop();
       if (mediaStream) mediaStream.getTracks().forEach((t) => t.stop());
     }
     stopActiveVoiceAudio();
+    if (callState !== 'idle') teardownCall({ notifyRemote: true, signalType: 'call-end' });
   });})();
