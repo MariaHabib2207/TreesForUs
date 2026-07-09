@@ -1,5 +1,5 @@
 - is_mine = message.user_id == current_user_id
-div class="flex #{is_mine ? 'justify-end' : 'justify-start'} message-row #{'message-row--mine' if is_mine}"
+div class="flex #{is_mine ? 'justify-end' : 'justify-start'} message-row #{'message-row--mine' if is_mine}" data-message-id=message.id data-sender-id=message.user_id
   div class="max-w-[75%] sm:max-w-[65%] rounded-2xl px-3 py-2 shadow-sm message-bubble #{is_mine ? 'bg-[#ffffff] rounded-br-md message-bubble--mine' : 'bg-white rounded-bl-md'}"
 
     - if message.body.present?

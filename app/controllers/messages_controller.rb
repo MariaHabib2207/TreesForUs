@@ -64,7 +64,6 @@ class MessagesController < ApplicationController
     params.require(:message).permit(:body, :duration_in_seconds, attachments: [])
   end
 
-
   def infer_message_type(message)
     return "voice" if message.duration_in_seconds.present?
     return "image" if message.attachments.any? { |a| a.content_type.to_s.start_with?("image/") }
@@ -80,10 +79,6 @@ class MessagesController < ApplicationController
       attachment.blob.update!(content_type: attachment.blob.content_type.sub("video/", "audio/"))
     end
   end
-
-  def set_chatroom
-  @chatroom = Chatroom.find(params[:chatroom_id])
-end
 
   def broadcast_message
     html = ApplicationController.render(

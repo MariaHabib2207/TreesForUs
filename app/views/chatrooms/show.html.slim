@@ -88,8 +88,7 @@ div class="flex justify-center"
 
             button type="submit" id="send-btn" class="shrink-0 p-2.5 sm:p-3 rounded-full bg-[#1D4D3A] text-white hover:bg-[#183f2f] active:bg-[#132f24] shadow-sm transition-colors disabled:opacity-50 disabled:pointer-events-none"
               svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-
+                path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"
           / Recording row
           div class="hidden items-center gap-2 sm:gap-3 bg-white rounded-2xl px-3 py-2 shadow-sm" id="recording-row"
             button type="button" id="cancel-recording-btn" title="Cancel" class="shrink-0 p-2 rounded-full text-gray-500 hover:bg-black/5 active:bg-black/10 transition-colors"
@@ -765,6 +764,7 @@ javascript:
       {
         received(data) {
           if (Number(data.sender_id) === Number(currentUserId)) return;
+          console.log("Incoming call:", data)
           handleSignal(data);
         }
       }
@@ -1022,10 +1022,28 @@ javascript:
     startPolling();
   }
 
-  document.addEventListener('turbo:load', init);
-  document.addEventListener('DOMContentLoaded', init);
+  // Guard against DOMContentLoaded and turbo:load both firing for the same
+  // page load, which was double-binding the submit handler, double-
+  // subscribing to ActionCable channels, and could cause a single tap of
+  // "Send" to POST the same message twice.
+  //
+  // IMPORTANT: pageInitialized is only ever reset to false in
+  // turbo:before-cache (i.e. when navigating away). It must NOT be reset
+  // inside the turbo:load handler itself — doing that defeated the guard
+  // and caused init() to run twice on every single page load, which
+  // doubled the ActionCable subscription and the polling interval.
+  let pageInitialized = false;
+  function safeInit() {
+    if (pageInitialized) return;
+    pageInitialized = true;
+    init();
+  }
+
+  document.addEventListener('turbo:load', safeInit);
+  document.addEventListener('DOMContentLoaded', safeInit);
 
   document.addEventListener('turbo:before-cache', function() {
+    pageInitialized = false;
     if (subscription) { subscription.unsubscribe(); subscription = null; }
     if (callSubscription) { callSubscription.unsubscribe(); callSubscription = null; }
     stopPolling();

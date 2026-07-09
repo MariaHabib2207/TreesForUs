@@ -140,6 +140,8 @@ class User < ApplicationRecord
   has_many :inverse_partners,
            through: :inverse_user_partners,
            source: :user
+  has_many :chatroom_members, dependent: :destroy
+  has_many :chatrooms, through: :chatroom_members
 
   # ===================================================
   # ENUMS
@@ -368,10 +370,6 @@ rescue ActiveRecord::RecordInvalid => e
   false
 end
 
-def set_chatroom
-  @chatroom = Chatroom.find(params[:chatroom_id])
-end
-
 private
 
 def redeem_family_code!(family_code)
@@ -402,9 +400,12 @@ def redeem_family_code!(family_code)
     end
   end
 end
+
+public
+
 # ===================================================
 # OMNIAUTH
-# ===================================================def self.from_omniauth(auth)
+# ===================================================
 def self.from_omniauth(auth)
   user = where(provider: auth.provider, uid: auth.uid).first
   user ||= where(email: auth.info.email).first_or_initialize do |u|
