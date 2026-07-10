@@ -7,3 +7,14 @@
 //= link logo.png
 //= link application.js
 //= link controllers/application.js
+//= link chat/calling.js
+//= link call_channel.js
+//= link chat/call_session.js
+//= link chat/outgoing_call.js
+//= link chat/incoming_call.js
+//= link chat/chatroom.js
+//= link chat/dom_utils.js
+//= link chat/message_form.js
+//= link chat/voice_player.js
+//= link chat/add_people.js
+//= link chat/cable_messages.js
