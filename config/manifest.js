@@ -9,3 +9,4 @@
 //= link logo.png
 //= link application.js
 //= link logo.png
+//= link controllers/application.js
