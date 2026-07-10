@@ -4,3 +4,16 @@
 //= link chatroom.scss
 //= link family_tree.scss
 //= link application.js
+//= link controllers
+//= link controllers/application.js
+//= link chat/chatroom.js
+//= link controllers/hello_controller.js
+//= link controllers/index.js
+//= link controllers/membership_type_controller.js
+//= link chat/add_people.js
+//= link chat/cable_messages.js
+//= link chat/calling.js
+//= link chat/chatroom.js
+//= link chat/dom_utils.js
+//= link chat/message_form.js
+//= link chat/voice_player.js
