@@ -17,6 +17,7 @@ import {
   scrollToBottom,
   markMineIfNeeded,
 } from "./dom_utils";
+import { createConsumer } from "@rails/actioncable";
 
 const POLL_MS = 3000;
 
@@ -35,14 +36,9 @@ export function initActionCable() {
   const chatroomId = container.dataset.chatroomId;
   const currentUserId = container.dataset.currentUserId;
 
-  if (!window.ActionCable) {
-    setTimeout(initActionCable, 100);
-    return;
-  }
-
   teardownActionCable();
 
-  const consumer = window.ActionCable.createConsumer("/cable");
+  const consumer = createConsumer("/cable");
   subscription = consumer.subscriptions.create(
     { channel: "ChatroomChannel", chatroom_id: chatroomId },
     {
