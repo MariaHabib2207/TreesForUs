@@ -1,12 +1,9 @@
 //= link_tree ../images
 //= link_tree ../builds
-//= link_directory ../stylesheets .css
-//= link_tree ../images
 //= link application.css
 //= link life_activities.css
 //= link chatroom.scss
 //= link family_tree.scss
 //= link logo.png
 //= link application.js
-//= link logo.png
 //= link controllers/application.js
