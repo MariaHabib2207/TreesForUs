@@ -19,3 +19,4 @@
 //= link chat/call_session.js
 //= link chat/outgoing_call.js
 //= link chat/incoming_call.js
+ //= link chat/calling.js
