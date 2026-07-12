@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_05_094246) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_12_232313) do
   create_table "active_admin_comments", force: :cascade do |t|
     t.string "namespace"
     t.text "body"
@@ -82,6 +82,33 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_05_094246) do
     t.string "unconfirmed_email"
     t.index ["email"], name: "index_admin_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_admin_users_on_reset_password_token", unique: true
+  end
+
+  create_table "call_hidings", force: :cascade do |t|
+    t.integer "call_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["call_id", "user_id"], name: "index_call_hidings_on_call_id_and_user_id", unique: true
+    t.index ["call_id"], name: "index_call_hidings_on_call_id"
+    t.index ["user_id"], name: "index_call_hidings_on_user_id"
+  end
+
+  create_table "calls", force: :cascade do |t|
+    t.integer "chatroom_id", null: false
+    t.integer "caller_id", null: false
+    t.integer "callee_id", null: false
+    t.string "call_type", default: "audio", null: false
+    t.string "status", default: "missed", null: false
+    t.integer "duration_in_seconds", default: 0, null: false
+    t.datetime "ended_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["call_type"], name: "index_calls_on_call_type"
+    t.index ["callee_id"], name: "index_calls_on_callee_id"
+    t.index ["caller_id"], name: "index_calls_on_caller_id"
+    t.index ["chatroom_id"], name: "index_calls_on_chatroom_id"
+    t.index ["status"], name: "index_calls_on_status"
   end
 
   create_table "chatroom_members", force: :cascade do |t|
@@ -168,6 +195,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_05_094246) do
     t.datetime "read_at"
     t.string "message_type", default: "text", null: false
     t.integer "duration_in_seconds"
+    t.integer "call_id"
+    t.index ["call_id"], name: "index_messages_on_call_id"
     t.index ["id"], name: "index_messages_on_id", unique: true
     t.index ["message_type"], name: "index_messages_on_message_type"
   end
@@ -303,6 +332,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_05_094246) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "call_hidings", "calls"
+  add_foreign_key "call_hidings", "users"
+  add_foreign_key "calls", "chatrooms"
+  add_foreign_key "calls", "users", column: "callee_id"
+  add_foreign_key "calls", "users", column: "caller_id"
   add_foreign_key "family_codes", "families"
   add_foreign_key "family_codes", "users", column: "created_by_id"
   add_foreign_key "family_codes", "users", column: "related_user_id"
@@ -312,6 +346,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_05_094246) do
   add_foreign_key "friendships", "users"
   add_foreign_key "friendships", "users", column: "friend_id"
   add_foreign_key "life_activities", "users"
+  add_foreign_key "messages", "calls"
   add_foreign_key "user_partners", "users"
   add_foreign_key "user_partners", "users", column: "partner_id"
   add_foreign_key "user_sessions", "users"

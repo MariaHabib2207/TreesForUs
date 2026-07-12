@@ -1,11 +1,12 @@
 class Message < ApplicationRecord
   belongs_to :chatroom
   belongs_to :user
+  belongs_to :call, optional: true
   has_many_attached :attachments
 
   encrypts :body
 
-  enum :message_type, { text: "text", voice: "voice", image: "image", file: "file", system: "system"  }
+  enum :message_type, { text: "text", voice: "voice", image: "image", file: "file", system: "system", call: "call" }
 
   scope :ordered, -> { order(created_at: :asc) }
 
@@ -27,6 +28,11 @@ class Message < ApplicationRecord
   private
 
   def body_or_attachments_present
+    # Call-summary messages carry their info via the `call` association and
+    # `duration_in_seconds`, not `body` or attachments, so they're exempt
+    # from the usual "must have text or a file" rule.
+    return if message_type == "call" && call.present?
+
     errors.add(:base, "Message must have text or an attachment") if body.blank? && attachments.blank?
   end
 

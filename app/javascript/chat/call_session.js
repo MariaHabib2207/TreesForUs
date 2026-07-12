@@ -39,6 +39,13 @@ let ringOscInterval = null;
 let offerHandler = null; // set by incoming_call.js via initCallChannel()
 let currentFacingMode = "user"; // "user" (front) | "environment" (back)
 let isFlippingCamera = false; // guards against double-taps mid-swap
+let isOutgoingCall = false; // true only on the browser that placed the call —
+                             // that's the one that logs the Call record, so a
+                             // single call never produces two log rows.
+
+export function setOutgoingCall(value) {
+  isOutgoingCall = !!value;
+}
 
 // ---- state accessors ----
 
@@ -207,7 +214,8 @@ async function handleSignal(data) {
       }
     }
   } else if (["call-end", "call-busy", "call-decline"].includes(data.type)) {
-    teardownCall({ notifyRemote: false });
+    const reasonMap = { "call-busy": "busy", "call-decline": "declined" };
+    teardownCall({ notifyRemote: false, reason: reasonMap[data.type] });
   }
 }
 
@@ -455,7 +463,7 @@ export function clearCallTimeout() {
   clearTimeout(callTimeoutHandle);
 }
 
-async function recordMissedCall() {
+async function logCallSummary(status) {
   const container = messagesContainer();
   const chatroomId = container?.dataset.chatroomId;
   const recipientId =
@@ -471,10 +479,15 @@ async function recordMissedCall() {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
-      body: JSON.stringify({ recipient_id: recipientId }),
+      body: JSON.stringify({
+        recipient_id: recipientId,
+        call_type: callType,
+        status,
+        duration_in_seconds: callSeconds,
+      }),
     });
   } catch (err) {
-    console.error("Missed call log error:", err);
+    console.error("Call log error:", err);
   }
 }
 
@@ -515,9 +528,16 @@ export function toggleCamera() {
   document.getElementById("camera-off-icon")?.classList.toggle("hidden", !isCameraOff);
 }
 
-export function teardownCall({ notifyRemote, signalType } = {}) {
-  const wasCalling = callState === "calling";
+export function teardownCall({ notifyRemote, signalType, reason } = {}) {
   const wasConnected = callState === "connected";
+  const wasActive = callState === "calling" || callState === "ringing" || wasConnected;
+  const status = wasConnected
+    ? "answered"
+    : reason === "declined"
+      ? "declined"
+      : reason === "busy"
+        ? "busy"
+        : "missed";
 
   clearTimeout(callTimeoutHandle);
   stopRingtone();
@@ -536,7 +556,8 @@ export function teardownCall({ notifyRemote, signalType } = {}) {
   document.getElementById("remote-audio")?.remove();
 
   if (notifyRemote) sendSignal(signalType || "call-end", {});
-  if (wasCalling && !wasConnected) recordMissedCall();
+  // Only the browser that placed the call logs it — see isOutgoingCall.
+  if (isOutgoingCall && wasActive) logCallSummary(status);
 
   isMuted = false;
   isCameraOff = false;
@@ -548,6 +569,7 @@ export function teardownCall({ notifyRemote, signalType } = {}) {
   pendingOffer = null;
   callState = "idle";
   callType = "audio";
+  isOutgoingCall = false;
 }
 
 export function initCallControls() {

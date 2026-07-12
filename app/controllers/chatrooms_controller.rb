@@ -6,6 +6,8 @@ class ChatroomsController < ApplicationController
                          .where(chatroom_members: { user_id: current_user.id })
                          .includes(:members, :messages)
                          .order(updated_at: :desc)
+
+      @recent_calls = Call.involving(current_user).visible_to(current_user).includes(:caller, :callee, :chatroom).recent_first.limit(6)
   end
 
   def show

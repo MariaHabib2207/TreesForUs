@@ -14,8 +14,12 @@ body.login-bg
   aside.chat-sidebar id="chat-sidebar" aria-hidden="true"
     .chat-sidebar-header
       h2.chat-sidebar-title Conversations
-      button.chat-sidebar-close type="button" aria-label="Close conversations" onclick="closeChatSidebar()"
-        | &times;
+      .chat-sidebar-header-actions
+        = link_to calls_path, class: "chat-sidebar-calls-btn", "aria-label": "View call log", title: "Call log" do
+          svg viewBox="0 0 24 24" fill="none" width="19" height="19" xmlns="http://www.w3.org/2000/svg"
+            path d="M2 3h4l2 7-2.5 1.5a11 11 0 006 6L13 15l7 2v4a2 2 0 01-2 2A16 16 0 012 5a2 2 0 012-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+        button.chat-sidebar-close type="button" aria-label="Close conversations" onclick="closeChatSidebar()"
+          | &times;
 
     .chat-sidebar-list
       - if @chatrooms.present?
@@ -145,6 +149,31 @@ css:
     font-weight: 600;
     color: #e0dac9;
     margin: 0;
+  }
+
+  .chat-sidebar-header-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+
+  .chat-sidebar-calls-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    color: #e0dac9;
+    text-decoration: none;
+    transition: background 0.15s ease;
+    flex-shrink: 0;
+  }
+
+  .chat-sidebar-calls-btn:hover {
+    background: rgba(255, 255, 255, 0.14);
   }
 
   .chat-sidebar-close {

@@ -1,0 +1,58 @@
+div class="flex justify-center"
+  div class="flex flex-col w-full max-w-2xl h-[88vh] bg-white shadow-xl md:my-4 md:rounded-xl overflow-hidden relative"
+
+    / Header
+    div class="flex items-center gap-3 px-4 py-3 bg-[#1D4D3A] text-white shrink-0"
+      = link_to authenticated_root_path, class: "shrink-0 p-1.5 -ml-1.5 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors" do
+        svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"
+      h1 class="text-base font-semibold" Calls
+
+    - if flash[:notice]
+      div class="px-4 py-2 text-xs text-center bg-green-50 text-green-700 border-b border-green-100" = flash[:notice]
+
+    / Call list
+    div class="flex-1 min-h-0 overflow-y-auto"
+      - if @calls.empty?
+        div class="flex flex-col items-center justify-center h-full text-center px-6 text-gray-400"
+          svg class="w-10 h-10 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2 3h4l2 7-2.5 1.5a11 11 0 006 6L13 15l7 2v4a2 2 0 01-2 2A16 16 0 012 5a2 2 0 012-2z"
+          p class="text-sm" No calls yet
+      - else
+        - @calls.each do |call|
+          - other = call.other_party(current_user)
+          - other_profile = other.user_profile
+          - outgoing = call.outgoing?(current_user)
+          - missed_for_me = !outgoing && call.status.in?(%w[missed declined])
+
+          div id="call-row-#{call.id}" class="flex items-center gap-3 px-4 py-3 border-b border-gray-100"
+            = link_to chatroom_path(call.chatroom), class: "flex items-center gap-3 flex-1 min-w-0" do
+              - if other_profile&.avatar&.attached?
+                = image_tag other_profile.avatar, class: "w-11 h-11 rounded-full object-cover shrink-0"
+              - else
+                div class="w-11 h-11 rounded-full bg-[#1D4D3A]/10 text-[#1D4D3A] flex items-center justify-center text-sm font-semibold shrink-0"
+                  = "#{other.first_name.first}#{other.last_name.first}"
+
+              div class="flex-1 min-w-0"
+                p class="text-sm font-medium truncate #{'text-red-600' if missed_for_me}" = other.full_name
+                div class="flex items-center gap-1.5 mt-0.5 text-xs text-gray-500"
+                  svg class="w-3.5 h-3.5 shrink-0 #{'text-red-500' if missed_for_me}" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    - if outgoing
+                      path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17L17 7M17 7H8m9 0v9"
+                    - else
+                      path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 7L7 17M7 17h9M7 17V8"
+
+                  - if call.call_type == "video"
+                    svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                      path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.55-2.28A1 1 0 0121 8.62v6.76a1 1 0 01-1.45.9L15 14M4 6h9a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z"
+
+                  span = call.status.capitalize
+                  - if call.formatted_duration
+                    span ·
+                    span = call.formatted_duration
+
+            div class="flex flex-col items-end gap-1.5 shrink-0 pl-2"
+              span class="text-xs text-gray-400 whitespace-nowrap" = call.created_at.strftime("%b %-d, %-I:%M %p")
+              = button_to call_path(call), method: :delete, form: { data: { turbo_confirm: "Remove this call from your call log?" } }, class: "p-1.5 rounded-full hover:bg-black/5 text-gray-400 transition-colors" do
+                svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3M4 7h16"

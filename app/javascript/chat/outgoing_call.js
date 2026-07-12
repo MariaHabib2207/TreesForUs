@@ -7,6 +7,7 @@ import {
   currentCallState,
   setCallState,
   setCallType,
+  setOutgoingCall,
   createPeerConnection,
   acquireMediaStream,
   attachLocalTracks,
@@ -35,6 +36,7 @@ async function startCall(video) {
   }
 
   setCallType(video ? "video" : "audio");
+  setOutgoingCall(true);
 
   const peerConnection = createPeerConnection();
   attachLocalTracks(peerConnection, localStream);

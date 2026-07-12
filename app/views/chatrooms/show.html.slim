@@ -4,7 +4,7 @@ div class="flex justify-center"
     / Header
     div class="flex items-center justify-between gap-3 px-3 sm:px-4 py-2.5 bg-[#1D4D3A] text-white shrink-0 z-10"
       div class="flex items-center gap-3 min-w-0"
-        = link_to chatrooms_path, class: "shrink-0 p-1.5 -ml-1.5 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors" do
+        = link_to authenticated_root_path, class: "shrink-0 p-1.5 -ml-1.5 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors" do
           svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
             path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"
 
@@ -192,8 +192,3 @@ div class="flex justify-center"
         svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" transform="rotate(135)"
           path d="M2 3h4l2 7-2.5 1.5a11 11 0 006 6L13 15l7 2v4a2 2 0 01-2 2A16 16 0 012 5a2 2 0 012-2z"
 
-  / All chatroom JS now lives in app/javascript/chat/*.
-  / See app/javascript/chat/chatroom.js for the entry point, which is
-  / imported once from app/javascript/application.js:
-  /   import "chat/chatroom"
-  / This partial no longer needs an inline <script> block at all.
