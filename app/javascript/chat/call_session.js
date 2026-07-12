@@ -37,6 +37,8 @@ let isCameraOff = false;
 let ringAudioCtx = null;
 let ringOscInterval = null;
 let offerHandler = null; // set by incoming_call.js via initCallChannel()
+let currentFacingMode = "user"; // "user" (front) | "environment" (back)
+let isFlippingCamera = false; // guards against double-taps mid-swap
 
 // ---- state accessors ----
 
@@ -246,11 +248,90 @@ export function createPeerConnection() {
 
 // video: true requests camera + mic, false requests mic only
 export async function acquireMediaStream(video) {
+  currentFacingMode = "user";
   localStream = await navigator.mediaDevices.getUserMedia({
     audio: true,
     video: video ? { facingMode: "user" } : false,
   });
+  if (video) maybeShowFlipButton();
   return localStream;
+}
+
+// Shows the flip-camera button only when the device actually has more than
+// one camera to switch between (most desktops/laptops have exactly one, so
+// there's nothing to flip to).
+async function maybeShowFlipButton() {
+  const flipBtn = document.getElementById("video-flip-camera-btn");
+  if (!flipBtn) return;
+
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const cameraCount = devices.filter((d) => d.kind === "videoinput").length;
+    flipBtn.classList.toggle("hidden", cameraCount < 2);
+  } catch (err) {
+    // If we can't enumerate (permissions not settled yet, unsupported
+    // browser, etc.) just leave the button hidden rather than show a
+    // control that's likely to fail.
+    flipBtn.classList.add("hidden");
+  }
+}
+
+function hideFlipButton() {
+  document.getElementById("video-flip-camera-btn")?.classList.add("hidden");
+}
+
+// Swaps between front and back camera mid-call by requesting a fresh video
+// track for the opposite facing mode and replacing it on both the live
+// RTCPeerConnection sender (no renegotiation needed) and the local stream
+// used for the PiP preview.
+export async function flipCamera() {
+  if (!localStream || callType !== "video" || isFlippingCamera) return;
+  const oldTrack = localStream.getVideoTracks()[0];
+  if (!oldTrack) return;
+
+  const nextFacingMode = currentFacingMode === "user" ? "environment" : "user";
+  isFlippingCamera = true;
+
+  let newStream;
+  try {
+    newStream = await navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: { facingMode: { exact: nextFacingMode } },
+    });
+  } catch (err) {
+    console.error("Camera flip failed:", err);
+    isFlippingCamera = false;
+    return;
+  }
+
+  const newTrack = newStream.getVideoTracks()[0];
+  if (!newTrack) {
+    isFlippingCamera = false;
+    return;
+  }
+
+  if (peerConnection) {
+    const sender = peerConnection.getSenders().find((s) => s.track && s.track.kind === "video");
+    if (sender) {
+      try {
+        await sender.replaceTrack(newTrack);
+      } catch (err) {
+        console.error("replaceTrack failed during camera flip:", err);
+        newTrack.stop();
+        isFlippingCamera = false;
+        return;
+      }
+    }
+  }
+
+  localStream.removeTrack(oldTrack);
+  oldTrack.stop();
+  localStream.addTrack(newTrack);
+  newTrack.enabled = !isCameraOff;
+  attachLocalPreview(localStream);
+
+  currentFacingMode = nextFacingMode;
+  isFlippingCamera = false;
 }
 
 // Back-compat alias for any existing audio-only call sites.
@@ -459,8 +540,11 @@ export function teardownCall({ notifyRemote, signalType } = {}) {
 
   isMuted = false;
   isCameraOff = false;
+  currentFacingMode = "user";
+  isFlippingCamera = false;
   resetMuteIcon();
   resetCameraIcon();
+  hideFlipButton();
   pendingOffer = null;
   callState = "idle";
   callType = "audio";
@@ -477,4 +561,5 @@ export function initCallControls() {
     ?.addEventListener("click", () => teardownCall({ notifyRemote: true, signalType: "call-end" }));
   document.getElementById("video-mute-btn")?.addEventListener("click", toggleMute);
   document.getElementById("video-camera-toggle-btn")?.addEventListener("click", toggleCamera);
+  document.getElementById("video-flip-camera-btn")?.addEventListener("click", flipCamera);
 }
