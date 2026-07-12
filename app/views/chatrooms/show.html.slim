@@ -26,9 +26,13 @@ div class="flex justify-center"
 
       div class="flex items-center gap-1 shrink-0"
         - if @other_member && (@other_members.nil? || @other_members.size <= 1)
-          button type="button" id="voice-call-btn" title="Call" data-recipient-id=@other_member.id class="p-1.5 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors"
+          button type="button" id="voice-call-btn" title="Voice call" data-recipient-id=@other_member.id class="p-1.5 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors"
             svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
               path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 3h4l2 7-2.5 1.5a11 11 0 006 6L13 15l7 2v4a2 2 0 01-2 2A16 16 0 012 5a2 2 0 012-2z"
+
+          button type="button" id="video-call-btn" title="Video call" data-recipient-id=@other_member.id class="p-1.5 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors"
+            svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.55-2.28A1 1 0 0121 8.62v6.76a1 1 0 01-1.45.9L15 14M4 6h9a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z"
 
         button type="button" id="add-people-btn" title="Group" class="flex items-center gap-1 pl-2 pr-2.5 py-1.5 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors"
           svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -39,7 +43,7 @@ div class="flex justify-center"
           svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
             path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"
 
-    / In-call bar (shown while calling / ringing outbound / connected)
+    / In-call bar (audio calls only — shown while calling / ringing outbound / connected)
     div id="call-bar" class="hidden items-center justify-between gap-3 px-3 sm:px-4 py-2 bg-[#123A2B] text-white shrink-0 z-10"
       div class="flex items-center gap-2 min-w-0"
         span class="relative flex h-2.5 w-2.5 shrink-0"
@@ -122,6 +126,8 @@ div class="flex justify-center"
               button type="button" data-recipient-id=friend.id class="invite-friend-btn shrink-0 text-xs font-medium px-3 py-1.5 rounded-full bg-[#1D4D3A] text-white hover:bg-[#183f2f]" Invite
 
   / Incoming call modal — full-screen, blocks interaction with the rest of the app
+  / Used for both audio and video incoming offers; #incoming-call-type-label
+  / text is swapped by incoming_call.js depending on the offer payload.
   div id="incoming-call-modal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black/60 backdrop-blur-sm px-4"
     div class="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl text-center py-10 px-6"
       / Pulsing ringing icon
@@ -138,7 +144,7 @@ div class="flex justify-center"
             path d="M2 3h4l2 7-2.5 1.5a11 11 0 006 6L13 15l7 2v4a2 2 0 01-2 2A16 16 0 012 5a2 2 0 012-2z"
 
       h2 id="incoming-caller-name" class="mt-5 text-xl font-semibold text-gray-900"
-      p class="text-sm text-gray-500 mt-1 tracking-wide" Incoming voice call…
+      p id="incoming-call-type-label" class="text-sm text-gray-500 mt-1 tracking-wide" Incoming voice call…
 
       div class="flex items-center justify-center gap-10 mt-9"
         div class="flex flex-col items-center gap-2"
@@ -153,165 +159,34 @@ div class="flex justify-center"
               path d="M2 3h4l2 7-2.5 1.5a11 11 0 006 6L13 15l7 2v4a2 2 0 01-2 2A16 16 0 012 5a2 2 0 012-2z"
           span class="text-xs font-medium text-gray-500" Accept
 
-  / All chatroom JS now lives in app/javascript/chat/*.
-  / See app/javascript/chat/chatroom.js for the entry point, which is
-  / imported once from app/javascript/application.js:
-  /   import "chat/chatroom"
-  / This partial no longer needs an inline <script> block at all.
-div class="flex justify-center"
-  div class="flex flex-col w-full max-w-2xl h-[88vh] bg-[#efeae2] shadow-xl md:my-4 md:rounded-xl overflow-hidden relative"
+  / Video call overlay — full-screen, shown for the duration of a video call
+  / (both while ringing out/in and once connected). Hidden for audio calls,
+  / which continue to use #call-bar instead.
+  div id="video-call-overlay" class="hidden fixed inset-0 z-40 bg-black items-center justify-center"
+    video id="remote-video" autoplay="true" playsinline="true" class="absolute inset-0 w-full h-full object-cover"
+    video id="local-video" autoplay="true" playsinline="true" muted="true" class="hidden absolute bottom-28 right-4 w-24 h-32 sm:w-32 sm:h-44 rounded-2xl object-cover shadow-lg ring-2 ring-white/20 bg-black z-10"
 
-    / Header
-    div class="flex items-center justify-between gap-3 px-3 sm:px-4 py-2.5 bg-[#1D4D3A] text-white shrink-0 z-10"
-      div class="flex items-center gap-3 min-w-0"
-        = link_to chatrooms_path, class: "shrink-0 p-1.5 -ml-1.5 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors" do
-          svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-            path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"
+    div class="absolute top-0 left-0 right-0 flex items-center justify-between px-4 py-3 bg-gradient-to-b from-black/70 to-transparent z-10"
+      span id="video-call-status" class="text-white text-sm font-medium" Calling…
+      span id="video-call-timer" class="hidden text-white/70 text-sm tabular-nums" 00:00
 
-        - other_profile = @other_member&.user_profile
-        - if other_profile&.avatar&.attached?
-          = image_tag other_profile.avatar, id: "other-member-avatar-img", class: "w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover shrink-0 ring-2 ring-white/20"
-        - else
-          div id="other-member-avatar-fallback" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/15 flex items-center justify-center text-sm font-semibold shrink-0 ring-2 ring-white/20"
-            = "#{@other_member&.first_name&.first}#{@other_member&.last_name&.first}"
+    div class="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-4 py-8 z-10"
+      button type="button" id="video-mute-btn" title="Mute" class="p-4 rounded-full bg-white/15 hover:bg-white/25 active:bg-white/30 text-white transition-colors"
+        svg id="video-mic-on-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"
+          path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 10v2a7 7 0 01-14 0v-2M12 19v4"
+        svg id="video-mic-off-icon" class="hidden w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3l18 18M12 1a3 3 0 00-3 3v5m6 3v-1M19 10v2a7 7 0 01-9.4 6.6M12 19v4"
 
-        div class="min-w-0"
-          - if @other_members && @other_members.size > 1
-            h1 class="text-sm sm:text-base font-semibold truncate" = @other_members.map(&:first_name).join(", ")
-          - else
-            h1 id="other-member-name" class="text-sm sm:text-base font-semibold truncate" = @other_member&.full_name || @chatroom.name
-          div class="flex items-center gap-1.5"
-            span class="w-2 h-2 rounded-full bg-green-400 shrink-0"
-            span class="text-xs text-white/70 truncate" Active now
+      button type="button" id="video-camera-toggle-btn" title="Turn camera off" class="p-4 rounded-full bg-white/15 hover:bg-white/25 active:bg-white/30 text-white transition-colors"
+        svg id="camera-on-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.55-2.28A1 1 0 0121 8.62v6.76a1 1 0 01-1.45.9L15 14M4 6h9a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z"
+        svg id="camera-off-icon" class="hidden w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3l18 18M15 10l4.55-2.28A1 1 0 0121 8.62v6.76a1 1 0 01-.86.9M4 6h9a2 2 0 012 2v.5M4.5 4.5A2 2 0 002 8v8a2 2 0 002 2h9a2 2 0 001.7-.94"
 
-      div class="flex items-center gap-1 shrink-0"
-        - if @other_member && (@other_members.nil? || @other_members.size <= 1)
-          button type="button" id="voice-call-btn" title="Call" data-recipient-id=@other_member.id class="p-1.5 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors"
-            svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-              path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 3h4l2 7-2.5 1.5a11 11 0 006 6L13 15l7 2v4a2 2 0 01-2 2A16 16 0 012 5a2 2 0 012-2z"
-
-        button type="button" id="add-people-btn" title="Group" class="flex items-center gap-1 pl-2 pr-2.5 py-1.5 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors"
-          svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-            path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15"
-          span class="text-xs font-medium" Group
-
-        = link_to chatrooms_path, class: "p-1.5 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors", title: "Close chat" do
-          svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-            path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"
-
-    / In-call bar (shown while calling / ringing outbound / connected)
-    div id="call-bar" class="hidden items-center justify-between gap-3 px-3 sm:px-4 py-2 bg-[#123A2B] text-white shrink-0 z-10"
-      div class="flex items-center gap-2 min-w-0"
-        span class="relative flex h-2.5 w-2.5 shrink-0"
-          span id="call-bar-pulse" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"
-          span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-400"
-        span id="call-bar-status" class="text-sm font-medium truncate" Calling…
-        span id="call-timer" class="hidden text-sm text-white/70 tabular-nums" 00:00
-
-      div class="flex items-center gap-2 shrink-0"
-        button type="button" id="call-mute-btn" title="Mute" class="hidden p-2 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors"
-          svg id="mic-on-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-            path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"
-            path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 10v2a7 7 0 01-14 0v-2M12 19v4"
-          svg id="mic-off-icon" class="hidden w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-            path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3l18 18M12 1a3 3 0 00-3 3v5m6 3v-1M19 10v2a7 7 0 01-9.4 6.6M12 19v4"
-
-        button type="button" id="call-hangup-btn" title="End call" class="p-2 rounded-full bg-red-600 hover:bg-red-700 transition-colors"
-          svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" transform="rotate(135)"
-            path d="M2 3h4l2 7-2.5 1.5a11 11 0 006 6L13 15l7 2v4a2 2 0 01-2 2A16 16 0 012 5a2 2 0 012-2z"
-
-    / Messages container — WhatsApp-style scrollable pane
-    div class="flex-1 min-h-0 overflow-y-auto overscroll-contain px-2 sm:px-4 py-3 flex flex-col gap-1.5 bg-no-repeat bg-center" style="background-image: linear-gradient(rgba(239,234,226,0.75), rgba(239,234,226,0.75)), url(#{image_path('watermark.png')}); background-size: cover, 420px 420px;" id="messages-container" data-chatroom-id=@chatroom.id data-current-user-id=current_user.id data-current-user-name=current_user.full_name
-      - @messages.each do |message|
-        = render "messages/message", message: message, current_user_id: current_user.id
-
-    / Input area
-    div class="shrink-0 bg-[#f0f2f5] px-2 sm:px-3 py-2 border-t border-black/5"
-      = form_with url: chatroom_messages_path(@chatroom), scope: :message, method: :post, html: { multipart: true, id: "message-form", data: { turbo: "false" } } do |f|
-        div class="relative"
-          div id="attachment-preview" class="hidden flex-wrap gap-2 mb-2 px-1"
-          = f.hidden_field :duration_in_seconds, id: "duration-input", value: ""
-
-          / Normal input row
-          div class="flex items-end gap-1.5 sm:gap-2" id="normal-input-row"
-            label for="file-input" class="shrink-0 p-2.5 rounded-full text-gray-500 hover:bg-black/5 active:bg-black/10 cursor-pointer transition-colors" title="Attach file"
-              svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.4 6.4a6 6 0 008.486 8.486L20.5 13"
-              = f.file_field :attachments, multiple: true, id: "file-input", class: "hidden", accept: "image/*,audio/*,.pdf,.doc,.docx,.txt,.zip"
-
-            = f.text_area :body, placeholder: "Type a message...", id: "message-input", rows: 1, class: "flex-1 min-w-0 resize-none max-h-32 bg-white rounded-2xl px-4 py-2.5 text-sm sm:text-[15px] leading-5 text-gray-800 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1D4D3A]/30"
-
-            button type="button" id="voice-btn" title="Record voice message" class="shrink-0 p-2.5 rounded-full text-gray-500 hover:bg-black/5 active:bg-black/10 transition-colors"
-              svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"
-                path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 10v2a7 7 0 01-14 0v-2M12 19v4"
-
-            button type="submit" id="send-btn" class="shrink-0 p-2.5 sm:p-3 rounded-full bg-[#1D4D3A] text-white hover:bg-[#183f2f] active:bg-[#132f24] shadow-sm transition-colors disabled:opacity-50 disabled:pointer-events-none"
-              svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"
-          / Recording row
-          div class="hidden items-center gap-2 sm:gap-3 bg-white rounded-2xl px-3 py-2 shadow-sm" id="recording-row"
-            button type="button" id="cancel-recording-btn" title="Cancel" class="shrink-0 p-2 rounded-full text-gray-500 hover:bg-black/5 active:bg-black/10 transition-colors"
-              svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"
-
-            div class="flex-1 flex items-center gap-2 min-w-0"
-              span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shrink-0"
-              span id="recording-timer" class="text-sm font-medium text-gray-700 tabular-nums" 0:00
-
-            button type="button" id="stop-recording-btn" title="Stop recording" class="shrink-0 p-2.5 rounded-full bg-[#1D4D3A] text-white hover:bg-[#183f2f] active:bg-[#132f24] transition-colors"
-              svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"
-                rect x="6" y="6" width="12" height="12" rx="2"
-
-  / Add people modal
-  div id="add-people-modal" class="hidden fixed inset-0 z-20 items-center justify-center bg-black/40 px-4"
-    div class="bg-white rounded-2xl w-full max-w-sm max-h-[70vh] overflow-y-auto shadow-xl"
-      div class="flex items-center justify-between px-4 py-3 border-b border-black/5"
-        h2 class="text-sm font-semibold text-gray-800" Add people
-        button type="button" id="close-add-people-btn" class="p-1 rounded-full hover:bg-black/5"
-          svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-            path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"
-
-      div class="p-2"
-        - if @available_friends.blank?
-          p class="text-sm text-gray-500 px-3 py-4 text-center" No friends left to add.
-        - else
-          - @available_friends.each do |friend|
-            div class="flex items-center justify-between gap-2 px-3 py-2 rounded-xl hover:bg-black/5"
-              span class="text-sm text-gray-800 truncate" = friend.full_name
-              button type="button" data-recipient-id=friend.id class="invite-friend-btn shrink-0 text-xs font-medium px-3 py-1.5 rounded-full bg-[#1D4D3A] text-white hover:bg-[#183f2f]" Invite
-
-  / Incoming call modal — full-screen, blocks interaction with the rest of the app
-  div id="incoming-call-modal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black/60 backdrop-blur-sm px-4"
-    div class="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl text-center py-10 px-6"
-      / Pulsing ringing icon
-      div class="relative w-24 h-24 mx-auto"
-        span class="absolute inset-0 rounded-full bg-[#1D4D3A]/20 animate-ping"
-        span class="absolute inset-2 rounded-full bg-[#1D4D3A]/10"
-        - if other_profile&.avatar&.attached?
-          = image_tag other_profile.avatar, class: "relative w-24 h-24 rounded-full object-cover ring-4 ring-white shadow-lg"
-        - else
-          div class="relative w-24 h-24 rounded-full bg-[#1D4D3A] flex items-center justify-center text-2xl font-semibold text-white ring-4 ring-white shadow-lg"
-            = "#{@other_member&.first_name&.first}#{@other_member&.last_name&.first}"
-        div class="absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-green-500 flex items-center justify-center ring-4 ring-white"
-          svg class="w-4 h-4 text-white animate-pulse" fill="currentColor" viewBox="0 0 24 24"
-            path d="M2 3h4l2 7-2.5 1.5a11 11 0 006 6L13 15l7 2v4a2 2 0 01-2 2A16 16 0 012 5a2 2 0 012-2z"
-
-      h2 id="incoming-caller-name" class="mt-5 text-xl font-semibold text-gray-900"
-      p class="text-sm text-gray-500 mt-1 tracking-wide" Incoming voice call…
-
-      div class="flex items-center justify-center gap-10 mt-9"
-        div class="flex flex-col items-center gap-2"
-          button type="button" id="decline-call-btn" title="Decline" class="p-5 rounded-full bg-red-600 hover:bg-red-700 active:bg-red-800 text-white shadow-lg shadow-red-600/30 transition-transform hover:scale-105"
-            svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24" transform="rotate(135)"
-              path d="M2 3h4l2 7-2.5 1.5a11 11 0 006 6L13 15l7 2v4a2 2 0 01-2 2A16 16 0 012 5a2 2 0 012-2z"
-          span class="text-xs font-medium text-gray-500" Decline
-
-        div class="flex flex-col items-center gap-2"
-          button type="button" id="accept-call-btn" title="Accept" class="p-5 rounded-full bg-green-600 hover:bg-green-700 active:bg-green-800 text-white shadow-lg shadow-green-600/30 transition-transform hover:scale-105"
-            svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"
-              path d="M2 3h4l2 7-2.5 1.5a11 11 0 006 6L13 15l7 2v4a2 2 0 01-2 2A16 16 0 012 5a2 2 0 012-2z"
-          span class="text-xs font-medium text-gray-500" Accept
+      button type="button" id="video-hangup-btn" title="End call" class="p-4 rounded-full bg-red-600 hover:bg-red-700 active:bg-red-800 text-white transition-colors"
+        svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" transform="rotate(135)"
+          path d="M2 3h4l2 7-2.5 1.5a11 11 0 006 6L13 15l7 2v4a2 2 0 01-2 2A16 16 0 012 5a2 2 0 012-2z"
 
   / All chatroom JS now lives in app/javascript/chat/*.
   / See app/javascript/chat/chatroom.js for the entry point, which is

@@ -1,11 +1,11 @@
 // app/javascript/chat/call_session.js
-// Shared plumbing for voice calls: the CallChannel subscription, WebRTC
-// peer connection setup, the in-call bar, ringtone, and teardown.
+// Shared plumbing for voice + video calls: the CallChannel subscription,
+// WebRTC peer connection setup, the audio call-bar, the video overlay,
+// ringtone, and teardown.
 //
-// This module owns all the state that both the outgoing call button
-// (outgoing_call.js) and the incoming call modal (incoming_call.js) need to
-// read or mutate, so neither of those files touches ActionCable or
-// RTCPeerConnection directly — they just call the functions here.
+// Call type travels inside the "call-offer" signal payload as
+// { sdp, video: true|false } so the receiving side knows whether to render
+// the audio call-bar or the video overlay before it even answers.
 //
 // NOTE (open investigation): if CallChannel's `subscribed` never appears to
 // fire server-side, confirm the client is actually reaching the channel at
@@ -27,11 +27,13 @@ let callSubscription = null;
 let peerConnection = null;
 let localStream = null;
 let callState = "idle"; // idle | calling | ringing | connected
+let callType = "audio"; // audio | video
 let callTimerInterval = null;
 let callSeconds = 0;
 let callTimeoutHandle = null;
-let pendingOffer = null;
+let pendingOffer = null; // { sdp, video }
 let isMuted = false;
+let isCameraOff = false;
 let ringAudioCtx = null;
 let ringOscInterval = null;
 let offerHandler = null; // set by incoming_call.js via initCallChannel()
@@ -44,6 +46,14 @@ export function currentCallState() {
 
 export function setCallState(state) {
   callState = state;
+}
+
+export function currentCallType() {
+  return callType;
+}
+
+export function setCallType(type) {
+  callType = type === "video" ? "video" : "audio";
 }
 
 export function getPeerConnection() {
@@ -146,7 +156,9 @@ async function handleSignal(data) {
       sendSignal("call-busy", {});
       return;
     }
+    // payload is { sdp, video }
     pendingOffer = data.payload;
+    setCallType(data.payload?.video ? "video" : "audio");
     callState = "ringing";
     if (offerHandler) offerHandler(data.payload);
   } else if (data.type === "call-answer") {
@@ -175,14 +187,19 @@ export function createPeerConnection() {
   };
 
   pc.ontrack = (e) => {
-    let remoteAudio = document.getElementById("remote-audio");
-    if (!remoteAudio) {
-      remoteAudio = document.createElement("audio");
-      remoteAudio.id = "remote-audio";
-      remoteAudio.autoplay = true;
-      document.body.appendChild(remoteAudio);
+    if (callType === "video") {
+      const remoteVideo = document.getElementById("remote-video");
+      if (remoteVideo) remoteVideo.srcObject = e.streams[0];
+    } else {
+      let remoteAudio = document.getElementById("remote-audio");
+      if (!remoteAudio) {
+        remoteAudio = document.createElement("audio");
+        remoteAudio.id = "remote-audio";
+        remoteAudio.autoplay = true;
+        document.body.appendChild(remoteAudio);
+      }
+      remoteAudio.srcObject = e.streams[0];
     }
-    remoteAudio.srcObject = e.streams[0];
   };
 
   pc.onconnectionstatechange = () => {
@@ -195,16 +212,48 @@ export function createPeerConnection() {
   return pc;
 }
 
-export async function acquireMicrophone() {
-  localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+// video: true requests camera + mic, false requests mic only
+export async function acquireMediaStream(video) {
+  localStream = await navigator.mediaDevices.getUserMedia({
+    audio: true,
+    video: video ? { facingMode: "user" } : false,
+  });
   return localStream;
+}
+
+// Back-compat alias for any existing audio-only call sites.
+export async function acquireMicrophone() {
+  return acquireMediaStream(false);
 }
 
 export function attachLocalTracks(pc, stream) {
   stream.getTracks().forEach((track) => pc.addTrack(track, stream));
 }
 
-// ---- call bar / timer ----
+export function attachLocalPreview(stream) {
+  const localVideo = document.getElementById("local-video");
+  if (!localVideo) return;
+  if (stream.getVideoTracks().length === 0) {
+    localVideo.classList.add("hidden");
+    return;
+  }
+  localVideo.srcObject = stream;
+  localVideo.classList.remove("hidden");
+}
+
+function clearLocalPreview() {
+  const localVideo = document.getElementById("local-video");
+  if (!localVideo) return;
+  localVideo.srcObject = null;
+  localVideo.classList.add("hidden");
+}
+
+function clearRemoteVideo() {
+  const remoteVideo = document.getElementById("remote-video");
+  if (remoteVideo) remoteVideo.srcObject = null;
+}
+
+// ---- audio call bar ----
 
 export function showCallBar(status, { showTimer, showMute } = {}) {
   const bar = document.getElementById("call-bar");
@@ -225,15 +274,41 @@ export function hideCallBar() {
   bar.classList.remove("flex");
 }
 
+// ---- video call overlay ----
+
+export function showVideoCallUI(status, { showTimer } = {}) {
+  const overlay = document.getElementById("video-call-overlay");
+  const statusEl = document.getElementById("video-call-status");
+  const timerEl = document.getElementById("video-call-timer");
+  if (!overlay) return;
+
+  overlay.classList.remove("hidden");
+  overlay.classList.add("flex");
+  if (statusEl) statusEl.textContent = status;
+  if (timerEl) timerEl.classList.toggle("hidden", !showTimer);
+}
+
+export function hideVideoCallUI() {
+  const overlay = document.getElementById("video-call-overlay");
+  if (!overlay) return;
+  overlay.classList.add("hidden");
+  overlay.classList.remove("flex");
+  clearLocalPreview();
+  clearRemoteVideo();
+}
+
 function startCallTimer() {
   callSeconds = 0;
   const timerEl = document.getElementById("call-timer");
-  timerEl.textContent = "00:00";
+  const videoTimerEl = document.getElementById("video-call-timer");
+  if (timerEl) timerEl.textContent = "00:00";
+  if (videoTimerEl) videoTimerEl.textContent = "00:00";
   callTimerInterval = setInterval(() => {
     callSeconds++;
     const m = String(Math.floor(callSeconds / 60)).padStart(2, "0");
     const s = String(callSeconds % 60).padStart(2, "0");
-    timerEl.textContent = `${m}:${s}`;
+    if (timerEl) timerEl.textContent = `${m}:${s}`;
+    if (videoTimerEl) videoTimerEl.textContent = `${m}:${s}`;
   }, 1000);
 }
 
@@ -249,7 +324,12 @@ export function onCallConnected() {
   stopRingtone();
   callState = "connected";
   const name = document.getElementById("other-member-name")?.textContent || "call";
-  showCallBar(`In call with ${name}`, { showTimer: true, showMute: true });
+
+  if (callType === "video") {
+    showVideoCallUI(name, { showTimer: true });
+  } else {
+    showCallBar(`In call with ${name}`, { showTimer: true, showMute: true });
+  }
   startCallTimer();
 }
 
@@ -265,7 +345,9 @@ export function clearCallTimeout() {
 async function recordMissedCall() {
   const container = messagesContainer();
   const chatroomId = container?.dataset.chatroomId;
-  const recipientId = document.getElementById("voice-call-btn")?.dataset.recipientId;
+  const recipientId =
+    document.getElementById("voice-call-btn")?.dataset.recipientId ||
+    document.getElementById("video-call-btn")?.dataset.recipientId;
   if (!chatroomId || !recipientId) return;
 
   try {
@@ -286,6 +368,13 @@ async function recordMissedCall() {
 function resetMuteIcon() {
   document.getElementById("mic-on-icon")?.classList.remove("hidden");
   document.getElementById("mic-off-icon")?.classList.add("hidden");
+  document.getElementById("video-mic-on-icon")?.classList.remove("hidden");
+  document.getElementById("video-mic-off-icon")?.classList.add("hidden");
+}
+
+function resetCameraIcon() {
+  document.getElementById("camera-on-icon")?.classList.remove("hidden");
+  document.getElementById("camera-off-icon")?.classList.add("hidden");
 }
 
 export function toggleMute() {
@@ -296,6 +385,21 @@ export function toggleMute() {
   });
   document.getElementById("mic-on-icon")?.classList.toggle("hidden", isMuted);
   document.getElementById("mic-off-icon")?.classList.toggle("hidden", !isMuted);
+  document.getElementById("video-mic-on-icon")?.classList.toggle("hidden", isMuted);
+  document.getElementById("video-mic-off-icon")?.classList.toggle("hidden", !isMuted);
+}
+
+export function toggleCamera() {
+  if (!localStream) return;
+  const videoTracks = localStream.getVideoTracks();
+  if (videoTracks.length === 0) return;
+
+  isCameraOff = !isCameraOff;
+  videoTracks.forEach((t) => {
+    t.enabled = !isCameraOff;
+  });
+  document.getElementById("camera-on-icon")?.classList.toggle("hidden", isCameraOff);
+  document.getElementById("camera-off-icon")?.classList.toggle("hidden", !isCameraOff);
 }
 
 export function teardownCall({ notifyRemote, signalType } = {}) {
@@ -306,6 +410,7 @@ export function teardownCall({ notifyRemote, signalType } = {}) {
   stopRingtone();
   stopCallTimer();
   hideCallBar();
+  hideVideoCallUI();
 
   if (peerConnection) {
     peerConnection.close();
@@ -321,9 +426,12 @@ export function teardownCall({ notifyRemote, signalType } = {}) {
   if (wasCalling && !wasConnected) recordMissedCall();
 
   isMuted = false;
+  isCameraOff = false;
   resetMuteIcon();
+  resetCameraIcon();
   pendingOffer = null;
   callState = "idle";
+  callType = "audio";
 }
 
 export function initCallControls() {
@@ -331,4 +439,10 @@ export function initCallControls() {
     .getElementById("call-hangup-btn")
     ?.addEventListener("click", () => teardownCall({ notifyRemote: true, signalType: "call-end" }));
   document.getElementById("call-mute-btn")?.addEventListener("click", toggleMute);
+
+  document
+    .getElementById("video-hangup-btn")
+    ?.addEventListener("click", () => teardownCall({ notifyRemote: true, signalType: "call-end" }));
+  document.getElementById("video-mute-btn")?.addEventListener("click", toggleMute);
+  document.getElementById("video-camera-toggle-btn")?.addEventListener("click", toggleCamera);
 }

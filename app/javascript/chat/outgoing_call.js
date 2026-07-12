@@ -1,42 +1,57 @@
 // app/javascript/chat/outgoing_call.js
-// Owns exactly one thing: the "Call" button that places an outgoing call.
+// Owns the two outbound-call buttons: "Call" (audio) and "Video call".
 // Everything about receiving/answering a call lives in incoming_call.js —
 // this file never touches the incoming-call modal.
 
 import {
   currentCallState,
   setCallState,
+  setCallType,
   createPeerConnection,
-  acquireMicrophone,
+  acquireMediaStream,
   attachLocalTracks,
+  attachLocalPreview,
   sendSignal,
   showCallBar,
+  showVideoCallUI,
   playRingtone,
   scheduleCallTimeout,
   teardownCall,
 } from "./call_session";
 
-async function startCall() {
+async function startCall(video) {
   if (currentCallState() !== "idle") return;
 
   let localStream;
   try {
-    localStream = await acquireMicrophone();
+    localStream = await acquireMediaStream(video);
   } catch (err) {
-    alert("Microphone access is required to make a call.");
+    alert(
+      video
+        ? "Camera and microphone access is required to make a video call."
+        : "Microphone access is required to make a call."
+    );
     return;
   }
+
+  setCallType(video ? "video" : "audio");
 
   const peerConnection = createPeerConnection();
   attachLocalTracks(peerConnection, localStream);
 
   const offer = await peerConnection.createOffer();
   await peerConnection.setLocalDescription(offer);
-  sendSignal("call-offer", offer);
+  sendSignal("call-offer", { sdp: offer, video });
 
   setCallState("calling");
   const name = document.getElementById("other-member-name")?.textContent || "them";
-  showCallBar(`Calling ${name}…`, { showTimer: false, showMute: false });
+
+  if (video) {
+    attachLocalPreview(localStream);
+    showVideoCallUI(`Calling ${name}…`, { showTimer: false });
+  } else {
+    showCallBar(`Calling ${name}…`, { showTimer: false, showMute: false });
+  }
   playRingtone();
 
   scheduleCallTimeout(() => {
@@ -45,5 +60,6 @@ async function startCall() {
 }
 
 export function initOutgoingCall() {
-  document.getElementById("voice-call-btn")?.addEventListener("click", startCall);
+  document.getElementById("voice-call-btn")?.addEventListener("click", () => startCall(false));
+  document.getElementById("video-call-btn")?.addEventListener("click", () => startCall(true));
 }
