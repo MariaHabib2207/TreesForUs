@@ -4,7 +4,6 @@ html class="h-full"
     meta charset="utf-8"
     meta name="viewport" content="width=device-width,initial-scale=1"
 
-    = turbo_frame_tag "modal"
     = stylesheet_link_tag "family_tree", media: "all"
     = stylesheet_link_tag "life_activities", media: "all"
     script src="https://cdn.tailwindcss.com"
@@ -12,8 +11,11 @@ html class="h-full"
     = favicon_link_tag "/favicon.ico"
     = csrf_meta_tags
     = csp_meta_tag
+    = javascript_importmap_tags
 
   body class="h-full flex flex-col overflow-hidden bg-cover bg-center bg-no-repeat bg-fixed" style="background-image: url(#{image_path('background-img.png')})"
+
+    = turbo_frame_tag "modal"
 
     - if user_signed_in?
       = render "layouts/navbar"
@@ -28,4 +30,3 @@ html class="h-full"
 
     main class="flex-1 overflow-y-auto"
       = yield
-      = javascript_importmap_tags

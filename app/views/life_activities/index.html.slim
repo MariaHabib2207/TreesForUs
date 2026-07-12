@@ -4,9 +4,7 @@
       | ✨ #{@owner.first_name}'s Life Timeline
 
     - if current_user == @owner
-      = link_to new_user_life_activity_path(@owner),
-          class: "btn-add-activity",
-          data: { turbo_frame: "modal" } do
+      = link_to new_user_life_activity_path(@owner), class: "btn-add-activity" do
         span + Add Activity
 
   - if @activities.empty?
@@ -36,9 +34,9 @@
 
                   - if current_user == @owner
                     .timeline-actions
-                      = link_to edit_user_life_activity_path(@owner,activity), class: "btn-icon", data: { turbo_frame: "modal" } do
+                      = link_to edit_user_life_activity_path(@owner, activity), class: "btn-icon" do
                         | ✏️
-                      = link_to user_life_activity_path(@owner,activity),
+                      = link_to user_life_activity_path(@owner, activity),
                           method: :delete,
                           data: { confirm: "Remove this activity?" },
                           class: "btn-icon btn-icon--danger" do
