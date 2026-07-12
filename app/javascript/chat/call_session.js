@@ -150,17 +150,49 @@ export function sendSignal(type, payload) {
   callSubscription.perform("signal", { type, payload });
 }
 
+// Turns whatever came back over the wire into a consistent
+// { sdp: RTCSessionDescriptionInit, video: boolean } shape.
+//
+// Expected shape (current client): payload = { sdp: {type, sdp}, video }
+// Tolerated shape (legacy client / server that stripped the wrapper):
+//   payload = {type, sdp} directly, i.e. the raw offer with no wrapper.
+//
+// If neither shape yields a usable { type, sdp } pair, returns null so the
+// caller can fail loudly instead of crashing inside RTCSessionDescription.
+function normalizeOfferPayload(payload) {
+  if (!payload || typeof payload !== "object") return null;
+
+  const looksLikeWrapped = payload.sdp && typeof payload.sdp === "object";
+  const rawSdp = looksLikeWrapped ? payload.sdp : payload;
+  const video = !!payload.video;
+
+  if (!rawSdp || typeof rawSdp.type !== "string" || typeof rawSdp.sdp !== "string") {
+    console.error("[CallChannel] Received an unusable call-offer payload:", payload);
+    return null;
+  }
+
+  return { sdp: rawSdp, video };
+}
+
 async function handleSignal(data) {
   if (data.type === "call-offer") {
     if (callState !== "idle") {
       sendSignal("call-busy", {});
       return;
     }
-    // payload is { sdp, video }
-    pendingOffer = data.payload;
-    setCallType(data.payload?.video ? "video" : "audio");
+
+    const normalized = normalizeOfferPayload(data.payload);
+    if (!normalized) {
+      // Malformed offer — bail out instead of leaving the caller ringing
+      // forever with a client that's about to throw.
+      sendSignal("call-decline", {});
+      return;
+    }
+
+    pendingOffer = normalized;
+    setCallType(normalized.video ? "video" : "audio");
     callState = "ringing";
-    if (offerHandler) offerHandler(data.payload);
+    if (offerHandler) offerHandler(normalized);
   } else if (data.type === "call-answer") {
     if (peerConnection) await peerConnection.setRemoteDescription(new RTCSessionDescription(data.payload));
     onCallConnected();
