@@ -3,6 +3,7 @@
 # Table name: user_parent_child_relationships
 #
 #  id         :integer          not null, primary key
+#  deleted_at :datetime
 #  created_at :datetime         not null
 #  updated_at :datetime         not null
 #  child_id   :integer
@@ -10,9 +11,12 @@
 #
 # Indexes
 #
-#  idx_on_parent_id_child_id_94af4b48a2  (parent_id,child_id) UNIQUE
+#  idx_on_parent_id_child_id_94af4b48a2                 (parent_id,child_id) UNIQUE
+#  index_user_parent_child_relationships_on_deleted_at  (deleted_at)
 #
 class UserParentRelationship < ApplicationRecord
+  acts_as_paranoid
+
 
   self.table_name = "user_parent_child_relationships"
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_12_232313) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_13_232043) do
   create_table "active_admin_comments", force: :cascade do |t|
     t.string "namespace"
     t.text "body"
@@ -64,6 +64,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_12_232313) do
     t.integer "recipient_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "deleted_at"
+    t.index ["deleted_at"], name: "index_activities_on_deleted_at"
     t.index ["owner_type", "owner_id"], name: "index_activities_on_owner"
     t.index ["recipient_type", "recipient_id"], name: "index_activities_on_recipient"
     t.index ["trackable_type", "trackable_id"], name: "index_activities_on_trackable"
@@ -104,10 +106,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_12_232313) do
     t.datetime "ended_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "deleted_at"
     t.index ["call_type"], name: "index_calls_on_call_type"
     t.index ["callee_id"], name: "index_calls_on_callee_id"
     t.index ["caller_id"], name: "index_calls_on_caller_id"
     t.index ["chatroom_id"], name: "index_calls_on_chatroom_id"
+    t.index ["deleted_at"], name: "index_calls_on_deleted_at"
     t.index ["status"], name: "index_calls_on_status"
   end
 
@@ -116,6 +120,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_12_232313) do
     t.integer "user_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "deleted_at"
+    t.index ["deleted_at"], name: "index_chatroom_members_on_deleted_at"
   end
 
   create_table "chatrooms", force: :cascade do |t|
@@ -123,12 +129,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_12_232313) do
     t.integer "created_by_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "deleted_at"
+    t.index ["deleted_at"], name: "index_chatrooms_on_deleted_at"
   end
 
   create_table "families", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "deleted_at"
+    t.index ["deleted_at"], name: "index_families_on_deleted_at"
   end
 
   create_table "family_codes", force: :cascade do |t|
@@ -143,8 +153,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_12_232313) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "related_user_id"
+    t.datetime "deleted_at"
     t.index ["code"], name: "index_family_codes_on_code", unique: true
     t.index ["created_by_id"], name: "index_family_codes_on_created_by_id"
+    t.index ["deleted_at"], name: "index_family_codes_on_deleted_at"
     t.index ["email"], name: "index_family_codes_on_email"
     t.index ["family_id"], name: "index_family_codes_on_family_id"
     t.index ["related_user_id"], name: "index_family_codes_on_related_user_id"
@@ -157,6 +169,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_12_232313) do
     t.integer "membership_type"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "deleted_at"
+    t.index ["deleted_at"], name: "index_family_memberships_on_deleted_at"
     t.index ["family_id"], name: "index_family_memberships_on_family_id"
     t.index ["user_id"], name: "index_family_memberships_on_user_id"
   end
@@ -166,6 +180,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_12_232313) do
     t.integer "friend_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "deleted_at"
+    t.index ["deleted_at"], name: "index_friendships_on_deleted_at"
     t.index ["friend_id"], name: "index_friendships_on_friend_id"
     t.index ["user_id", "friend_id"], name: "index_friendships_on_user_id_and_friend_id", unique: true
     t.index ["user_id"], name: "index_friendships_on_user_id"
@@ -181,9 +197,21 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_12_232313) do
     t.string "visibility", default: "friends_and_family", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "deleted_at"
+    t.index ["deleted_at"], name: "index_life_activities_on_deleted_at"
     t.index ["user_id", "occurred_on"], name: "index_life_activities_on_user_id_and_occurred_on"
     t.index ["user_id"], name: "index_life_activities_on_user_id"
     t.index ["visibility"], name: "index_life_activities_on_visibility"
+  end
+
+  create_table "message_deletions", force: :cascade do |t|
+    t.integer "message_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["message_id", "user_id"], name: "index_message_deletions_on_message_id_and_user_id", unique: true
+    t.index ["message_id"], name: "index_message_deletions_on_message_id"
+    t.index ["user_id"], name: "index_message_deletions_on_user_id"
   end
 
   create_table "messages", force: :cascade do |t|
@@ -196,7 +224,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_12_232313) do
     t.string "message_type", default: "text", null: false
     t.integer "duration_in_seconds"
     t.integer "call_id"
+    t.datetime "deleted_for_everyone_at"
+    t.integer "deleted_for_everyone_by_id"
+    t.datetime "deleted_at"
     t.index ["call_id"], name: "index_messages_on_call_id"
+    t.index ["deleted_at"], name: "index_messages_on_deleted_at"
+    t.index ["deleted_for_everyone_by_id"], name: "index_messages_on_deleted_for_everyone_by_id"
     t.index ["id"], name: "index_messages_on_id", unique: true
     t.index ["message_type"], name: "index_messages_on_message_type"
   end
@@ -230,6 +263,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_12_232313) do
     t.integer "child_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "deleted_at"
+    t.index ["deleted_at"], name: "index_user_parent_child_relationships_on_deleted_at"
     t.index ["parent_id", "child_id"], name: "idx_on_parent_id_child_id_94af4b48a2", unique: true
   end
 
@@ -238,6 +273,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_12_232313) do
     t.integer "partner_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "deleted_at"
+    t.index ["deleted_at"], name: "index_user_partners_on_deleted_at"
     t.index ["partner_id"], name: "index_user_partners_on_partner_id"
     t.index ["user_id", "partner_id"], name: "index_user_partners_on_user_id_and_partner_id", unique: true
     t.index ["user_id"], name: "index_user_partners_on_user_id"
@@ -262,6 +299,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_12_232313) do
     t.integer "updated_by"
     t.string "current_status"
     t.date "death_date"
+    t.datetime "deleted_at"
+    t.index ["deleted_at"], name: "index_user_profiles_on_deleted_at"
     t.index ["user_id"], name: "index_user_profiles_on_user_id"
   end
 
@@ -324,6 +363,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_12_232313) do
     t.datetime "confirmed_at"
     t.datetime "confirmation_sent_at"
     t.string "unconfirmed_email"
+    t.datetime "deleted_at"
+    t.index ["deleted_at"], name: "index_users_on_deleted_at"
     t.index ["identification_type", "identification_number"], name: "index_users_on_id_type_and_number", unique: true
     t.index ["parent_id"], name: "index_users_on_parent_id"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
@@ -346,7 +387,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_12_232313) do
   add_foreign_key "friendships", "users"
   add_foreign_key "friendships", "users", column: "friend_id"
   add_foreign_key "life_activities", "users"
+  add_foreign_key "message_deletions", "messages"
+  add_foreign_key "message_deletions", "users"
   add_foreign_key "messages", "calls"
+  add_foreign_key "messages", "users", column: "deleted_for_everyone_by_id"
   add_foreign_key "user_partners", "users"
   add_foreign_key "user_partners", "users", column: "partner_id"
   add_foreign_key "user_sessions", "users"

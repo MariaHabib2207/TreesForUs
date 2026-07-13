@@ -10,6 +10,7 @@
 #  created_by     :integer
 #  current_status :string
 #  death_date     :date
+#  deleted_at     :datetime
 #  gender         :string
 #  marital_status :string
 #  nationality    :string
@@ -24,7 +25,8 @@
 #
 # Indexes
 #
-#  index_user_profiles_on_user_id  (user_id)
+#  index_user_profiles_on_deleted_at  (deleted_at)
+#  index_user_profiles_on_user_id     (user_id)
 #
 require "test_helper"
 

@@ -1,4 +1,3 @@
-
 = stylesheet_link_tag "family_tree", media: "all"
 = stylesheet_link_tag "life_activities", media: "all"
 
@@ -47,7 +46,7 @@ nav class="bg-white shadow-md px-5 py-4"
         - else
           = image_tag "logo.png", class: "w-10 h-10 rounded-full border-2 border-gray-300 object-cover"
 
-      = render partial: 'shared/notification_bell'
+      = render partial: 'shared/notification_bell', locals: { id_suffix: 'desktop' }
 
       = button_to destroy_user_session_path, method: :delete, class: "text-sm font-medium text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition" do
         | Logout
@@ -99,26 +98,26 @@ nav class="bg-white shadow-md px-5 py-4"
               = unread_count > 9 ? "9+" : unread_count.to_s
         span class="ml-1" Messages
 
-    = render partial: 'shared/notification_bell'
+    = render partial: 'shared/notification_bell', locals: { id_suffix: 'mobile' }
 
     = button_to destroy_user_session_path, method: :delete, class: "w-full text-sm font-medium text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition" do
       | Logout
 
 javascript:
-  const btn = document.getElementById('mobile-menu-btn');
-  const menu = document.getElementById('mobile-menu');
+  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
   const iconOpen = document.getElementById('icon-open');
   const iconClose = document.getElementById('icon-close');
 
-  btn.addEventListener('click', () => {
-    menu.classList.toggle('hidden');
+  mobileMenuBtn.addEventListener('click', () => {
+    mobileMenu.classList.toggle('hidden');
     iconOpen.classList.toggle('hidden');
     iconClose.classList.toggle('hidden');
   });
 
   document.addEventListener('click', (e) => {
-    if (!btn.contains(e.target) && !menu.contains(e.target)) {
-      menu.classList.add('hidden');
+    if (!mobileMenuBtn.contains(e.target) && !mobileMenu.contains(e.target)) {
+      mobileMenu.classList.add('hidden');
       iconOpen.classList.remove('hidden');
       iconClose.classList.add('hidden');
     }

@@ -83,6 +83,8 @@ gem 'geocoder'
 gem 'user_agent_parser'
 gem 'httparty'
 gem 'device_detector'
+gem "acts_as_paranoid", "~> 0.11.0"
+gem "noticed", "~> 3.0"
 
 
 
@@ -104,4 +106,4 @@ end
 gem 'omniauth-google-oauth2'
 gem 'omniauth-rails_csrf_protection'
 
-gem "noticed", "~> 3.0"
+

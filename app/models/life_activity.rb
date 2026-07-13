@@ -5,6 +5,7 @@
 #
 #  id          :integer          not null, primary key
 #  category    :string           not null
+#  deleted_at  :datetime
 #  description :text
 #  location    :string
 #  occurred_on :date
@@ -16,6 +17,7 @@
 #
 # Indexes
 #
+#  index_life_activities_on_deleted_at               (deleted_at)
 #  index_life_activities_on_user_id                  (user_id)
 #  index_life_activities_on_user_id_and_occurred_on  (user_id,occurred_on)
 #  index_life_activities_on_visibility               (visibility)
@@ -27,6 +29,8 @@
 class LifeActivity < ApplicationRecord
   belongs_to :user
   has_many_attached :photos
+  acts_as_paranoid
+
 
   CATEGORIES = %w[travel kids marriage education career milestone other].freeze
 

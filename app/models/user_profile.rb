@@ -10,6 +10,7 @@
 #  created_by     :integer
 #  current_status :string
 #  death_date     :date
+#  deleted_at     :datetime
 #  gender         :string
 #  marital_status :string
 #  nationality    :string
@@ -24,13 +25,16 @@
 #
 # Indexes
 #
-#  index_user_profiles_on_user_id  (user_id)
+#  index_user_profiles_on_deleted_at  (deleted_at)
+#  index_user_profiles_on_user_id     (user_id)
 #
 #  index_user_profiles_on_user_id  (user_id)
 
 class UserProfile < ApplicationRecord
   has_one_attached :avatar
   belongs_to :user
+  acts_as_paranoid
+
 
   after_update :notify_profile_owner_if_manager_edited
 

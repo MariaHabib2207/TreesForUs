@@ -8,6 +8,7 @@
 #  created_by             :integer
 #  current_sign_in_at     :datetime
 #  current_sign_in_ip     :string
+#  deleted_at             :datetime
 #  email                  :string
 #  encrypted_password     :string
 #  failed_attempts        :integer          default(0), not null
@@ -40,6 +41,7 @@
 #
 # Indexes
 #
+#  index_users_on_deleted_at            (deleted_at)
 #  index_users_on_id_type_and_number    (identification_type,identification_number) UNIQUE
 #  index_users_on_parent_id             (parent_id)
 #  index_users_on_reset_password_token  (reset_password_token) UNIQUE
@@ -48,6 +50,8 @@
 class User < ApplicationRecord
 # Remove: include Noticed::Model
 # Remove: has_noticed_notifications
+  acts_as_paranoid
+
 
 # Add this instead:
   has_many :noticed_notifications, as: :recipient, dependent: :destroy, class_name: "Noticed::Notification"

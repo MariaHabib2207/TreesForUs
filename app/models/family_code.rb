@@ -4,6 +4,7 @@
 #
 #  id              :integer          not null, primary key
 #  code            :string           not null
+#  deleted_at      :datetime
 #  email           :string           not null
 #  expires_at      :datetime         not null
 #  membership_type :integer          not null
@@ -19,6 +20,7 @@
 #
 #  index_family_codes_on_code             (code) UNIQUE
 #  index_family_codes_on_created_by_id    (created_by_id)
+#  index_family_codes_on_deleted_at       (deleted_at)
 #  index_family_codes_on_email            (email)
 #  index_family_codes_on_family_id        (family_id)
 #  index_family_codes_on_related_user_id  (related_user_id)
@@ -36,6 +38,8 @@ class FamilyCode < ApplicationRecord
   belongs_to :created_by,   class_name: "User"
   belongs_to :used_by,      class_name: "User", optional: true
   belongs_to :related_user, class_name: "User", optional: true  # parent or partner
+  acts_as_paranoid
+
 
   enum :membership_type, FamilyMembership.membership_types
 

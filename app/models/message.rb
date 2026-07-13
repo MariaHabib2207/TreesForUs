@@ -1,8 +1,41 @@
+# == Schema Information
+#
+# Table name: messages
+#
+#  id                         :integer          not null, primary key
+#  body                       :text
+#  deleted_at                 :datetime
+#  deleted_for_everyone_at    :datetime
+#  duration_in_seconds        :integer
+#  message_type               :string           default("text"), not null
+#  read_at                    :datetime
+#  created_at                 :datetime         not null
+#  updated_at                 :datetime         not null
+#  call_id                    :integer
+#  chatroom_id                :integer
+#  deleted_for_everyone_by_id :integer
+#  user_id                    :integer
+#
+# Indexes
+#
+#  index_messages_on_call_id                     (call_id)
+#  index_messages_on_deleted_at                  (deleted_at)
+#  index_messages_on_deleted_for_everyone_by_id  (deleted_for_everyone_by_id)
+#  index_messages_on_id                          (id) UNIQUE
+#  index_messages_on_message_type                (message_type)
+#
+# Foreign Keys
+#
+#  call_id                     (call_id => calls.id)
+#  deleted_for_everyone_by_id  (deleted_for_everyone_by_id => users.id)
+#
 class Message < ApplicationRecord
   belongs_to :chatroom
   belongs_to :user
   belongs_to :call, optional: true
   has_many_attached :attachments
+
+  acts_as_paranoid
 
   encrypts :body
 

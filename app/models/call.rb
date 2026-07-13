@@ -1,3 +1,34 @@
+# == Schema Information
+#
+# Table name: calls
+#
+#  id                  :integer          not null, primary key
+#  call_type           :string           default("audio"), not null
+#  deleted_at          :datetime
+#  duration_in_seconds :integer          default(0), not null
+#  ended_at            :datetime
+#  status              :string           default("missed"), not null
+#  created_at          :datetime         not null
+#  updated_at          :datetime         not null
+#  callee_id           :integer          not null
+#  caller_id           :integer          not null
+#  chatroom_id         :integer          not null
+#
+# Indexes
+#
+#  index_calls_on_call_type    (call_type)
+#  index_calls_on_callee_id    (callee_id)
+#  index_calls_on_caller_id    (caller_id)
+#  index_calls_on_chatroom_id  (chatroom_id)
+#  index_calls_on_deleted_at   (deleted_at)
+#  index_calls_on_status       (status)
+#
+# Foreign Keys
+#
+#  callee_id    (callee_id => users.id)
+#  caller_id    (caller_id => users.id)
+#  chatroom_id  (chatroom_id => chatrooms.id)
+#
 class Call < ApplicationRecord
   belongs_to :chatroom
   belongs_to :caller, class_name: "User"
@@ -7,6 +38,8 @@ class Call < ApplicationRecord
 
   enum :call_type, { audio: "audio", video: "video" }
   enum :status, { missed: "missed", declined: "declined", answered: "answered", busy: "busy" }
+  
+  acts_as_paranoid
 
   validates :duration_in_seconds, numericality: { greater_than_or_equal_to: 0 }
 
