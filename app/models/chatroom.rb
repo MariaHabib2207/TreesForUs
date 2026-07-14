@@ -21,13 +21,13 @@ class Chatroom < ApplicationRecord
   acts_as_paranoid
 
 
-  def self.between(user1, user2)
-    joins(:chatroom_members)
-      .where(chatroom_members: { user_id: user1.id })
-      .joins(:chatroom_members)
-      .where(chatroom_members: { user_id: user2.id })
-      .first
-  end
+def self.between(user1, user2)
+  where(
+    id: ChatroomMember.where(user_id: user1.id).select(:chatroom_id)
+  ).where(
+    id: ChatroomMember.where(user_id: user2.id).select(:chatroom_id)
+  ).select { |c| c.chatroom_members.count == 2 }.first
+end
     def broadcast_system_message(user:, body:)
     message = messages.create!(user: user, body: body, message_type: "system")
 
