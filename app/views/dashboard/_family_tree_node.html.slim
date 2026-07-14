@@ -13,7 +13,7 @@ div class="tree-node" data-depth=depth data-user-id=node_user.id
 
       div class="card-wrapper js-card-hover"
 
-        = link_to user_profile_path(node_user.id), class: "card #{"root" if depth == 0}", data: { turbo_frame: "modal" } do
+        = link_to user_profile_path(node_user.id), class: "card #{"root" if depth == 0}"
 
           div class="avatar"
             - if profile&.avatar&.attached?
