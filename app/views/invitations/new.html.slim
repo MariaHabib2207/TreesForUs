@@ -23,7 +23,7 @@ div style="min-height:100vh; background:#f0ebe3; display:flex; align-items:cente
       div style="position:absolute; right:28px; top:50%; transform:translateY(-50%); opacity:0.13; font-size:80px; line-height:1; color:#fff; pointer-events:none; user-select:none;"
         | 🌿
 
-    = form_with url: user_invitations_path(user_id: @invitee.id), scope: :invitation do |f|
+    = form_with url: user_invitations_path(user_id: @invitee.id), scope: :invitation, data: { turbo: false } do |f|
 
       = f.hidden_field :membership_type, value: @membership_type
       = f.hidden_field :related_user_id, value: @related_user&.id

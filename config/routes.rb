@@ -22,7 +22,9 @@ Rails.application.routes.draw do
 
   resources :users do
     resources :user_partners, only: [:new, :create]
-    resources :invitations, only: [:new, :create]
+    resources :invitations, only: [:new, :create] do
+      delete :cancel, on: :collection
+    end
     resources :life_activities, only: %i[index new create edit update destroy]
   end
 

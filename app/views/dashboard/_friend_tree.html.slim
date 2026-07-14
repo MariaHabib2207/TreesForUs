@@ -9,7 +9,7 @@
 
   div(style="position: relative; width: 480px; height: 480px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;")
     div.card-wrapper
-      = link_to user_profile_path(current_user.id), class: "card friend-card friend-card--current", data: { turbo_frame: "modal" } do
+      = link_to user_profile_path(current_user.id), class: "card friend-card friend-card--current" do
         div.avatar.avatar--lg
           - if current_user_profile&.avatar&.attached?
             = image_tag url_for(current_user_profile.avatar), class: "avatar-img"
@@ -19,7 +19,7 @@
         div.card-name = "#{current_user.first_name} #{current_user.last_name}"
         div.card-role You
 
-      = link_to new_friendship_path(user_id: current_user.id, family_id: params[:family_id]), class: "btn-add btn-add--friend btn-add--dynamic", title: "Add friend", data: { turbo_frame: "modal" } do
+      = link_to new_friendship_path(user_id: current_user.id, family_id: params[:family_id]), class: "btn-add btn-add--friend btn-add--dynamic", title: "Add friend" do
         span.btn-add__icon +
         span.btn-add__label Friend
 
@@ -36,7 +36,7 @@
     / --- CENTER: current user ---
     div(style="position: absolute; top: 240px; left: 240px; transform: translate(-50%, -50%); z-index: 2;")
       div.card-wrapper
-        = link_to user_profile_path(current_user.id), class: "card friend-card friend-card--current", data: { turbo_frame: "modal" } do
+        = link_to user_profile_path(current_user.id), class: "card friend-card friend-card--current" do
           div.avatar.avatar--lg
             - if current_user_profile&.avatar&.attached?
               = image_tag url_for(current_user_profile.avatar), class: "avatar-img"
@@ -46,7 +46,7 @@
           div.card-name = "#{current_user.first_name} #{current_user.last_name}"
           div.card-role You
 
-        = link_to new_friendship_path(user_id: current_user.id, family_id: params[:family_id]), class: "btn-add btn-add--friend btn-add--dynamic", title: "Add friend", data: { turbo_frame: "modal" } do
+        = link_to new_friendship_path(user_id: current_user.id, family_id: params[:family_id]), class: "btn-add btn-add--friend btn-add--dynamic", title: "Add friend" do
           span.btn-add__icon +
           span.btn-add__label Friend
 
@@ -61,7 +61,7 @@
 
       div(data-user-id=f_user.id style="position: absolute; top: #{y}px; left: #{x}px; transform: translate(-50%, -50%); z-index: 2;")
         div.card-wrapper
-          = link_to user_profile_path(f_user.id), class: "card friend-card", data: { turbo_frame: "modal" } do
+          = link_to user_profile_path(f_user.id), class: "card friend-card" do
             div.avatar
               - if f_profile&.avatar&.attached?
                 = image_tag url_for(f_profile.avatar), class: "avatar-img"
@@ -77,7 +77,7 @@
               div = f_profile&.occupation || "—"
 
           / --- ADD FRIEND ---
-          = link_to new_friendship_path(user_id: f_user.id, family_id: params[:family_id]), class: "btn-add btn-add--friend btn-add--dynamic", title: "Add friend", data: { turbo_frame: "modal" } do
+          = link_to new_friendship_path(user_id: f_user.id, family_id: params[:family_id]), class: "btn-add btn-add--friend btn-add--dynamic", title: "Add friend" do
             span.btn-add__icon +
             span.btn-add__label Friend
 
@@ -105,7 +105,11 @@
               div.btn-add.btn-add--invite.btn-add--dynamic.btn-add--invited
                 span.btn-add__icon ✉
                 span.btn-add__label Invited
+
+              = button_to cancel_user_invitations_path(user_id: f_user.id), method: :delete, class: "btn-add btn-add--cancel btn-add--dynamic", title: "Cancel invite", form: { data: { turbo: false, turbo_confirm: "Cancel this invitation?" } } do
+                span.btn-add__icon ✕
+                span.btn-add__label Cancel
             - else
-              = link_to new_user_invitation_path(user_id: f_user.id, type: "friend", related_user_id: current_user.id), class: "btn-add btn-add--invite btn-add--dynamic", title: "Invite to app", data: { turbo_frame: "modal" } do
+              = link_to new_user_invitation_path(user_id: f_user.id, type: "friend", related_user_id: current_user.id), class: "btn-add btn-add--invite btn-add--dynamic", title: "Invite to app" do
                 span.btn-add__icon ✉
                 span.btn-add__label Invite

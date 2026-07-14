@@ -5,7 +5,11 @@ class InvitationsController < ApplicationController
 
   def new
     # Derive membership_type and related_user from URL params set by the tree
-    @membership_type = params[:type] == "partner" ? "marriage" : "birth"
+    @membership_type = case params[:type]
+                        when "partner" then "marriage"
+                        when "friend"   then "friend"
+                        else "birth"
+                        end
     @related_user    = User.find_by(id: params[:related_user_id])
   end
 
@@ -42,12 +46,17 @@ class InvitationsController < ApplicationController
     raw_token = @invitee.invite!(invited_by: current_user)
     InvitationMailer.invite(@invitee, raw_token, email, family_code).deliver_now
 
-    respond_to do |format|
-      format.turbo_stream { render turbo_stream: turbo_stream.replace("modal", "") }
-      format.html { redirect_back fallback_location: authenticated_root_path, notice: "Invitation sent to #{email}!" }
-    end
+    redirect_to authenticated_root_path, notice: "Invitation sent to #{email}!"
   end
 
+  def cancel
+  invitee = User.find(params[:user_id])
+
+  FamilyCode.where(related_user_id: invitee.id).destroy_all
+  invitee.update_columns(invitation_token: nil, invitation_sent_at: nil)
+
+  redirect_to authenticated_root_path, notice: "Invitation to #{invitee.first_name} was cancelled."
+end
   private
 
   def set_invitee
@@ -67,11 +76,9 @@ class InvitationsController < ApplicationController
   end
 
   def respond_with_error(msg)
-    respond_to do |format|
-      format.turbo_stream do
-        render turbo_stream: turbo_stream.replace("flash", partial: "shared/flash", locals: { message: msg, type: :alert })
-      end
-      format.html { redirect_back fallback_location: root_path, alert: msg }
-    end
+    redirect_back fallback_location: root_path, alert: msg
   end
+
+
+
 end

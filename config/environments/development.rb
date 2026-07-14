@@ -37,7 +37,7 @@ Rails.application.configure do
   config.action_mailer.perform_caching = false
 
   # Mailer settings
-  config.action_mailer.delivery_method = :resend
+  config.action_mailer.delivery_method = :letter_opener
     config.action_mailer.default_options = {
     from: "TreeOfUs <support@tree-of-us.com>"
   }

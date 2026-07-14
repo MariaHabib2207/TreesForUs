@@ -228,7 +228,7 @@ def pending_chat_invite_from?(inviter)
     .any? do |notification|
       params = notification.event.params
       params = JSON.parse(params) if params.is_a?(String)
-      params["inviter_id"].to_s == inviter.id.to_s
+      params.with_indifferent_access[:inviter_id].to_s == inviter.id.to_s
     end
 end
   #==============================================

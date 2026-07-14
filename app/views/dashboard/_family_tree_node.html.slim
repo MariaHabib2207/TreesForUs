@@ -13,7 +13,7 @@ div class="tree-node" data-depth=depth data-user-id=node_user.id
 
       div class="card-wrapper js-card-hover"
 
-        = link_to user_profile_path(node_user.id), class: "card #{"root" if depth == 0}"
+        = link_to user_profile_path(node_user.id), class: "card #{"root" if depth == 0}" do
 
           div class="avatar"
             - if profile&.avatar&.attached?
@@ -38,11 +38,11 @@ div class="tree-node" data-depth=depth data-user-id=node_user.id
               = profile&.occupation || "—"
 
         - if is_adult
-          = link_to new_user_user_partner_path(user_id: node_user.id, family_id: params[:family_id], type: "partner"), class: "btn-add btn-add--spouse btn-add--dynamic", title: "Add spouse / partner", data: { turbo_frame: "modal" } do
+          = link_to new_user_user_partner_path(user_id: node_user.id, family_id: params[:family_id], type: "partner"), class: "btn-add btn-add--spouse btn-add--dynamic", title: "Add spouse / partner" do
             span class="btn-add__icon" +
             span class="btn-add__label" Spouse
 
-          = link_to new_relationship_path(user_id: node_user.id, family_id: params[:family_id], type: "child"), class: "btn-add btn-add--child btn-add--dynamic", title: "Add child", data: { turbo_frame: "modal" } do
+          = link_to new_relationship_path(user_id: node_user.id, family_id: params[:family_id], type: "child"), class: "btn-add btn-add--child btn-add--dynamic", title: "Add child" do
             span class="btn-add__icon" +
             span class="btn-add__label" Child
 
@@ -71,7 +71,7 @@ div class="tree-node" data-depth=depth data-user-id=node_user.id
               span class="btn-add__icon" ✉
               span class="btn-add__label" Invited
           - else
-            = link_to new_user_invitation_path(user_id: node_user.id, type: "child", related_user_id: node_user.parents.first&.id), class: "btn-add btn-add--invite btn-add--dynamic", title: "Invite to app", data: { turbo_frame: "modal" } do
+            = link_to new_user_invitation_path(user_id: node_user.id, type: "child", related_user_id: node_user.parents.first&.id), class: "btn-add btn-add--invite btn-add--dynamic", title: "Invite to app" do
               span class="btn-add__icon" ✉
               span class="btn-add__label" Invite
 
@@ -86,7 +86,7 @@ div class="tree-node" data-depth=depth data-user-id=node_user.id
 
         div class="card-wrapper js-card-hover"
 
-          = link_to user_profile_path(partner), class: "card partner-card", id: "user_card_#{partner.id}", data: { turbo_frame: "modal" } do
+          = link_to user_profile_path(partner), class: "card partner-card", id: "user_card_#{partner.id}" do
 
             div class="avatar"
               - if p_profile&.avatar&.attached?
@@ -135,7 +135,7 @@ div class="tree-node" data-depth=depth data-user-id=node_user.id
                 span class="btn-add__icon" ✉
                 span class="btn-add__label" Invited
             - else
-              = link_to new_user_invitation_path(user_id: partner.id, type: "partner", related_user_id: node_user.id), class: "btn-add btn-add--invite btn-add--dynamic", title: "Invite to app", data: { turbo_frame: "modal" } do
+              = link_to new_user_invitation_path(user_id: partner.id, type: "partner", related_user_id: node_user.id), class: "btn-add btn-add--invite btn-add--dynamic", title: "Invite to app" do
                 span class="btn-add__icon" ✉
                 span class="btn-add__label" Invite
 
