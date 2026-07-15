@@ -1,12 +1,21 @@
+// app/javascript/chat/chatroom.js
+// Chatroom-page-specific setup: messages (ActionCable + polling fallback),
+// the message composer, voice message playback, the "add people" modal,
+// and the outbound call buttons (Call / Video call) — all of which only
+// exist when #messages-container is on the page.
+//
+// Global call plumbing (the CallChannel subscription, the incoming-call
+// modal, and the audio/video call controls) does NOT live here anymore —
+// it's initialized once, globally, in application.js, because it has to
+// keep working on every page the user navigates to, not just this one.
+// See application.js for that.
 
 import { scrollToBottom, messagesContainer } from "./dom_utils";
 import { initActionCable, teardownActionCable, startPolling, stopPolling } from "./cable_messages";
 import { initMessageForm, stopRecordingIfActive } from "./message_form";
 import { initVoicePlayers, stopActiveVoiceAudio } from "./voice_player";
 import { initAddPeople } from "./add_people";
-import { initCallControls, teardownCall, currentCallState } from "./call_session";
 import { initOutgoingCall } from "./outgoing_call";
-import { initIncomingCall } from "./incoming_call";
 
 function init() {
   if (!messagesContainer()) return;
@@ -15,9 +24,7 @@ function init() {
   initMessageForm();
   initVoicePlayers();
   initAddPeople();
-  initCallControls();
   initOutgoingCall();
-  initIncomingCall();
   startPolling();
 }
 
@@ -26,10 +33,12 @@ function teardown() {
   stopPolling();
   stopRecordingIfActive();
   stopActiveVoiceAudio();
-  if (currentCallState() !== "idle") {
-    teardownCall({ notifyRemote: true, signalType: "call-end" });
-  }
+  // NOTE: no call teardown here anymore. An active/ringing call must
+  // survive navigating away from the chatroom page — the call UI is
+  // data-turbo-permanent and the CallChannel subscription is global, so
+  // leaving this page should not hang up or decline a call in progress.
 }
+
 let pageInitialized = false;
 function safeInit() {
   if (pageInitialized) return;

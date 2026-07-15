@@ -1,7 +1,10 @@
 // app/javascript/chat/call_session.js
-// Shared plumbing for voice + video calls: the CallChannel subscription,
-// WebRTC peer connection setup, the audio call-bar, the video overlay,
-// ringtone, and teardown.
+// Shared plumbing for voice + video calls: the CallChannel subscription
+// (scoped to the signed-in user, not any particular chatroom), WebRTC peer
+// connection setup, the audio call-bar, the video overlay, ringtone, and
+// teardown. Works from any page because the call UI lives in a
+// data-turbo-permanent partial in the layout, and the subscription reads
+// the user id off <body data-current-user-id>.
 //
 // Call type travels inside the "call-offer" signal payload as
 // { sdp, video: true|false } so the receiving side knows whether to render
@@ -16,6 +19,7 @@
 
 import { messagesContainer, csrfToken } from "./dom_utils";
 import { createConsumer } from "@rails/actioncable";
+import { initVideoLayout, resetVideoLayout, setLocalMirrored } from "./video_layout";
 
 const CALL_TIMEOUT_MS = 30000;
 const ICE_SERVERS = [
@@ -42,6 +46,31 @@ let isFlippingCamera = false; // guards against double-taps mid-swap
 let isOutgoingCall = false; // true only on the browser that placed the call —
                              // that's the one that logs the Call record, so a
                              // single call never produces two log rows.
+
+// Identity of the call in progress, independent of whatever page the user
+// is currently on. Set by outgoing_call.js when placing a call, or derived
+// from the incoming offer's payload when receiving one. Every signal sent
+// after a call is established reads recipient_id/chatroom_id from here.
+let activeChatroomId = null;
+let activeRecipientId = null;
+let activeCallerName = null;
+let activeCallerAvatarUrl = null;
+
+export function setActiveCall({ chatroomId, recipientId, callerName, callerAvatarUrl } = {}) {
+  if (chatroomId !== undefined) activeChatroomId = chatroomId;
+  if (recipientId !== undefined) activeRecipientId = recipientId;
+  if (callerName !== undefined) activeCallerName = callerName;
+  if (callerAvatarUrl !== undefined) activeCallerAvatarUrl = callerAvatarUrl;
+}
+
+export function getActiveCall() {
+  return {
+    chatroomId: activeChatroomId,
+    recipientId: activeRecipientId,
+    callerName: activeCallerName,
+    callerAvatarUrl: activeCallerAvatarUrl,
+  };
+}
 
 export function setOutgoingCall(value) {
   isOutgoingCall = !!value;
@@ -126,24 +155,23 @@ export function stopRingtone() {
 
 // ---- CallChannel signaling ----
 
+// Subscribes once per full page load, identified by the signed-in user
+// (from <body data-current-user-id>) rather than any chatroom. Safe to call
+// from any page; safe to call more than once (no-ops if already subscribed).
+//
 // handlers: { onOffer(payload) } — called when a call-offer arrives while
 // idle. Incoming-call UI registers this; outgoing calls don't need it.
 export function initCallChannel(handlers = {}) {
   offerHandler = handlers.onOffer || null;
 
-  const container = messagesContainer();
-  if (!container) return;
-  const chatroomId = container.dataset.chatroomId;
-  const currentUserId = container.dataset.currentUserId;
+  const currentUserId = document.body.dataset.currentUserId;
+  if (!currentUserId) return; // not signed in
 
-  if (callSubscription) {
-    callSubscription.unsubscribe();
-    callSubscription = null;
-  }
+  if (callSubscription) return; // already subscribed — don't double-subscribe
 
   const consumer = createConsumer("/cable");
   callSubscription = consumer.subscriptions.create(
-    { channel: "CallChannel", chatroom_id: chatroomId },
+    { channel: "CallChannel" },
     {
       received(data) {
         if (Number(data.sender_id) === Number(currentUserId)) return;
@@ -154,9 +182,20 @@ export function initCallChannel(handlers = {}) {
   );
 }
 
+// Every signal now needs to say who it's for, since the channel is scoped
+// to the sender's own connection, not a shared chatroom stream.
 export function sendSignal(type, payload) {
   if (!callSubscription) return;
-  callSubscription.perform("signal", { type, payload });
+  if (!activeRecipientId) {
+    console.error("[CallChannel] sendSignal called with no active recipient");
+    return;
+  }
+  callSubscription.perform("signal", {
+    type,
+    payload,
+    recipient_id: activeRecipientId,
+    chatroom_id: activeChatroomId,
+  });
 }
 
 // Turns whatever came back over the wire into a consistent
@@ -186,17 +225,28 @@ function normalizeOfferPayload(payload) {
 async function handleSignal(data) {
   if (data.type === "call-offer") {
     if (callState !== "idle") {
+      // Need a recipient to decline back to — use the sender of this offer.
+      setActiveCall({ recipientId: data.sender_id, chatroomId: data.chatroom_id });
       sendSignal("call-busy", {});
       return;
     }
 
     const normalized = normalizeOfferPayload(data.payload);
     if (!normalized) {
-      // Malformed offer — bail out instead of leaving the caller ringing
-      // forever with a client that's about to throw.
+      setActiveCall({ recipientId: data.sender_id, chatroomId: data.chatroom_id });
       sendSignal("call-decline", {});
       return;
     }
+
+    // Capture who's calling and from which chatroom BEFORE invoking the
+    // handler, so incoming_call.js can render the caller's name/avatar
+    // without needing to be on that chatroom's page.
+    setActiveCall({
+      chatroomId: data.chatroom_id,
+      recipientId: data.sender_id,
+      callerName: data.sender_name || "Someone",
+      callerAvatarUrl: data.sender_avatar_url || null,
+    });
 
     pendingOffer = normalized;
     setCallType(normalized.video ? "video" : "audio");
@@ -261,7 +311,9 @@ export async function acquireMediaStream(video) {
     audio: true,
     video: video ? { facingMode: "user" } : false,
   });
-  if (video) maybeShowFlipButton();
+  if (video) {
+    maybeShowFlipButton();
+  }
   return localStream;
 }
 
@@ -277,9 +329,6 @@ async function maybeShowFlipButton() {
     const cameraCount = devices.filter((d) => d.kind === "videoinput").length;
     flipBtn.classList.toggle("hidden", cameraCount < 2);
   } catch (err) {
-    // If we can't enumerate (permissions not settled yet, unsupported
-    // browser, etc.) just leave the button hidden rather than show a
-    // control that's likely to fail.
     flipBtn.classList.add("hidden");
   }
 }
@@ -288,10 +337,7 @@ function hideFlipButton() {
   document.getElementById("video-flip-camera-btn")?.classList.add("hidden");
 }
 
-// Swaps between front and back camera mid-call by requesting a fresh video
-// track for the opposite facing mode and replacing it on both the live
-// RTCPeerConnection sender (no renegotiation needed) and the local stream
-// used for the PiP preview.
+
 export async function flipCamera() {
   if (!localStream || callType !== "video" || isFlippingCamera) return;
   const oldTrack = localStream.getVideoTracks()[0];
@@ -339,6 +385,7 @@ export async function flipCamera() {
   attachLocalPreview(localStream);
 
   currentFacingMode = nextFacingMode;
+   setLocalMirrored(true);
   isFlippingCamera = false;
 }
 
@@ -407,6 +454,7 @@ export function showVideoCallUI(status, { showTimer } = {}) {
   overlay.classList.add("flex");
   if (statusEl) statusEl.textContent = status;
   if (timerEl) timerEl.classList.toggle("hidden", !showTimer);
+  resetVideoLayout(); // start each call remote-main / local-pip, default corner
 }
 
 export function hideVideoCallUI() {
@@ -416,6 +464,7 @@ export function hideVideoCallUI() {
   overlay.classList.remove("flex");
   clearLocalPreview();
   clearRemoteVideo();
+  resetVideoLayout(); // clean slate for next call
 }
 
 function startCallTimer() {
@@ -444,7 +493,7 @@ export function onCallConnected() {
   clearTimeout(callTimeoutHandle);
   stopRingtone();
   callState = "connected";
-  const name = document.getElementById("other-member-name")?.textContent || "call";
+  const name = activeCallerName || "call";
 
   if (callType === "video") {
     showVideoCallUI(name, { showTimer: true });
@@ -464,11 +513,8 @@ export function clearCallTimeout() {
 }
 
 async function logCallSummary(status) {
-  const container = messagesContainer();
-  const chatroomId = container?.dataset.chatroomId;
-  const recipientId =
-    document.getElementById("voice-call-btn")?.dataset.recipientId ||
-    document.getElementById("video-call-btn")?.dataset.recipientId;
+  const chatroomId = activeChatroomId || messagesContainer()?.dataset.chatroomId;
+  const recipientId = activeRecipientId;
   if (!chatroomId || !recipientId) return;
 
   try {
@@ -570,6 +616,7 @@ export function teardownCall({ notifyRemote, signalType, reason } = {}) {
   callState = "idle";
   callType = "audio";
   isOutgoingCall = false;
+  setActiveCall({ chatroomId: null, recipientId: null, callerName: null, callerAvatarUrl: null });
 }
 
 export function initCallControls() {
@@ -584,4 +631,6 @@ export function initCallControls() {
   document.getElementById("video-mute-btn")?.addEventListener("click", toggleMute);
   document.getElementById("video-camera-toggle-btn")?.addEventListener("click", toggleCamera);
   document.getElementById("video-flip-camera-btn")?.addEventListener("click", flipCamera);
+
+  initVideoLayout();
 }

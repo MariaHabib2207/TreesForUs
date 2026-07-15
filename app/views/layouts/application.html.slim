@@ -13,20 +13,21 @@ html class="h-full"
     = csp_meta_tag
     = javascript_importmap_tags
 
-  body class="h-full flex flex-col overflow-hidden bg-cover bg-center bg-no-repeat bg-fixed" style="background-image: url(#{image_path('background-img.png')})"
+  body class="h-full flex flex-col overflow-hidden bg-cover bg-center bg-no-repeat bg-fixed" style="background-image: url(#{image_path('background-img.png')})" data-current-user-id=(user_signed_in? ? current_user.id : nil)
 
     = turbo_frame_tag "modal"
 
     - if user_signed_in?
       = render "layouts/navbar"
+      = render "calls/call_ui"
 
-      - if notice
-        .mb-4.rounded-xl.border.border-green-200.bg-green-50.p-4.text-green-800.shadow-sm
-          = notice
+    - if notice
+      .mb-4.rounded-xl.border.border-green-200.bg-green-50.p-4.text-green-800.shadow-sm
+        = notice
 
-      - if alert
-        .mb-4.rounded-xl.border.border-red-200.bg-red-50.p-4.text-red-800.shadow-sm
-          = alert
+    - if alert
+      .mb-4.rounded-xl.border.border-red-200.bg-red-50.p-4.text-red-800.shadow-sm
+        = alert
 
     main class="flex-1 overflow-y-auto"
       = yield

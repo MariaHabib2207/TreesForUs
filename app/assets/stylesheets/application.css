@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+#video-call-overlay video.video-pip {
+  transition: box-shadow 0.15s ease;
+}
+#video-call-overlay video.video-pip-dragging {
+  transition: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+.video-mirrored {
+  transform: scaleX(-1);
+}

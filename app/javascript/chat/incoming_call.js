@@ -1,12 +1,13 @@
 // app/javascript/chat/incoming_call.js
 // Owns the incoming-call popup: showing it when an offer arrives (audio or
 // video), and wiring Accept/Decline. This is the only file that touches
-// #incoming-call-modal.
+// #incoming-call-modal. Works from any page — the modal lives in a
+// data-turbo-permanent partial, and caller name/avatar come from the
+// signal payload rather than any chatroom-page DOM element.
 console.log("incoming_call.js loaded, subscribing to CallChannel");
 import {
   getPendingOffer,
-  setPendingOffer,
-  setCallType,
+  getActiveCall,
   createPeerConnection,
   acquireMediaStream,
   attachLocalTracks,
@@ -20,10 +21,10 @@ import {
   teardownCall,
   initCallChannel,
 } from "./call_session";
+import { messagesContainer } from "./dom_utils";
 
 function showIncomingCallModal(offerPayload) {
-  setPendingOffer(offerPayload);
-  setCallType(offerPayload?.video ? "video" : "audio");
+  const { callerName, callerAvatarUrl } = getActiveCall();
 
   stopRingtone();
   playRingtone();
@@ -31,10 +32,24 @@ function showIncomingCallModal(offerPayload) {
   const modal = document.getElementById("incoming-call-modal");
   const nameEl = document.getElementById("incoming-caller-name");
   const typeLabel = document.getElementById("incoming-call-type-label");
-  nameEl.textContent = document.getElementById("other-member-name")?.textContent || "Someone";
+  const avatarImg = document.getElementById("incoming-caller-avatar-img");
+  const avatarFallback = document.getElementById("incoming-caller-avatar-fallback");
+
+  nameEl.textContent = callerName || "Someone";
   if (typeLabel) {
     typeLabel.textContent = offerPayload?.video ? "Incoming video call…" : "Incoming voice call…";
   }
+
+  if (callerAvatarUrl) {
+    avatarImg.src = callerAvatarUrl;
+    avatarImg.classList.remove("hidden");
+    avatarFallback.classList.add("hidden");
+  } else {
+    avatarImg.classList.add("hidden");
+    avatarFallback.classList.remove("hidden");
+    avatarFallback.textContent = (callerName || "?").slice(0, 2).toUpperCase();
+  }
+
   modal.classList.remove("hidden");
   modal.classList.add("flex");
 
@@ -54,6 +69,7 @@ async function acceptCall() {
   if (!pendingOffer) return;
 
   const isVideo = !!pendingOffer.video;
+  const { chatroomId } = getActiveCall();
 
   if (!pendingOffer.sdp || typeof pendingOffer.sdp.type !== "string") {
     console.error("[CallChannel] Refusing to accept — offer has no usable SDP:", pendingOffer);
@@ -91,6 +107,14 @@ async function acceptCall() {
   sendSignal("call-answer", answer);
 
   onCallConnected();
+
+  // If the call came in while the user was somewhere other than that
+  // chatroom, take them there now. The call UI itself (bar/overlay) is
+  // data-turbo-permanent, so this navigation doesn't interrupt the call.
+  const currentChatroomId = messagesContainer()?.dataset.chatroomId;
+  if (chatroomId && String(currentChatroomId) !== String(chatroomId) && window.Turbo) {
+    window.Turbo.visit(`/chatrooms/${chatroomId}`);
+  }
 }
 
 function declineCall() {
@@ -111,8 +135,8 @@ export function initIncomingCall() {
   });
 }
 
-// Exposed for chatroom.js teardown so the modal is hidden if the page
-// unloads mid-ring.
+// Exposed in case any page-specific teardown needs to hide the modal
+// explicitly (e.g. mid-ring cleanup).
 export function hideIncomingCallModalIfShown() {
   hideIncomingCallModal();
 }
