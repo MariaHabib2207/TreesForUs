@@ -47,6 +47,23 @@ let isOutgoingCall = false; // true only on the browser that placed the call —
                              // that's the one that logs the Call record, so a
                              // single call never produces two log rows.
 
+// ---- screen share state ----
+// screenStream: the MediaStream from getDisplayMedia(), kept only so we can
+// stop() its tracks on exit (releases the "sharing your screen" browser UI).
+// cameraVideoTrack: the ORIGINAL camera track, stashed while sharing so
+// stopScreenShare() can hand it back to both the peer connection sender and
+// the local preview. It is never stopped while stashed — only swapped out
+// and back in — so the camera doesn't need to be re-acquired afterward.
+//
+// remoteIsScreenSharing: mirrors the OTHER participant's sharing state,
+// driven entirely by "screen-share-start"/"screen-share-stop" signals over
+// CallChannel. This is what enforces "only one person shares at a time" —
+// we never inspect media tracks to decide this, only the signal.
+let isScreenSharing = false;
+let screenStream = null;
+let cameraVideoTrack = null;
+let remoteIsScreenSharing = false;
+
 // Identity of the call in progress, independent of whatever page the user
 // is currently on. Set by outgoing_call.js when placing a call, or derived
 // from the incoming offer's payload when receiving one. Every signal sent
@@ -108,6 +125,23 @@ export function getPendingOffer() {
 
 export function setPendingOffer(offer) {
   pendingOffer = offer;
+}
+
+export function isCurrentlyScreenSharing() {
+  return isScreenSharing;
+}
+
+// Best-effort name for whoever's on the other end, for both call
+// directions: incoming calls capture it from the offer payload
+// (activeCallerName); outgoing calls read it off the chatroom page's
+// #other-member-name element (same element outgoing_call.js already uses
+// for its "Calling {name}…" status text).
+function getOtherParticipantName() {
+  return (
+    activeCallerName ||
+    document.getElementById("other-member-name")?.textContent?.trim() ||
+    "The other participant"
+  );
 }
 
 // ---- ringtone ----
@@ -263,6 +297,17 @@ async function handleSignal(data) {
         console.error("ICE add error:", err);
       }
     }
+  } else if (data.type === "screen-share-start") {
+    remoteIsScreenSharing = true;
+    updateScreenShareUI();
+    showScreenShareBanner(`${getOtherParticipantName()} is sharing their screen`);
+  } else if (data.type === "screen-share-stop") {
+    remoteIsScreenSharing = false;
+    updateScreenShareUI();
+    // Only clear the banner if I'M not the one currently sharing — avoids
+    // a race where their "stop" arrives right as I start, which would
+    // otherwise wipe my own "You're sharing…" banner.
+    if (!isScreenSharing) hideScreenShareBanner();
   } else if (["call-end", "call-busy", "call-decline"].includes(data.type)) {
     const reasonMap = { "call-busy": "busy", "call-decline": "declined" };
     teardownCall({ notifyRemote: false, reason: reasonMap[data.type] });
@@ -313,6 +358,7 @@ export async function acquireMediaStream(video) {
   });
   if (video) {
     maybeShowFlipButton();
+    setLocalMirrored(true); // front camera — mirror like a real mirror
   }
   return localStream;
 }
@@ -337,9 +383,35 @@ function hideFlipButton() {
   document.getElementById("video-flip-camera-btn")?.classList.add("hidden");
 }
 
+function hideScreenShareButton() {
+  document.getElementById("video-screen-share-btn")?.classList.add("hidden");
+}
+
+function showScreenShareButtonIfVideoCall() {
+  const btn = document.getElementById("video-screen-share-btn");
+  if (!btn) return;
+  btn.classList.toggle("hidden", callType !== "video");
+}
+
+function showScreenShareBanner(text) {
+  const banner = document.getElementById("video-screen-share-banner");
+  const textEl = document.getElementById("video-screen-share-banner-text");
+  if (!banner) return;
+  if (textEl) textEl.textContent = text;
+  banner.classList.remove("hidden");
+  banner.classList.add("flex");
+}
+
+function hideScreenShareBanner() {
+  const banner = document.getElementById("video-screen-share-banner");
+  if (!banner) return;
+  banner.classList.add("hidden");
+  banner.classList.remove("flex");
+}
+
 
 export async function flipCamera() {
-  if (!localStream || callType !== "video" || isFlippingCamera) return;
+  if (!localStream || callType !== "video" || isFlippingCamera || isScreenSharing) return;
   const oldTrack = localStream.getVideoTracks()[0];
   if (!oldTrack) return;
 
@@ -385,8 +457,150 @@ export async function flipCamera() {
   attachLocalPreview(localStream);
 
   currentFacingMode = nextFacingMode;
-   setLocalMirrored(true);
+  setLocalMirrored(true); // front camera mirrors, back camera doesn't
   isFlippingCamera = false;
+}
+
+// ---- screen sharing ----
+// Swaps the video track being SENT to the peer from the camera to a
+// getDisplayMedia() capture, using the exact same replaceTrack() approach
+// as flipCamera(). Only meaningful during an active video call.
+//
+// Mutual exclusion: enforced purely via the screen-share-start/-stop
+// signals, not by inspecting media. remoteIsScreenSharing is the single
+// source of truth for "is the other person currently sharing" on this
+// browser; it's set by handleSignal() above, and toggleScreenShare()
+// refuses to start a local share while it's true.
+//
+// Replacement, not hiding: once replaceTrack() swaps the sender's track,
+// the OTHER participant's <video id="remote-video"> element keeps playing
+// the same MediaStream it already has a reference to — WebRTC delivers the
+// new frames on the existing track with no re-negotiation and no new
+// "track" event. So the other person's view is never hidden or blanked;
+// it just starts showing screen content instead of camera content,
+// automatically. The banner below is purely an informational label on
+// top of that, not something that gates the video itself.
+
+export async function toggleScreenShare() {
+  if (callType !== "video" || callState !== "connected") return;
+
+  if (isScreenSharing) {
+    await stopScreenShare();
+    return;
+  }
+
+  if (remoteIsScreenSharing) {
+    alert(`${getOtherParticipantName()} is already sharing their screen. You can share yours once they stop.`);
+    return;
+  }
+
+  await startScreenShare();
+}
+
+async function startScreenShare() {
+  if (!peerConnection || !localStream || isFlippingCamera) return;
+
+  let displayStream;
+  try {
+    displayStream = await navigator.mediaDevices.getDisplayMedia({
+      video: true,
+      audio: false,
+    });
+  } catch (err) {
+    // User cancelled the "choose a tab/window/screen" picker, or denied
+    // permission — not worth alerting on, this is a normal outcome.
+    console.log("Screen share cancelled or denied:", err);
+    return;
+  }
+
+  const screenTrack = displayStream.getVideoTracks()[0];
+  if (!screenTrack) return;
+
+  const sender = peerConnection.getSenders().find((s) => s.track && s.track.kind === "video");
+  if (sender) {
+    try {
+      await sender.replaceTrack(screenTrack);
+    } catch (err) {
+      console.error("replaceTrack failed when starting screen share:", err);
+      screenTrack.stop();
+      return;
+    }
+  }
+
+  // Stash the live camera track (do NOT stop it) so it can be handed
+  // straight back on stopScreenShare() without re-requesting the camera.
+  cameraVideoTrack = localStream.getVideoTracks()[0] || null;
+  screenStream = displayStream;
+  isScreenSharing = true;
+
+  // Local preview should show exactly what's being sent — the screen, not
+  // your camera — so swap #local-video's srcObject to the capture too.
+  attachLocalPreview(new MediaStream([screenTrack]));
+  setLocalMirrored(false); // screen content is never mirrored
+
+  sendSignal("screen-share-start", {});
+  showScreenShareBanner("You're sharing your screen");
+
+  // Every browser puts its own native "Stop sharing" bar/button on the
+  // captured tab/window. If the user stops it from there instead of our
+  // in-app button, the track ends on its own — listen for that so state
+  // doesn't get stuck thinking we're still sharing.
+  screenTrack.addEventListener("ended", () => {
+    if (isScreenSharing) stopScreenShare();
+  });
+
+  updateScreenShareUI();
+}
+
+async function stopScreenShare() {
+  if (!isScreenSharing) return;
+
+  if (screenStream) {
+    screenStream.getTracks().forEach((t) => t.stop());
+    screenStream = null;
+  }
+
+  if (peerConnection && cameraVideoTrack) {
+    const sender = peerConnection.getSenders().find((s) => s.track && s.track.kind === "video");
+    if (sender) {
+      try {
+        await sender.replaceTrack(cameraVideoTrack);
+      } catch (err) {
+        console.error("replaceTrack failed when stopping screen share:", err);
+      }
+    }
+  }
+
+  isScreenSharing = false;
+  cameraVideoTrack = null;
+
+  if (localStream) {
+    attachLocalPreview(localStream);
+    setLocalMirrored(currentFacingMode === "user");
+  }
+
+  sendSignal("screen-share-stop", {});
+  hideScreenShareBanner();
+  updateScreenShareUI();
+}
+
+function updateScreenShareUI() {
+  document.getElementById("video-screen-share-on-icon")?.classList.toggle("hidden", !isScreenSharing);
+  document.getElementById("video-screen-share-off-icon")?.classList.toggle("hidden", isScreenSharing);
+
+  const btn = document.getElementById("video-screen-share-btn");
+  if (btn) {
+    btn.classList.toggle("bg-green-600", isScreenSharing);
+    btn.classList.toggle("hover:bg-green-700", isScreenSharing);
+    btn.classList.toggle("bg-white/15", !isScreenSharing);
+    btn.classList.toggle("hover:bg-white/25", !isScreenSharing);
+
+    // Greyed out (but not literally disabled — clicking still shows the
+    // "X is already sharing" alert rather than doing nothing silently)
+    // whenever the OTHER person is sharing and I'm not.
+    const blockedByRemote = remoteIsScreenSharing && !isScreenSharing;
+    btn.classList.toggle("opacity-40", blockedByRemote);
+  }
 }
 
 // Back-compat alias for any existing audio-only call sites.
@@ -455,6 +669,7 @@ export function showVideoCallUI(status, { showTimer } = {}) {
   if (statusEl) statusEl.textContent = status;
   if (timerEl) timerEl.classList.toggle("hidden", !showTimer);
   resetVideoLayout(); // start each call remote-main / local-pip, default corner
+  showScreenShareButtonIfVideoCall();
 }
 
 export function hideVideoCallUI() {
@@ -599,6 +814,10 @@ export function teardownCall({ notifyRemote, signalType, reason } = {}) {
     localStream.getTracks().forEach((t) => t.stop());
     localStream = null;
   }
+  if (screenStream) {
+    screenStream.getTracks().forEach((t) => t.stop());
+    screenStream = null;
+  }
   document.getElementById("remote-audio")?.remove();
 
   if (notifyRemote) sendSignal(signalType || "call-end", {});
@@ -609,9 +828,15 @@ export function teardownCall({ notifyRemote, signalType, reason } = {}) {
   isCameraOff = false;
   currentFacingMode = "user";
   isFlippingCamera = false;
+  isScreenSharing = false;
+  cameraVideoTrack = null;
+  remoteIsScreenSharing = false;
   resetMuteIcon();
   resetCameraIcon();
+  updateScreenShareUI();
+  hideScreenShareBanner();
   hideFlipButton();
+  hideScreenShareButton();
   pendingOffer = null;
   callState = "idle";
   callType = "audio";
@@ -631,6 +856,7 @@ export function initCallControls() {
   document.getElementById("video-mute-btn")?.addEventListener("click", toggleMute);
   document.getElementById("video-camera-toggle-btn")?.addEventListener("click", toggleCamera);
   document.getElementById("video-flip-camera-btn")?.addEventListener("click", flipCamera);
+  document.getElementById("video-screen-share-btn")?.addEventListener("click", toggleScreenShare);
 
   initVideoLayout();
 }
