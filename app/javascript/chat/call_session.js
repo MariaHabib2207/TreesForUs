@@ -308,6 +308,8 @@ async function handleSignal(data) {
     // a race where their "stop" arrives right as I start, which would
     // otherwise wipe my own "You're sharing…" banner.
     if (!isScreenSharing) hideScreenShareBanner();
+  } else if (data.type === "reaction") {
+    showReactionPopup(data.payload?.emoji);
   } else if (["call-end", "call-busy", "call-decline"].includes(data.type)) {
     const reasonMap = { "call-busy": "busy", "call-decline": "declined" };
     teardownCall({ notifyRemote: false, reason: reasonMap[data.type] });
@@ -409,6 +411,92 @@ function hideScreenShareBanner() {
   banner.classList.remove("flex");
 }
 
+// ---- reaction popup (Instagram double-tap-heart style) ----
+// Purely a local visual effect: showReactionPopup() renders a single
+// enlarged emoji centered over #video-call-overlay, lets it scale in and
+// fade out, then removes it from the DOM. Delivery to the other participant
+// rides the exact same signal/broadcast path as ICE candidates and
+// screen-share flags (see sendSignal / handleSignal above), so no new
+// server-side channel method is needed — CallChannel#signal already
+// re-broadcasts an arbitrary { type, payload } to the recipient.
+//
+// Styling and animation are applied entirely inline via JS (element.style +
+// the Web Animations API) rather than through an external stylesheet class.
+// This is deliberate: this effect must render correctly the instant it
+// ships, and external CSS only takes effect after your CSS build step
+// (esbuild/tailwindcss watcher, `bin/dev`, etc.) has actually recompiled
+// and the browser has reloaded the stylesheet. Doing it inline sidesteps
+// that entirely — no build step, no stale-CSS class of bugs.
+
+function showReactionPopup(emoji) {
+  if (!emoji) return;
+  const overlay = document.getElementById("video-call-overlay");
+  if (!overlay) {
+    console.warn("[reaction] #video-call-overlay not found in DOM — cannot show reaction popup");
+    return;
+  }
+
+  // If a popup is already mid-animation, remove it immediately so a fast
+  // second reaction doesn't stack visually on top of the first.
+  overlay.querySelectorAll(".js-reaction-popup").forEach((n) => n.remove());
+
+  const el = document.createElement("span");
+  el.textContent = emoji;
+  el.className = "js-reaction-popup"; // marker class only, no styling relies on this
+  Object.assign(el.style, {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    fontSize: "6rem",
+    lineHeight: "1",
+    pointerEvents: "none",
+    zIndex: "9999",
+    transform: "translate(-50%, -50%) scale(0.4)",
+    opacity: "0",
+    filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.35))",
+  });
+
+  overlay.appendChild(el);
+
+  if (typeof el.animate === "function") {
+    el.animate(
+      [
+        { opacity: 0, transform: "translate(-50%, -50%) scale(0.4)" },
+        { opacity: 1, transform: "translate(-50%, -50%) scale(1.15)", offset: 0.15 },
+        { opacity: 1, transform: "translate(-50%, -50%) scale(1)", offset: 0.3 },
+        { opacity: 1, transform: "translate(-50%, -50%) scale(1)", offset: 0.75 },
+        { opacity: 0, transform: "translate(-50%, -50%) scale(1.05)" },
+      ],
+      { duration: 1100, easing: "ease-out", fill: "forwards" }
+    );
+  } else {
+    // Very old browser fallback with no Web Animations API support: just
+    // show it plainly rather than leave it invisible.
+    el.style.opacity = "1";
+  }
+
+  setTimeout(() => el.remove(), 1150);
+}
+
+function toggleReactionPicker() {
+  const picker = document.getElementById("video-reaction-picker");
+  if (!picker) return;
+  const willShow = picker.classList.contains("hidden");
+  picker.classList.toggle("hidden", !willShow);
+  picker.classList.toggle("flex", willShow);
+}
+
+function hideReactionPicker() {
+  const picker = document.getElementById("video-reaction-picker");
+  if (!picker) return;
+  picker.classList.add("hidden");
+  picker.classList.remove("flex");
+}
+
+function sendReaction(emoji) {
+  sendSignal("reaction", { emoji }); // only the other participant sees this pop up
+  hideReactionPicker();
+}
 
 export async function flipCamera() {
   if (!localStream || callType !== "video" || isFlippingCamera || isScreenSharing) return;
@@ -805,6 +893,7 @@ export function teardownCall({ notifyRemote, signalType, reason } = {}) {
   stopCallTimer();
   hideCallBar();
   hideVideoCallUI();
+  hideReactionPicker();
 
   if (peerConnection) {
     peerConnection.close();
@@ -857,6 +946,11 @@ export function initCallControls() {
   document.getElementById("video-camera-toggle-btn")?.addEventListener("click", toggleCamera);
   document.getElementById("video-flip-camera-btn")?.addEventListener("click", flipCamera);
   document.getElementById("video-screen-share-btn")?.addEventListener("click", toggleScreenShare);
+
+  document.getElementById("video-reaction-btn")?.addEventListener("click", toggleReactionPicker);
+  document.querySelectorAll(".video-reaction-option").forEach((btn) => {
+    btn.addEventListener("click", () => sendReaction(btn.dataset.emoji));
+  });
 
   initVideoLayout();
 }

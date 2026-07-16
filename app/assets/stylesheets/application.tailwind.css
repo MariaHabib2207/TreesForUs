@@ -1,4 +1,54 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+#video-call-overlay video.video-pip {
+  transition: box-shadow 0.15s ease;
+}
+#video-call-overlay video.video-pip-dragging {
+  transition: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+.video-mirrored {
+  transform: scaleX(-1);
+}
+
+/* Instagram-style enlarged emoji reaction popup during a video call.
+   Spawned and removed by showReactionPopup() in call_session.js — a single
+   emoji appears centered over the video, pops up larger than life, holds
+   briefly, then fades. */
+#video-call-overlay .reaction-popup {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 6rem;
+  line-height: 1;
+  pointer-events: none;
+  z-index: 30;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.4);
+  animation: reactionPop 1.1s ease-out forwards;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.35));
+}
+
+@keyframes reactionPop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.4);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+  30% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  75% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+}

@@ -50,14 +50,25 @@ div#global-call-ui data-turbo-permanent="true"
   div id="video-call-overlay" class="hidden fixed inset-0 z-40 bg-black items-center justify-center"
     video id="remote-video" autoplay="true" playsinline="true" class="absolute inset-0 w-full h-full object-cover"
     video id="local-video" autoplay="true" playsinline="true" muted="true" class="hidden absolute bottom-28 right-4 w-24 h-32 sm:w-32 sm:h-44 rounded-2xl object-cover shadow-lg ring-2 ring-white/20 bg-black z-10"
+
+    div id="video-reaction-picker" class="hidden absolute bottom-24 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-sm rounded-full px-3 py-2 gap-1 z-20 items-center"
+      button type="button" class="video-reaction-option text-2xl p-1 hover:scale-125 transition-transform" data-emoji="👍" 👍
+      button type="button" class="video-reaction-option text-2xl p-1 hover:scale-125 transition-transform" data-emoji="❤️" ❤️
+      button type="button" class="video-reaction-option text-2xl p-1 hover:scale-125 transition-transform" data-emoji="😂" 😂
+      button type="button" class="video-reaction-option text-2xl p-1 hover:scale-125 transition-transform" data-emoji="😮" 😮
+      button type="button" class="video-reaction-option text-2xl p-1 hover:scale-125 transition-transform" data-emoji="👏" 👏
+      button type="button" class="video-reaction-option text-2xl p-1 hover:scale-125 transition-transform" data-emoji="🎉" 🎉
+
     div class="absolute top-0 left-0 right-0 flex items-center justify-between px-4 py-3 bg-gradient-to-b from-black/70 to-transparent z-10"
       span id="video-call-status" class="text-white text-sm font-medium" Calling…
       span id="video-call-timer" class="hidden text-white/70 text-sm tabular-nums" 00:00
+
     div id="video-screen-share-banner" class="hidden absolute top-14 left-0 right-0 items-center justify-center z-10"
       span class="bg-black/70 text-white text-xs font-medium px-3 py-1.5 rounded-full flex items-center gap-1.5"
         svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
           path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7a2 2 0 012-2h6a2 2 0 012 2v10m-10 0a2 2 0 002 2h6a2 2 0 002-2m-10 0H5a2 2 0 01-2-2V9a2 2 0 012-2h2"
         span id="video-screen-share-banner-text"
+
     div class="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-4 py-8 z-10"
       button type="button" id="video-mute-btn" title="Mute" class="p-4 rounded-full bg-white/15 hover:bg-white/25 active:bg-white/30 text-white transition-colors"
         svg id="video-mic-on-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -75,6 +86,9 @@ div#global-call-ui data-turbo-permanent="true"
           path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7a2 2 0 012-2h6a2 2 0 012 2v10m-10 0a2 2 0 002 2h6a2 2 0 002-2m-10 0H5a2 2 0 01-2-2V9a2 2 0 012-2h2"
         svg id="video-screen-share-on-icon" class="hidden w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
           path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"
+      button type="button" id="video-reaction-btn" title="Send a reaction" class="p-4 rounded-full bg-white/15 hover:bg-white/25 active:bg-white/30 text-white transition-colors"
+        svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10h.01M15 10h.01M8 15a4 4 0 008 0M12 3a9 9 0 100 18 9 9 0 000-18z"
       button type="button" id="video-flip-camera-btn" title="Switch camera" class="hidden p-4 rounded-full bg-white/15 hover:bg-white/25 active:bg-white/30 text-white transition-colors"
         svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
           path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
