@@ -3,13 +3,15 @@
 - is_chat_accepted = notification.event.type == "ChatInviteAcceptedNotifier"
 - is_family_notification = notification.event.type == "NewFamilyMemberNotifier"
 - is_missed_call = notification.event.type == "MissedCallNotifier"
+- is_invite = (is_chat_invite || is_chatroom_invite) && !notification.read_at?
 
 - display_message = notification.event.params[:message].presence || (notification.event.respond_to?(:message) ? notification.event.message : nil)
 - url = notification.event.params[:url].presence || (notification.event.respond_to?(:url) ? notification.event.url : nil)
 - chatroom_id = notification.event.params[:chatroom_id] || notification.event.params[:chatroom]&.id
+- inviter_id = notification.event.params[:inviter_id] if is_invite
 
-div class="px-4 py-3 hover:bg-gray-50 border-b border-gray-50 #{'bg-green-50' unless notification.read_at?}"
-  div class="flex items-start justify-between gap-2"
+div class="px-4 py-3 hover:bg-gray-50 border-b border-gray-50 #{'bg-green-50' unless notification.read_at?}" data-modal-target=("respond-modal-#{notification.id}" if is_invite)
+  div class="flex items-start justify-between gap-2 #{'cursor-pointer sm:cursor-default' if is_invite}"
     - if is_chat_accepted && chatroom_id.present?
       a href=chatroom_path(chatroom_id) class="flex-1 min-w-0 flex items-start gap-2"
         p class="text-sm text-gray-800 leading-snug break-words"
@@ -26,7 +28,13 @@ div class="px-4 py-3 hover:bg-gray-50 border-b border-gray-50 #{'bg-green-50' un
             = display_message
           p class="text-xs text-gray-400 mt-0.5"
             = notification.created_at.strftime("%b %d, %H:%M")
-    - elsif url.present? && !is_family_notification && !is_chat_invite && !is_chatroom_invite
+    - elsif is_invite
+      div class="flex-1 min-w-0"
+        p class="text-sm text-gray-800 leading-snug break-words"
+          = display_message
+        p class="text-xs text-gray-400 mt-0.5"
+          = notification.created_at.strftime("%b %d, %H:%M")
+    - elsif url.present? && !is_family_notification
       a href=url class="flex-1 min-w-0 block"
         p class="text-sm text-gray-800 leading-snug break-words"
           = display_message
@@ -39,24 +47,44 @@ div class="px-4 py-3 hover:bg-gray-50 border-b border-gray-50 #{'bg-green-50' un
         p class="text-xs text-gray-400 mt-0.5"
           = notification.created_at.strftime("%b %d, %H:%M")
 
-    = button_to notification_path(notification), method: :delete, class: "text-gray-300 hover:text-red-500 transition shrink-0 bg-transparent border-none p-1.5 -m-1.5 cursor-pointer", form: { data: { turbo_confirm: false } } do
-      svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-        path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"
+    span data-notif-delete="true"
+      = button_to notification_path(notification), method: :delete, class: "text-gray-300 hover:text-red-500 transition shrink-0 bg-transparent border-none p-1.5 -m-1.5 cursor-pointer", form: { data: { turbo_confirm: false } } do
+        svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"
 
-  / --- CHAT INVITE ACTIONS (1:1 new chat) ---
-  - if is_chat_invite && !notification.read_at?
-    - inviter_id = notification.event.params[:inviter_id]
-    div class="flex gap-2 mt-2"
-      = button_to accept_chatroom_invite_notifications_path(notification_id: notification.id, inviter_id: inviter_id), method: :post, class: "flex-1 text-xs font-semibold text-white bg-green-600 hover:bg-green-700 px-3 py-2 rounded-lg transition text-center", form: { data: { turbo: false } } do
-        | ✓ Accept
-      = button_to reject_chatroom_invite_notifications_path(notification_id: notification.id, inviter_id: inviter_id), method: :post, class: "flex-1 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 px-3 py-2 rounded-lg transition text-center", form: { data: { turbo: false } } do
-        | ✗ Decline
+  - if is_invite
+    div class="hidden sm:flex gap-2 mt-2"
+      - if is_chat_invite
+        = button_to accept_chatroom_invite_notifications_path(notification_id: notification.id, inviter_id: inviter_id), method: :post, class: "flex-1 text-xs font-semibold text-white bg-green-600 hover:bg-green-700 px-3 py-2 rounded-lg transition text-center", form: { data: { turbo: false } } do
+          | ✓ Accept
+        = button_to reject_chatroom_invite_notifications_path(notification_id: notification.id, inviter_id: inviter_id), method: :post, class: "flex-1 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 px-3 py-2 rounded-lg transition text-center", form: { data: { turbo: false } } do
+          | ✗ Decline
+      - else
+        = button_to accept_chatroom_invite_notifications_path(notification_id: notification.id, inviter_id: inviter_id, chatroom_id: chatroom_id), method: :post, class: "flex-1 text-xs font-semibold text-white bg-green-600 hover:bg-green-700 px-3 py-2 rounded-lg transition text-center", form: { data: { turbo: false } } do
+          | ✓ Accept
+        = button_to reject_chatroom_invite_notifications_path(notification_id: notification.id, inviter_id: inviter_id, chatroom_id: chatroom_id), method: :post, class: "flex-1 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 px-3 py-2 rounded-lg transition text-center", form: { data: { turbo: false } } do
+          | ✗ Decline
 
-  / --- CHATROOM INVITE ACTIONS (add to existing group) ---
-  - if is_chatroom_invite && !notification.read_at?
-    - inviter_id = notification.event.params[:inviter_id]
-    div class="flex gap-2 mt-2"
-      = button_to accept_chatroom_invite_notifications_path(notification_id: notification.id, inviter_id: inviter_id, chatroom_id: chatroom_id), method: :post, class: "flex-1 text-xs font-semibold text-white bg-green-600 hover:bg-green-700 px-3 py-2 rounded-lg transition text-center", form: { data: { turbo: false } } do
-        | ✓ Accept
-      = button_to reject_chatroom_invite_notifications_path(notification_id: notification.id, inviter_id: inviter_id, chatroom_id: chatroom_id), method: :post, class: "flex-1 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 px-3 py-2 rounded-lg transition text-center", form: { data: { turbo: false } } do
-        | ✗ Decline
+  - if is_invite
+    div id="respond-modal-#{notification.id}" class="fixed inset-0 z-50 items-center justify-center bg-black/40 p-4" style="display:none;"
+      div class="w-full max-w-xs bg-white rounded-lg shadow-xl overflow-hidden"
+        div class="flex items-center justify-between px-4 py-3 border-b border-gray-100"
+          span class="font-semibold text-gray-800 text-sm"
+            = is_chatroom_invite ? "Group chat invite" : "Chat invite"
+          button type="button" data-close-respond-modal="respond-modal-#{notification.id}" class="text-gray-400 hover:text-gray-600 p-1 -mr-1"
+            svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"
+        div class="px-4 py-3"
+          p class="text-sm text-gray-700 leading-snug break-words mb-3"
+            = display_message
+          div class="flex gap-2"
+            - if is_chat_invite
+              = button_to accept_chatroom_invite_notifications_path(notification_id: notification.id, inviter_id: inviter_id), method: :post, class: "flex-1 text-xs font-semibold text-white bg-green-600 hover:bg-green-700 px-3 py-2 rounded-lg transition text-center", form: { data: { turbo: false } } do
+                | ✓ Accept
+              = button_to reject_chatroom_invite_notifications_path(notification_id: notification.id, inviter_id: inviter_id), method: :post, class: "flex-1 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 px-3 py-2 rounded-lg transition text-center", form: { data: { turbo: false } } do
+                | ✗ Decline
+            - else
+              = button_to accept_chatroom_invite_notifications_path(notification_id: notification.id, inviter_id: inviter_id, chatroom_id: chatroom_id), method: :post, class: "flex-1 text-xs font-semibold text-white bg-green-600 hover:bg-green-700 px-3 py-2 rounded-lg transition text-center", form: { data: { turbo: false } } do
+                | ✓ Accept
+              = button_to reject_chatroom_invite_notifications_path(notification_id: notification.id, inviter_id: inviter_id, chatroom_id: chatroom_id), method: :post, class: "flex-1 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 px-3 py-2 rounded-lg transition text-center", form: { data: { turbo: false } } do
+                | ✗ Decline
