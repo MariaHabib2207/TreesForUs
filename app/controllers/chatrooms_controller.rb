@@ -18,6 +18,7 @@ class ChatroomsController < ApplicationController
     @messages = @chatroom.messages
                           .includes(:user, attachments_attachments: :blob)
                           .ordered
+                          .visible_for(current_user)
 
     @chatroom.messages.where(read_at: nil).where.not(user: current_user).update_all(read_at: Time.current)
 

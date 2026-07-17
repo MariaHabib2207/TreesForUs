@@ -1,8 +1,10 @@
 class MessagesController < ApplicationController
-  before_action :set_chatroom
+  before_action :authenticate_user!
+  before_action :set_chatroom, only: [:index, :create, :poll]
+  before_action :set_message, only: [:destroy]
 
   def index
-    @messages = @chatroom.messages.order(:created_at)
+    @messages = @chatroom.messages.order(:created_at).visible_for(current_user)
     render json: {
       messages_html: render_to_string(
         partial: "messages/message",
@@ -39,7 +41,7 @@ class MessagesController < ApplicationController
   end
 
   def poll
-    messages = @chatroom.messages.order(:created_at)
+    messages = @chatroom.messages.order(:created_at).visible_for(current_user)
     messages = messages.where("messages.id > ?", params[:after]) if params[:after].present?
 
     render json: {
@@ -54,10 +56,33 @@ class MessagesController < ApplicationController
     }
   end
 
+  def destroy
+    unless @message.chatroom.members.exists?(id: current_user.id)
+      return head :forbidden
+    end
+
+    case params[:scope]
+    when "everyone"
+      unless @message.user_id == current_user.id
+        return render json: { error: "You can only delete your own messages for everyone." }, status: :forbidden
+      end
+      @message.delete_for_everyone!(current_user)
+      broadcast_deletion(@message)
+    else
+      @message.hide_for(current_user)
+    end
+
+    head :ok
+  end
+
   private
 
   def set_chatroom
     @chatroom = current_user.chatrooms.find(params[:chatroom_id])
+  end
+
+  def set_message
+    @message = Message.find(params[:id])
   end
 
   def message_params
@@ -79,17 +104,20 @@ class MessagesController < ApplicationController
       attachment.blob.update!(content_type: attachment.blob.content_type.sub("video/", "audio/"))
     end
   end
+def broadcast_message
+  html = ApplicationController.render(
+    partial: "messages/message",
+    locals: { message: @message, current_user_id: nil },
+    formats: [:html],
+    layout: false
+  )
+  ChatroomChannel.broadcast_to(@chatroom, { message_html: html, sender_id: @message.user_id })
+end
 
-  def broadcast_message
-    html = ApplicationController.render(
-      partial: "messages/message",
-      locals: { message: @message, current_user_id: nil },
-      formats: [:html],
-      layout: false
-    )
-    ActionCable.server.broadcast(
-      "chatroom_#{@chatroom.id}",
-      { message_html: html, sender_id: @message.user_id }
-    )
-  end
+def broadcast_deletion(message)
+  ChatroomChannel.broadcast_to(
+    message.chatroom,
+    { deleted_message_id: message.id, deleted_for_everyone: true }
+  )
+end
 end

@@ -63,8 +63,8 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :calls, only: [:create]
-  resources :calls, only: [:index, :destroy]
+  resources :calls, only: [:create,:index, :destroy]
+  resources :messages, only: [:destroy] 
   authenticated :user do
     root to: "dashboard#index", as: :authenticated_root
   end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_13_232043) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_17_001912) do
   create_table "active_admin_comments", force: :cascade do |t|
     t.string "namespace"
     t.text "body"
@@ -214,6 +214,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_13_232043) do
     t.index ["user_id"], name: "index_message_deletions_on_user_id"
   end
 
+  create_table "message_hidings", force: :cascade do |t|
+    t.integer "message_id", null: false
+    t.integer "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["message_id", "user_id"], name: "index_message_hidings_on_message_id_and_user_id", unique: true
+    t.index ["message_id"], name: "index_message_hidings_on_message_id"
+    t.index ["user_id"], name: "index_message_hidings_on_user_id"
+  end
+
   create_table "messages", force: :cascade do |t|
     t.integer "chatroom_id"
     t.integer "user_id"
@@ -389,6 +399,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_13_232043) do
   add_foreign_key "life_activities", "users"
   add_foreign_key "message_deletions", "messages"
   add_foreign_key "message_deletions", "users"
+  add_foreign_key "message_hidings", "messages"
+  add_foreign_key "message_hidings", "users"
   add_foreign_key "messages", "calls"
   add_foreign_key "messages", "users", column: "deleted_for_everyone_by_id"
   add_foreign_key "user_partners", "users"

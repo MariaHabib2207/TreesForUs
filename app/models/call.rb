@@ -63,9 +63,9 @@ class Call < ApplicationRecord
 
   # "Delete" for the call log feature — hides the row for this user only.
   # Never destroys the underlying Call or its chat message.
-  def hide_for(user)
-    call_hidings.find_or_create_by(user: user)
-  end
+def hide_for(user)
+  call_hidings.find_or_create_by(user: user)
+end
 
   def formatted_duration
     return nil if duration_in_seconds.to_i <= 0

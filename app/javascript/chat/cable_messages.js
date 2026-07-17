@@ -1,13 +1,4 @@
-// app/javascript/chat/cable_messages.js
-// Handles real-time message delivery over ActionCable's ChatroomChannel,
-// with an HTTP-polling fallback so messages still arrive if the socket
-// never connects.
-//
-// NOTE (open investigation): if `connected()` below never logs, check for
-// stream-name mismatches between raw strings (e.g. "chatroom_#{id}") used
-// server-side in controllers/jobs vs. the GlobalID-based stream that
-// `stream_for` generates in the channel. A silent mismatch here is exactly
-// what makes polling mask a broken cable subscription.
+
 
 import {
   appendMessageRow,
@@ -17,6 +8,7 @@ import {
   scrollToBottom,
   markMineIfNeeded,
 } from "./dom_utils";
+import { applyDeletionBroadcast } from "./message_deletion";
 import { createConsumer } from "@rails/actioncable";
 
 const POLL_MS = 3000;
@@ -51,6 +43,11 @@ export function initActionCable() {
         cableConfirmedConnected = false;
       },
       received(data) {
+        if (data.deleted_message_id) {
+          applyDeletionBroadcast(data.deleted_message_id);
+          return;
+        }
+
         if (Number(data.sender_id) === Number(currentUserId)) return;
         appendMessageRow(data.message_html, currentUserId);
       },

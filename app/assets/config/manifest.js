@@ -21,3 +21,4 @@
 //= link chat/incoming_call.js
 //= link chat/calling.js
 //= link chat/video_layout.js
+//= link chat/message_deletion.js

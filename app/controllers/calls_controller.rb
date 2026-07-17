@@ -2,9 +2,6 @@ class CallsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_call, only: [:destroy]
 
-  # GET /calls — the WhatsApp-style call log, scoped to calls involving the
-  # current user and excluding anything they've deleted (hidden) for
-  # themselves.
   def index
     @calls = Call
       .involving(current_user)
@@ -13,12 +10,6 @@ class CallsController < ApplicationController
       .recent_first
   end
 
-  # POST /chatrooms/:chatroom_id/calls
-  # Called once, by the caller's browser only (see call_session.js /
-  # teardownCall), whenever a call they placed ends — answered, missed,
-  # declined, or busy. Creates the Call row (source of truth for the call
-  # log) and a matching Message (message_type: "call") so the summary shows
-  # up inline in the chatroom exactly like a normal message.
   def create
     chatroom = current_user.chatrooms.find(params[:chatroom_id])
     recipient = User.find(params[:recipient_id])
@@ -31,7 +22,6 @@ class CallsController < ApplicationController
 
     duration = params[:duration_in_seconds].to_i
     duration = 0 if duration.negative?
-    # Only an "answered" call should ever carry a nonzero duration.
     duration = 0 unless status == "answered"
 
     call = Call.create!(
@@ -59,8 +49,6 @@ class CallsController < ApplicationController
     render json: { error: e.record.errors.full_messages.to_sentence }, status: :unprocessable_entity
   end
 
-  # DELETE /calls/:id — "delete" for the call log: hides it for the current
-  # user only. The row (and the chat bubble it produced) is untouched.
   def destroy
     @call.hide_for(current_user)
 
