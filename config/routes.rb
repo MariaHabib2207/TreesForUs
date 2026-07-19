@@ -45,7 +45,11 @@ Rails.application.routes.draw do
       end
     end
     resources :calls, only: [:create]
-    member { post :invite_member }
+    member do
+      post :invite_member
+      patch :toggle_hidden, controller: "chatroom_memberships"
+      patch :toggle_blur, controller: "chatroom_memberships"
+    end
   end
 
   post "notifications/accept_chatroom_invite", to: "notifications#accept_chatroom_invite", as: :accept_chatroom_invite_notifications
@@ -63,8 +67,12 @@ Rails.application.routes.draw do
     end
   end
 
-  resources :calls, only: [:create,:index, :destroy]
-  resources :messages, only: [:destroy] 
+  resources :calls, only: [:create, :index, :destroy]
+  resources :messages, only: [:destroy]
+
+  get   "settings/privacy", to: "settings#privacy",        as: :privacy_settings
+  patch "settings/privacy", to: "settings#update_privacy", as: :update_privacy_settings
+
   authenticated :user do
     root to: "dashboard#index", as: :authenticated_root
   end

@@ -3,37 +3,37 @@ class ChatroomsController < ApplicationController
 
   def index
     @chatrooms = Chatroom.joins(:chatroom_members)
-                         .where(chatroom_members: { user_id: current_user.id })
-                         .includes(:members, :messages)
-                         .order(updated_at: :desc)
+                        .where(chatroom_members: { user_id: current_user.id, hidden_at: nil })
+                        .includes(:members, :messages)
+                        .order(updated_at: :desc)
 
-      @recent_calls = Call.involving(current_user).visible_to(current_user).includes(:caller, :callee, :chatroom).recent_first.limit(6)
+    @recent_calls = Call.involving(current_user).visible_to(current_user).includes(:caller, :callee, :chatroom).recent_first.limit(6)
   end
+    def show
+      @chatroom = Chatroom.joins(:chatroom_members)
+                          .where(chatroom_members: { user_id: current_user.id })
+                          .find(params[:id])
 
-  def show
-    @chatroom = Chatroom.joins(:chatroom_members)
-                        .where(chatroom_members: { user_id: current_user.id })
-                        .find(params[:id])
+      @messages = @chatroom.messages
+                            .includes(:user, attachments_attachments: :blob)
+                            .ordered
+                            .visible_for(current_user)
 
-    @messages = @chatroom.messages
-                          .includes(:user, attachments_attachments: :blob)
-                          .ordered
-                          .visible_for(current_user)
+      newly_read_ids = @chatroom.messages.where(read_at: nil).where.not(user: current_user).pluck(:id)
+      if newly_read_ids.any?
+        @chatroom.messages.where(id: newly_read_ids).update_all(read_at: Time.current, delivered_at: Time.current)
+        ChatroomChannel.broadcast_to(@chatroom, { read_message_ids: newly_read_ids })
+      end
 
-    newly_read_ids = @chatroom.messages
-                              .where(read_at: nil)
-                              .where.not(user: current_user)
-                              .pluck(:id)
+      @other_members     = @chatroom.members.where.not(id: current_user.id)
+      @other_member      = @other_members.first
+      @available_friends = @chatroom.available_friends_for(current_user)
+      @membership        = ChatroomMember.find_by(chatroom_id: @chatroom.id, user_id: current_user.id)
 
-    if newly_read_ids.any?
-      @chatroom.messages.where(id: newly_read_ids).update_all(read_at: Time.current, delivered_at: Time.current)
-      ChatroomChannel.broadcast_to(@chatroom, { read_message_ids: newly_read_ids })
+      @show_other_last_seen = @other_member.nil? || @other_member.can_view?(:last_seen, current_user)
+      @show_other_online    = @other_member.nil? || @other_member.can_view?(:online, current_user)
+      @show_other_avatar    = @other_member.nil? || @other_member.can_view?(:avatar, current_user)
     end
-
-    @other_members      = @chatroom.members.where.not(id: current_user.id)
-    @other_member        = @other_members.first
-    @available_friends   = @chatroom.available_friends_for(current_user)
-  end
 
   def invite_member
     @chatroom = Chatroom.joins(:chatroom_members)

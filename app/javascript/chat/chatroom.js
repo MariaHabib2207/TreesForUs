@@ -18,6 +18,7 @@ import { initAddPeople } from "./add_people";
 import { initOutgoingCall } from "./outgoing_call";
 import { initMessageDeletion } from "./message_deletion";
 import { initOtherMemberPresence, teardownOtherMemberPresence } from "./presence";
+import { initPrivacyToggles } from "./privacy";
 
 function init() {
   if (!messagesContainer()) return;
@@ -30,6 +31,7 @@ function init() {
   initMessageDeletion();
   initOtherMemberPresence();
   startPolling();
+  initPrivacyToggles();
 }
 
 function teardown() {

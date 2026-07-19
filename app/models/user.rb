@@ -39,6 +39,9 @@
 #  created_at               :datetime         not null
 #  updated_at               :datetime         not null
 #  parent_id                :integer
+#  last_seen_visibility     :string           default("everyone"), not null
+#  online_visibility        :string           default("everyone"), not null
+#  avatar_visibility        :string           default("everyone"), not null
 #
 # Indexes
 #
@@ -53,6 +56,7 @@ class User < ApplicationRecord
 # Remove: has_noticed_notifications
   acts_as_paranoid
 
+  VISIBILITY_MODES = %w[everyone nobody custom].freeze
 
 # Add this instead:
   has_many :noticed_notifications, as: :recipient, dependent: :destroy, class_name: "Noticed::Notification"
@@ -147,6 +151,13 @@ class User < ApplicationRecord
            source: :user
   has_many :chatroom_members, dependent: :destroy
   has_many :chatrooms, through: :chatroom_members
+  has_many :user_sessions, dependent: :destroy
+
+  # -------------------------
+  # PRIVACY / VISIBILITY
+  # -------------------------
+  has_many :visibility_permissions, dependent: :destroy
+  has_many :granted_visibility_permissions, class_name: "VisibilityPermission", foreign_key: :viewer_id, dependent: :destroy
 
   # ===================================================
   # ENUMS
@@ -192,6 +203,8 @@ class User < ApplicationRecord
             uniqueness: {
               scope: :identification_type
             }
+
+  validates :last_seen_visibility, :online_visibility, :avatar_visibility, inclusion: { in: VISIBILITY_MODES }
 
   validate :cannot_have_more_than_two_families
   # validate :identification_number_format
@@ -334,6 +347,51 @@ end
     !login_enabled?
   end
 
+  def last_active_at
+    user_sessions.maximum(:last_active_at)
+  end
+
+  # Real-time presence, driven by PresenceChannel's ActionCable subscribe/
+  # unsubscribe lifecycle (see app/channels/presence_channel.rb). This is
+  # the single source of truth for "online" — last_active_at is a separate,
+  # session-based timestamp used only for "Last seen ..." display.
+  def online?
+    active_connections_count.to_i > 0
+  end
+
+  # -------------------------
+  # PRIVACY / VISIBILITY
+  # -------------------------
+  def family_members
+    family_ids = FamilyMembership.where(user_id: id).pluck(:family_id)
+    member_ids = FamilyMembership.where(family_id: family_ids).where.not(user_id: id).pluck(:user_id)
+    User.where(id: member_ids)
+  end
+
+  def can_view?(setting, viewer)
+    return true if viewer.id == id
+
+    mode = public_send("#{setting}_visibility")
+    case mode
+    when "everyone" then true
+    when "nobody" then false
+    when "custom" then visibility_permissions.exists?(viewer_id: viewer.id, setting_type: setting.to_s)
+    else false
+    end
+  end
+
+  def allowed_viewer_ids_for(setting)
+    visibility_permissions.where(setting_type: setting.to_s).pluck(:viewer_id)
+  end
+
+  def set_custom_viewers(setting, viewer_ids)
+    transaction do
+      visibility_permissions.where(setting_type: setting.to_s).destroy_all
+      viewer_ids.reject(&:blank?).each do |vid|
+        visibility_permissions.create!(viewer_id: vid, setting_type: setting.to_s)
+      end
+    end
+  end
 
 # ===================================================
 # INVITATION
@@ -373,10 +431,6 @@ def accept_invitation!(email:, password:, password_confirmation:, family_code: n
 rescue ActiveRecord::RecordInvalid => e
   errors.add(:base, e.message)
   false
-end
-
-def online?
-  active_connections_count.to_i > 0
 end
 
 private
@@ -434,17 +488,6 @@ def self.from_omniauth(auth)
   user
 end
 
-has_many :user_sessions, dependent: :destroy
-
-  def last_active_at
-    user_sessions.maximum(:last_active_at)
-  end
-
-  def online?
-    last_active_at&.> 5.minutes.ago
-  end
-
- 
   # ===================================================
   # PRIVATE METHODS
   # ===================================================

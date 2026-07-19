@@ -39,6 +39,12 @@ nav class="bg-white shadow-md px-5 py-4"
             i class="ti ti-messages" style="font-size: 16px;"
           span class="ml-1" Messages
 
+      - unless current_page?(privacy_settings_path)
+        = link_to privacy_settings_path, title: "Settings", class: "p-2 rounded-full text-green-900 hover:bg-gray-100 transition" do
+          svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+            path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+
       = link_to user_profile_path(current_user), class: "flex items-center" do
         - profile = current_user.user_profile
         - if profile&.avatar&.attached?
@@ -97,6 +103,13 @@ nav class="bg-white shadow-md px-5 py-4"
             span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center leading-none font-bold"
               = unread_count > 9 ? "9+" : unread_count.to_s
         span class="ml-1" Messages
+
+    - unless current_page?(privacy_settings_path)
+      = link_to privacy_settings_path, class: "text-sm font-medium text-white primary-btn hover:bg-green-700 px-4 py-2 rounded-lg transition flex items-center justify-center gap-1" do
+        svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+          path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+        span Settings
 
     = render partial: 'shared/notification_bell', locals: { id_suffix: 'mobile' }
 

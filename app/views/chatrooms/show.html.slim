@@ -9,7 +9,7 @@ div class="flex justify-center"
             path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"
 
         - other_profile = @other_member&.user_profile
-        - if other_profile&.avatar&.attached?
+        - if @show_other_avatar && other_profile&.avatar&.attached?
           = image_tag other_profile.avatar, id: "other-member-avatar-img", class: "w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover shrink-0 ring-2 ring-white/20"
         - else
           div id="other-member-avatar-fallback" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/15 flex items-center justify-center text-sm font-semibold shrink-0 ring-2 ring-white/20"
@@ -21,14 +21,18 @@ div class="flex justify-center"
           - else
             h1 id="other-member-name" class="text-sm sm:text-base font-semibold truncate" = @other_member&.full_name || @chatroom.name
           div class="flex items-center gap-1.5"
-            span id="other-member-status-dot" class="w-2 h-2 rounded-full #{@other_member&.online? ? 'bg-green-400' : 'bg-gray-400'} shrink-0"
-            span id="other-member-status-label" class="text-xs text-white/70 truncate"
-              - if @other_member&.online?
-                | Active now
-              - elsif @other_member&.last_active_at
+            - if @show_other_online
+              span id="other-member-status-dot" class="w-2 h-2 rounded-full #{@other_member&.online? ? 'bg-green-400' : 'bg-gray-400'} shrink-0"
+              span id="other-member-status-label" class="text-xs text-white/70 truncate"
+                - if @other_member&.online?
+                  | Active now
+                - elsif @show_other_last_seen && @other_member&.last_active_at
+                  | Last seen #{@other_member.last_active_at.strftime("%b %-d at %I:%M %p").sub(" 0", " ")}
+                - else
+                  | Offline
+            - elsif @show_other_last_seen && @other_member&.last_active_at
+              span id="other-member-status-label" class="text-xs text-white/70 truncate"
                 | Last seen #{@other_member.last_active_at.strftime("%b %-d at %I:%M %p").sub(" 0", " ")}
-              - else
-                | Offline
 
       div class="flex items-center gap-1 shrink-0"
         - if @other_member && (@other_members.nil? || @other_members.size <= 1)
@@ -39,6 +43,7 @@ div class="flex justify-center"
           button type="button" id="video-call-btn" title="Video call" data-recipient-id=@other_member.id class="p-1.5 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors"
             svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
               path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.55-2.28A1 1 0 0121 8.62v6.76a1 1 0 01-1.45.9L15 14M4 6h9a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z"
+
 
         button type="button" id="add-people-btn" title="Group" class="flex items-center gap-1 pl-2 pr-2.5 py-1.5 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors"
           svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -71,7 +76,14 @@ div class="flex justify-center"
             path d="M2 3h4l2 7-2.5 1.5a11 11 0 006 6L13 15l7 2v4a2 2 0 01-2 2A16 16 0 012 5a2 2 0 012-2z"
 
     / Messages container — WhatsApp-style scrollable pane
-    div class="flex-1 min-h-0 overflow-y-auto overscroll-contain px-2 sm:px-4 py-3 flex flex-col gap-1.5 bg-no-repeat bg-center" style="background-image: linear-gradient(rgba(239,234,226,0.75), rgba(239,234,226,0.75)), url(#{image_path('watermark.png')}); background-size: cover, 420px 420px;" id="messages-container" data-chatroom-id=@chatroom.id data-current-user-id=current_user.id data-current-user-name=current_user.full_name data-other-user-id=@other_member&.id
+    div class="flex-1 min-h-0 overflow-y-auto overscroll-contain px-2 sm:px-4 py-3 flex flex-col gap-1.5 bg-no-repeat bg-center relative" style="background-image: linear-gradient(rgba(239,234,226,0.75), rgba(239,234,226,0.75)), url(#{image_path('watermark.png')}); background-size: cover, 420px 420px;" id="messages-container" data-chatroom-id=@chatroom.id data-current-user-id=current_user.id data-current-user-name=current_user.full_name data-other-user-id=@other_member&.id
+      - if @membership&.content_blurred
+        div id="chat-blur-overlay" class="absolute inset-0 z-20 flex items-center justify-center backdrop-blur-lg bg-white/40 cursor-pointer" data-chatroom-id=@chatroom.id
+          div class="flex flex-col items-center gap-2"
+            svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+            p class="text-sm font-medium text-gray-600" Tap to reveal messages
       - @messages.each do |message|
         = render "messages/message", message: message, current_user_id: current_user.id
 

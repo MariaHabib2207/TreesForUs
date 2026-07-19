@@ -1,0 +1,49 @@
+div class="max-w-xl mx-auto py-8 px-4"
+  h1 class="text-xl font-semibold mb-6" Privacy settings
+
+  = form_with url: update_privacy_settings_path, method: :patch, local: true, html: { id: "privacy-settings-form" } do |f|
+    - [["last_seen", "Last seen"], ["online", "Online status"], ["avatar", "Profile photo"]].each do |key, label|
+      div class="mb-6 border-b border-gray-200 pb-6"
+        h2 class="text-sm font-semibold text-gray-800 mb-2" = label
+        - current_mode = current_user.public_send("#{key}_visibility")
+        - ["everyone", "nobody", "custom"].each do |mode|
+          label class="flex items-center gap-2 text-sm text-gray-700 mb-1"
+            input type="radio" name="visibility[#{key}]" value=mode checked=(current_mode == mode) class="visibility-mode-radio" data-setting-key=key
+            = mode.capitalize
+
+        div class="mt-2 pl-6 #{'hidden' unless current_mode == 'custom'}" data-custom-panel=key
+          - allowed_ids = current_user.allowed_viewer_ids_for(key)
+          - members = current_user.family_members
+          - if members.blank?
+            p class="text-xs text-gray-400" No other family members yet.
+          - else
+            - members.each do |member|
+              label class="flex items-center gap-2 text-xs text-gray-600 mb-1"
+                input type="checkbox" name="custom_viewers[#{key}][]" value=member.id checked=allowed_ids.include?(member.id)
+                = member.full_name
+
+    button type="submit" class="px-4 py-2 rounded-full bg-[#1D4D3A] text-white text-sm font-medium hover:bg-[#183f2f]" Save settings
+
+javascript:
+  (function() {
+    function initPrivacyPanels() {
+      const radios = document.querySelectorAll('.visibility-mode-radio');
+      if (!radios.length) return;
+
+      radios.forEach((radio) => {
+        radio.addEventListener('change', () => {
+          const key = radio.dataset.settingKey;
+          const panel = document.querySelector(`[data-custom-panel="${key}"]`);
+          if (!panel) return;
+          panel.classList.toggle('hidden', radio.value !== 'custom' || !radio.checked);
+        });
+      });
+    }
+
+    if (document.readyState !== 'loading') {
+      initPrivacyPanels();
+    } else {
+      document.addEventListener('DOMContentLoaded', initPrivacyPanels);
+    }
+    document.addEventListener('turbo:load', initPrivacyPanels);
+  })();

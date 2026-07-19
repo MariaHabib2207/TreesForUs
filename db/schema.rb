@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_18_085930) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_19_044118) do
   create_table "active_admin_comments", force: :cascade do |t|
     t.string "namespace"
     t.text "body"
@@ -121,7 +121,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_18_085930) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "deleted_at"
+    t.datetime "hidden_at"
+    t.boolean "content_blurred", default: false, null: false
     t.index ["deleted_at"], name: "index_chatroom_members_on_deleted_at"
+    t.index ["hidden_at"], name: "index_chatroom_members_on_hidden_at"
   end
 
   create_table "chatrooms", force: :cascade do |t|
@@ -377,11 +380,25 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_18_085930) do
     t.string "unconfirmed_email"
     t.datetime "deleted_at"
     t.integer "active_connections_count", default: 0, null: false
+    t.string "last_seen_visibility", default: "everyone", null: false
+    t.string "online_visibility", default: "everyone", null: false
+    t.string "avatar_visibility", default: "everyone", null: false
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
     t.index ["identification_type", "identification_number"], name: "index_users_on_id_type_and_number", unique: true
     t.index ["parent_id"], name: "index_users_on_parent_id"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true
+  end
+
+  create_table "visibility_permissions", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "viewer_id", null: false
+    t.string "setting_type", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "viewer_id", "setting_type"], name: "index_visibility_permissions_uniqueness", unique: true
+    t.index ["user_id"], name: "index_visibility_permissions_on_user_id"
+    t.index ["viewer_id"], name: "index_visibility_permissions_on_viewer_id"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
@@ -409,4 +426,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_18_085930) do
   add_foreign_key "user_partners", "users"
   add_foreign_key "user_partners", "users", column: "partner_id"
   add_foreign_key "user_sessions", "users"
+  add_foreign_key "visibility_permissions", "users"
+  add_foreign_key "visibility_permissions", "users", column: "viewer_id"
 end

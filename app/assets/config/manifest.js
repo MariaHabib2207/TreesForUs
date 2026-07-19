@@ -23,3 +23,4 @@
 //= link chat/video_layout.js
 //= link chat/message_deletion.js
 //= link chat/read_receipts.js
+//= link chat/privacy.js
