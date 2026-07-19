@@ -5,6 +5,8 @@ class MessagesController < ApplicationController
 
   def index
     @messages = @chatroom.messages.order(:created_at).visible_for(current_user)
+    mark_delivered_and_broadcast(@messages)
+
     render json: {
       messages_html: render_to_string(
         partial: "messages/message",
@@ -43,6 +45,7 @@ class MessagesController < ApplicationController
   def poll
     messages = @chatroom.messages.order(:created_at).visible_for(current_user)
     messages = messages.where("messages.id > ?", params[:after]) if params[:after].present?
+    mark_delivered_and_broadcast(messages)
 
     render json: {
       messages_html: render_to_string(
@@ -104,20 +107,36 @@ class MessagesController < ApplicationController
       attachment.blob.update!(content_type: attachment.blob.content_type.sub("video/", "audio/"))
     end
   end
-def broadcast_message
-  html = ApplicationController.render(
-    partial: "messages/message",
-    locals: { message: @message, current_user_id: nil },
-    formats: [:html],
-    layout: false
-  )
-  ChatroomChannel.broadcast_to(@chatroom, { message_html: html, sender_id: @message.user_id })
-end
 
-def broadcast_deletion(message)
-  ChatroomChannel.broadcast_to(
-    message.chatroom,
-    { deleted_message_id: message.id, deleted_for_everyone: true }
-  )
-end
+  def broadcast_message
+    html = ApplicationController.render(
+      partial: "messages/message",
+      locals: { message: @message, current_user_id: nil },
+      formats: [:html],
+      layout: false
+    )
+    ChatroomChannel.broadcast_to(@chatroom, { message_html: html, sender_id: @message.user_id })
+    other_member = @chatroom.members.where.not(id: current_user.id).first
+    return unless other_member&.online?
+
+    @message.update_column(:delivered_at, Time.current)
+    ChatroomChannel.broadcast_to(@chatroom, { delivered_message_ids: [@message.id] })
+  end
+
+  def broadcast_deletion(message)
+    ChatroomChannel.broadcast_to(
+      message.chatroom,
+      { deleted_message_id: message.id, deleted_for_everyone: true }
+    )
+  end
+  def mark_delivered_and_broadcast(messages)
+    newly_delivered_ids = messages
+      .where.not(user_id: current_user.id)
+      .where(delivered_at: nil)
+      .pluck(:id)
+    return if newly_delivered_ids.empty?
+
+    Message.where(id: newly_delivered_ids).update_all(delivered_at: Time.current)
+    ChatroomChannel.broadcast_to(@chatroom, { delivered_message_ids: newly_delivered_ids })
+  end
 end

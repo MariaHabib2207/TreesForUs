@@ -17,6 +17,7 @@ import { initVoicePlayers, stopActiveVoiceAudio } from "./voice_player";
 import { initAddPeople } from "./add_people";
 import { initOutgoingCall } from "./outgoing_call";
 import { initMessageDeletion } from "./message_deletion";
+import { initOtherMemberPresence, teardownOtherMemberPresence } from "./presence";
 
 function init() {
   if (!messagesContainer()) return;
@@ -27,6 +28,7 @@ function init() {
   initAddPeople();
   initOutgoingCall();
   initMessageDeletion();
+  initOtherMemberPresence();
   startPolling();
 }
 
@@ -35,6 +37,7 @@ function teardown() {
   stopPolling();
   stopRecordingIfActive();
   stopActiveVoiceAudio();
+  teardownOtherMemberPresence();
   // NOTE: no call teardown here anymore. An active/ringing call must
   // survive navigating away from the chatroom page — the call UI is
   // data-turbo-permanent and the CallChannel subscription is global, so

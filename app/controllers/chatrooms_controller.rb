@@ -20,7 +20,15 @@ class ChatroomsController < ApplicationController
                           .ordered
                           .visible_for(current_user)
 
-    @chatroom.messages.where(read_at: nil).where.not(user: current_user).update_all(read_at: Time.current)
+    newly_read_ids = @chatroom.messages
+                              .where(read_at: nil)
+                              .where.not(user: current_user)
+                              .pluck(:id)
+
+    if newly_read_ids.any?
+      @chatroom.messages.where(id: newly_read_ids).update_all(read_at: Time.current, delivered_at: Time.current)
+      ChatroomChannel.broadcast_to(@chatroom, { read_message_ids: newly_read_ids })
+    end
 
     @other_members      = @chatroom.members.where.not(id: current_user.id)
     @other_member        = @other_members.first

@@ -21,8 +21,8 @@ div class="flex justify-center"
           - else
             h1 id="other-member-name" class="text-sm sm:text-base font-semibold truncate" = @other_member&.full_name || @chatroom.name
           div class="flex items-center gap-1.5"
-            span class="w-2 h-2 rounded-full bg-green-400 shrink-0"
-            span class="text-xs text-white/70 truncate" Active now
+            span id="other-member-status-dot" class="w-2 h-2 rounded-full bg-gray-400 shrink-0"
+            span id="other-member-status-label" class="text-xs text-white/70 truncate" Offline
 
       div class="flex items-center gap-1 shrink-0"
         - if @other_member && (@other_members.nil? || @other_members.size <= 1)
@@ -65,7 +65,7 @@ div class="flex justify-center"
             path d="M2 3h4l2 7-2.5 1.5a11 11 0 006 6L13 15l7 2v4a2 2 0 01-2 2A16 16 0 012 5a2 2 0 012-2z"
 
     / Messages container — WhatsApp-style scrollable pane
-    div class="flex-1 min-h-0 overflow-y-auto overscroll-contain px-2 sm:px-4 py-3 flex flex-col gap-1.5 bg-no-repeat bg-center" style="background-image: linear-gradient(rgba(239,234,226,0.75), rgba(239,234,226,0.75)), url(#{image_path('watermark.png')}); background-size: cover, 420px 420px;" id="messages-container" data-chatroom-id=@chatroom.id data-current-user-id=current_user.id data-current-user-name=current_user.full_name
+    div class="flex-1 min-h-0 overflow-y-auto overscroll-contain px-2 sm:px-4 py-3 flex flex-col gap-1.5 bg-no-repeat bg-center" style="background-image: linear-gradient(rgba(239,234,226,0.75), rgba(239,234,226,0.75)), url(#{image_path('watermark.png')}); background-size: cover, 420px 420px;" id="messages-container" data-chatroom-id=@chatroom.id data-current-user-id=current_user.id data-current-user-name=current_user.full_name data-other-user-id=@other_member&.id
       - @messages.each do |message|
         = render "messages/message", message: message, current_user_id: current_user.id
 
@@ -124,4 +124,3 @@ div class="flex justify-center"
             div class="flex items-center justify-between gap-2 px-3 py-2 rounded-xl hover:bg-black/5"
               span class="text-sm text-gray-800 truncate" = friend.full_name
               button type="button" data-recipient-id=friend.id class="invite-friend-btn shrink-0 text-xs font-medium px-3 py-1.5 rounded-full bg-[#1D4D3A] text-white hover:bg-[#183f2f]" Invite
-

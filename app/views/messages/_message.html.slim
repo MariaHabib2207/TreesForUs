@@ -70,5 +70,16 @@
           - else
             = link_to attachment.filename.to_s, url_for(attachment), class: "flex items-center gap-2 mt-1 text-sm text-[#1D4D3A] underline break-all", target: "_blank"
 
-      p class="text-[10px] text-gray-400 text-right mt-1"
-        = message.created_at.strftime("%I:%M %p").sub(/^0/, '')
+      p class="text-[10px] text-gray-400 text-right mt-1 flex items-center justify-end gap-1"
+        span = message.created_at.strftime("%I:%M %p").sub(/^0/, '')
+        - if is_mine
+          span class="message-status-tick" data-message-id=message.id data-read="#{message.read?}" data-delivered="#{message.delivered?}"
+            - if message.read?
+              svg class="w-3.5 h-3.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l3 3 3-3m2 3l7-9M9 16l7-9"
+            - elsif message.delivered?
+              svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l3 3 3-3m2 3l7-9M9 16l7-9"
+            - else
+              svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"

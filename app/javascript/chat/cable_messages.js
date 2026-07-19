@@ -1,5 +1,4 @@
-
-
+// app/javascript/chat/cable_messages.js
 import {
   appendMessageRow,
   getLastMessageId,
@@ -9,6 +8,7 @@ import {
   markMineIfNeeded,
 } from "./dom_utils";
 import { applyDeletionBroadcast } from "./message_deletion";
+import { applyDeliveredBroadcast, applyReadBroadcast } from "./read_receipts";
 import { createConsumer } from "@rails/actioncable";
 
 const POLL_MS = 3000;
@@ -45,6 +45,16 @@ export function initActionCable() {
       received(data) {
         if (data.deleted_message_id) {
           applyDeletionBroadcast(data.deleted_message_id);
+          return;
+        }
+
+        if (data.delivered_message_ids) {
+          applyDeliveredBroadcast(data.delivered_message_ids);
+          return;
+        }
+
+        if (data.read_message_ids) {
+          applyReadBroadcast(data.read_message_ids);
           return;
         }
 

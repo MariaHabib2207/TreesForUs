@@ -22,3 +22,4 @@
 //= link chat/calling.js
 //= link chat/video_layout.js
 //= link chat/message_deletion.js
+//= link chat/read_receipts.js

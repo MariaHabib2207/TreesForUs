@@ -2,42 +2,43 @@
 #
 # Table name: users
 #
-#  id                     :integer          not null, primary key
-#  confirmation_sent_at   :datetime
-#  confirmed_at           :datetime
-#  created_by             :integer
-#  current_sign_in_at     :datetime
-#  current_sign_in_ip     :string
-#  deleted_at             :datetime
-#  email                  :string
-#  encrypted_password     :string
-#  failed_attempts        :integer          default(0), not null
-#  first_name             :string           not null
-#  identification_number  :string           not null
-#  identification_type    :integer          default("nric"), not null
-#  invitation_accepted_at :datetime
-#  invitation_sent_at     :datetime
-#  invitation_token       :string
-#  last_name              :string           not null
-#  last_sign_in_at        :datetime
-#  last_sign_in_ip        :string
-#  locked_at              :datetime
-#  login_enabled          :boolean          default(FALSE), not null
-#  provider               :string
-#  remember_created_at    :datetime
-#  remember_token         :string
-#  reset_password_sent_at :datetime
-#  reset_password_token   :string
-#  role                   :integer          default("family_manager"), not null
-#  sign_in_count          :integer          default(0), not null
-#  status                 :integer          default("alive"), not null
-#  uid                    :string
-#  unconfirmed_email      :string
-#  unlock_token           :string
-#  updated_by             :integer
-#  created_at             :datetime         not null
-#  updated_at             :datetime         not null
-#  parent_id              :integer
+#  id                       :integer          not null, primary key
+#  active_connections_count :integer          default(0), not null
+#  confirmation_sent_at     :datetime
+#  confirmed_at             :datetime
+#  created_by               :integer
+#  current_sign_in_at       :datetime
+#  current_sign_in_ip       :string
+#  deleted_at               :datetime
+#  email                    :string
+#  encrypted_password       :string
+#  failed_attempts          :integer          default(0), not null
+#  first_name               :string           not null
+#  identification_number    :string           not null
+#  identification_type      :integer          default("nric"), not null
+#  invitation_accepted_at   :datetime
+#  invitation_sent_at       :datetime
+#  invitation_token         :string
+#  last_name                :string           not null
+#  last_sign_in_at          :datetime
+#  last_sign_in_ip          :string
+#  locked_at                :datetime
+#  login_enabled            :boolean          default(FALSE), not null
+#  provider                 :string
+#  remember_created_at      :datetime
+#  remember_token           :string
+#  reset_password_sent_at   :datetime
+#  reset_password_token     :string
+#  role                     :integer          default("family_manager"), not null
+#  sign_in_count            :integer          default(0), not null
+#  status                   :integer          default("alive"), not null
+#  uid                      :string
+#  unconfirmed_email        :string
+#  unlock_token             :string
+#  updated_by               :integer
+#  created_at               :datetime         not null
+#  updated_at               :datetime         not null
+#  parent_id                :integer
 #
 # Indexes
 #
@@ -372,6 +373,10 @@ def accept_invitation!(email:, password:, password_confirmation:, family_code: n
 rescue ActiveRecord::RecordInvalid => e
   errors.add(:base, e.message)
   false
+end
+
+def online?
+  active_connections_count.to_i > 0
 end
 
 private

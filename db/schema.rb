@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_17_001912) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_18_085930) do
   create_table "active_admin_comments", force: :cascade do |t|
     t.string "namespace"
     t.text "body"
@@ -237,9 +237,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_17_001912) do
     t.datetime "deleted_for_everyone_at"
     t.integer "deleted_for_everyone_by_id"
     t.datetime "deleted_at"
+    t.datetime "delivered_at"
     t.index ["call_id"], name: "index_messages_on_call_id"
     t.index ["deleted_at"], name: "index_messages_on_deleted_at"
     t.index ["deleted_for_everyone_by_id"], name: "index_messages_on_deleted_for_everyone_by_id"
+    t.index ["delivered_at"], name: "index_messages_on_delivered_at"
     t.index ["id"], name: "index_messages_on_id", unique: true
     t.index ["message_type"], name: "index_messages_on_message_type"
   end
@@ -374,6 +376,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_17_001912) do
     t.datetime "confirmation_sent_at"
     t.string "unconfirmed_email"
     t.datetime "deleted_at"
+    t.integer "active_connections_count", default: 0, null: false
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
     t.index ["identification_type", "identification_number"], name: "index_users_on_id_type_and_number", unique: true
     t.index ["parent_id"], name: "index_users_on_parent_id"

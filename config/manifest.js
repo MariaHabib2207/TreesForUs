@@ -18,3 +18,5 @@
 //= link chat/voice_player.js
 //= link chat/add_people.js
 //= link chat/cable_messages.js
+//= link chat/message_deletion.js
+//= link chat/presence.js
