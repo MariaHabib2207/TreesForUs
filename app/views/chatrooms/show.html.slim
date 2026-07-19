@@ -21,8 +21,14 @@ div class="flex justify-center"
           - else
             h1 id="other-member-name" class="text-sm sm:text-base font-semibold truncate" = @other_member&.full_name || @chatroom.name
           div class="flex items-center gap-1.5"
-            span id="other-member-status-dot" class="w-2 h-2 rounded-full bg-gray-400 shrink-0"
-            span id="other-member-status-label" class="text-xs text-white/70 truncate" Offline
+            span id="other-member-status-dot" class="w-2 h-2 rounded-full #{@other_member&.online? ? 'bg-green-400' : 'bg-gray-400'} shrink-0"
+            span id="other-member-status-label" class="text-xs text-white/70 truncate"
+              - if @other_member&.online?
+                | Active now
+              - elsif @other_member&.last_active_at
+                | Last seen #{@other_member.last_active_at.strftime("%b %-d at %I:%M %p").sub(" 0", " ")}
+              - else
+                | Offline
 
       div class="flex items-center gap-1 shrink-0"
         - if @other_member && (@other_members.nil? || @other_members.size <= 1)
