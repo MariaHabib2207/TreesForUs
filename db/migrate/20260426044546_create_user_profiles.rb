@@ -9,7 +9,7 @@ class CreateUserProfiles < ActiveRecord::Migration[8.0]
       t.string :occupation
       t.string :address
       t.string :city
-      t.string :state 
+      t.string :state
       t.string :zip
       t.string :country
       t.string :phone

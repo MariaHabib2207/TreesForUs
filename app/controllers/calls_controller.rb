@@ -1,6 +1,6 @@
 class CallsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_call, only: [:destroy]
+  before_action :set_call, only: [ :destroy ]
 
   def index
     @calls = Call

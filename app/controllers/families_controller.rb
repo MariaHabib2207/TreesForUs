@@ -30,11 +30,9 @@ def create
   @family = Family.new(family_params)
 
   respond_to do |format|
-
     begin
 
       ActiveRecord::Base.transaction do
-
         @family.save!
 
         existing_types = current_user.family_memberships.pluck(:membership_type)
@@ -56,7 +54,6 @@ def create
           family: @family,
           membership_type: membership_type
         )
-
       end
 
       if @family.errors.any?
@@ -98,7 +95,6 @@ def create
       end
 
     end
-
   end
 end
 
@@ -108,25 +104,25 @@ def activity_feed
   family_user_ids = FamilyMembership.where(family_id: @family.id).pluck(:user_id)
 
   @activities = PublicActivity::Activity
-    .where(owner_type: 'User', owner_id: family_user_ids)
-    .where.not(trackable_type: 'UserProfile')
+    .where(owner_type: "User", owner_id: family_user_ids)
+    .where.not(trackable_type: "UserProfile")
     .order(created_at: :desc)
 
-  if params[:filter].present? && params[:filter] != 'all'
+  if params[:filter].present? && params[:filter] != "all"
     @activities = @activities.where("key LIKE ?", "%#{params[:filter]}%")
   end
 
   @stats = {
     total:   @activities.count,
-    created: @activities.where("key LIKE ?", '%create%').count,
-    updated: @activities.where("key LIKE ?", '%update%').count,
-    deleted: @activities.where("key LIKE ?", '%destroy%').count,
-    logins:  @activities.where("key LIKE ?", '%login%').count,
+    created: @activities.where("key LIKE ?", "%create%").count,
+    updated: @activities.where("key LIKE ?", "%update%").count,
+    deleted: @activities.where("key LIKE ?", "%destroy%").count,
+    logins:  @activities.where("key LIKE ?", "%login%").count
   }
 
   @activities = @activities.page(params[:page]).per(20)
 
-  render template: 'activities/index'
+  render template: "activities/index"
 end
   def update
     respond_to do |format|

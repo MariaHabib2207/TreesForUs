@@ -35,5 +35,4 @@ class UserPartner < ApplicationRecord
   def cannot_partner_with_self
     errors.add(:partner_id, "can't be same as user") if user_id == partner_id
   end
-  
 end

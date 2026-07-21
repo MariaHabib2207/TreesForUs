@@ -41,7 +41,7 @@ class UserPartnersController < ApplicationController
 
   def find_or_create_partner!
     if user_partner_params[:partner_id].present?
-      return [User.find(user_partner_params[:partner_id]), nil]
+      return [ User.find(user_partner_params[:partner_id]), nil ]
     end
 
     p_attrs       = safe_partner_params
@@ -85,7 +85,7 @@ class UserPartnersController < ApplicationController
     profile = partner.user_profile || partner.create_user_profile!
     profile.update!(profile_attrs) if profile_attrs.any?
 
-    [partner, avatar]
+    [ partner, avatar ]
   end
 
   private
@@ -128,7 +128,6 @@ class UserPartnersController < ApplicationController
   end
 
   def safe_partner_profile_params
-
     permitted = params.fetch(:partner, {}).permit(
       user_profile_attributes: %i[
         birth_date

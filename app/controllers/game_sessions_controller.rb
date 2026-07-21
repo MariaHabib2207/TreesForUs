@@ -1,6 +1,6 @@
 class GameSessionsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_game_session, only: [:show, :accept, :decline, :cancel, :move, :destroy]
+  before_action :set_game_session, only: [ :show, :accept, :decline, :cancel, :move, :destroy ]
 
   def index
     @game_sessions = GameSession.for_user(current_user).order(updated_at: :desc)
@@ -73,7 +73,7 @@ class GameSessionsController < ApplicationController
   end
 
   def destroy
-    unless [@game_session.player_x_id, @game_session.player_o_id].include?(current_user.id)
+    unless [ @game_session.player_x_id, @game_session.player_o_id ].include?(current_user.id)
       return head :forbidden
     end
 

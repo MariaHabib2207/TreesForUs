@@ -42,7 +42,7 @@ class FamilyMembership < ApplicationRecord
   after_create_commit :notify_existing_family_members
 
   def self.family_memberships_type_options
-    membership_types.keys.map { |membership| [membership.humanize, membership] }
+    membership_types.keys.map { |membership| [ membership.humanize, membership ] }
   end
 
   private

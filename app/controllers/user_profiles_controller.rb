@@ -13,7 +13,7 @@ class UserProfilesController < ApplicationController
 
   def edit
     @user = User.find(params[:id])
-    @user_profile = @user.user_profile 
+    @user_profile = @user.user_profile
   end
 
   def update

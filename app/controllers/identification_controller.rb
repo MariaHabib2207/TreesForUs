@@ -1,6 +1,6 @@
 
 class IdentificationController < ApplicationController
-  before_action :load_google_data, only: [:edit, :update]
+  before_action :load_google_data, only: [ :edit, :update ]
 
   def edit
     @user = User.new(

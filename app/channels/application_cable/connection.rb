@@ -11,8 +11,8 @@ module ApplicationCable
 
     def find_verified_user
       # Try warden first (Devise)
-      verified_user = env['warden']&.user(:user)
-      verified_user ||= env['warden']&.user
+      verified_user = env["warden"]&.user(:user)
+      verified_user ||= env["warden"]&.user
 
       if verified_user
         verified_user

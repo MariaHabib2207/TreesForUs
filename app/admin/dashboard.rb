@@ -3,13 +3,11 @@ ActiveAdmin.register_page "Dashboard" do
   menu priority: 1, label: "Dashboard"
 
   content title: "Dashboard" do
-
     # ── Stat Cards ────────────────────────────────────────────
     div style: "display:flex; gap:16px; margin-bottom:24px;" do
-
       div style: "flex:1; background:#fff; border-radius:8px; padding:20px; box-shadow:0 1px 4px rgba(0,0,0,0.1); border-left:4px solid #2ecc71;" do
         h3 "🟢 Online Now", style: "margin:0 0 8px; font-size:13px; color:#666; text-transform:uppercase; letter-spacing:0.5px;"
-        span UserSession.where('last_active_at > ?', 5.minutes.ago).count.to_s,
+        span UserSession.where("last_active_at > ?", 5.minutes.ago).count.to_s,
              style: "font-size:32px; font-weight:700; color:#2ecc71;"
       end
 
@@ -24,12 +22,10 @@ ActiveAdmin.register_page "Dashboard" do
         span User.count.to_s,
              style: "font-size:32px; font-weight:700; color:#9b59b6;"
       end
-
     end
 
     # ── Breakdown Panels ──────────────────────────────────────
     columns do
-
       column do
         panel "📱 By Device" do
           device_colors = { "Desktop" => "#3498db", "Mobile" => "#2ecc71", "Tablet" => "#e67e22", "Bot" => "#e74c3c" }
@@ -79,7 +75,6 @@ ActiveAdmin.register_page "Dashboard" do
           end
         end
       end
-
     end
   end
 end

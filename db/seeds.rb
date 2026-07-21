@@ -391,18 +391,18 @@ puts "   ✓ #{FamilyMembership.count} memberships created"
 puts "\n🌳 Creating parent-child relationships..."
 
 [
-  [george,   ali],
-  [margaret, ali],
-  [george,   zainab],
-  [margaret, zainab],
-  [ali,      maria],
-  [sara,     maria],
-  [ali,      yusuf],
-  [sara,     yusuf],
-  [ali,      layla],
-  [sara,     layla],
-  [omar,     hana],
-  [zainab,   hana]
+  [ george,   ali ],
+  [ margaret, ali ],
+  [ george,   zainab ],
+  [ margaret, zainab ],
+  [ ali,      maria ],
+  [ sara,     maria ],
+  [ ali,      yusuf ],
+  [ sara,     yusuf ],
+  [ ali,      layla ],
+  [ sara,     layla ],
+  [ omar,     hana ],
+  [ zainab,   hana ]
 ].each do |parent, child|
   UserParentRelationship.create!(parent_id: parent.id, child_id: child.id)
 end

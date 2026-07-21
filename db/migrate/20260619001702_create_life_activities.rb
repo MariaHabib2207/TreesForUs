@@ -11,7 +11,7 @@ class CreateLifeActivities < ActiveRecord::Migration[8.0]
       t.string     :visibility, null: false, default: "friends_and_family"
       t.timestamps
     end
-    add_index :life_activities, [:user_id, :occurred_on]
+    add_index :life_activities, [ :user_id, :occurred_on ]
     add_index :life_activities, :visibility
   end
 end

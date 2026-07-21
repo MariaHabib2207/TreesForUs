@@ -1,7 +1,7 @@
 class DashboardController < ApplicationController
   before_action :authenticate_user!
 
-def index  
+def index
   @user = current_user
   @user_profile = @user.user_profile
 
@@ -50,7 +50,7 @@ def index
 end
   private
 
-  def resolve_active_family 
+  def resolve_active_family
     family_id =
       if params[:family_id].present?
         params[:family_id].to_i
@@ -140,7 +140,7 @@ end
 
 
   def children_of(user, partners)
-    parent_ids = [user.id] + Array(partners).map(&:id)
+    parent_ids = [ user.id ] + Array(partners).map(&:id)
 
     User
       .joins(:parent_relationships)

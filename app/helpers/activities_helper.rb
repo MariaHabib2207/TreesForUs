@@ -1,6 +1,6 @@
 module ActivitiesHelper
   def initials_for(user)
-    return '?' unless user
+    return "?" unless user
     "#{user.first_name&.first}#{user.last_name&.first}".upcase
   end
 
@@ -12,48 +12,48 @@ module ActivitiesHelper
 
   def dot_class(key)
     case key
-    when /create/  then 'dot-green'
-    when /update/  then 'dot-amber'
-    when /destroy/ then 'dot-red'
-    when /login/   then 'dot-blue'
-    else 'dot-gray'
+    when /create/  then "dot-green"
+    when /update/  then "dot-amber"
+    when /destroy/ then "dot-red"
+    when /login/   then "dot-blue"
+    else "dot-gray"
     end
   end
 
   def badge_class(key)
     case key
-    when /create/  then 'badge-green'
-    when /update/  then 'badge-amber'
-    when /destroy/ then 'badge-red'
-    when /login/   then 'badge-blue'
-    else 'badge-gray'
+    when /create/  then "badge-green"
+    when /update/  then "badge-amber"
+    when /destroy/ then "badge-red"
+    when /login/   then "badge-blue"
+    else "badge-gray"
     end
   end
 
   def badge_label(key)
     case key
-    when /create/  then 'Created'
-    when /update/  then 'Updated'
-    when /destroy/ then 'Deleted'
-    when /login/   then 'Login'
-    else key.split('.').last.capitalize
+    when /create/  then "Created"
+    when /update/  then "Updated"
+    when /destroy/ then "Deleted"
+    when /login/   then "Login"
+    else key.split(".").last.capitalize
     end
   end
 
   def action_text(key)
     case key
-    when /create/  then 'created'
-    when /update/  then 'updated'
-    when /destroy/ then 'deleted'
-    when /login/   then 'logged in'
-    else key.split('.').last.humanize.downcase
+    when /create/  then "created"
+    when /update/  then "updated"
+    when /destroy/ then "deleted"
+    when /login/   then "logged in"
+    else key.split(".").last.humanize.downcase
     end
   end
 
 def target_name(activity)
-  return 'a user' if activity.key =~ /destroy/
+  return "a user" if activity.key =~ /destroy/
 
-  return '' unless activity.trackable
+  return "" unless activity.trackable
 
   case activity.trackable
   when User

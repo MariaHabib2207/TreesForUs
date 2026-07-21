@@ -7,6 +7,6 @@ class CreateVisibilityPermissions < ActiveRecord::Migration[8.0]
       t.string :setting_type, null: false # "last_seen" | "online" | "avatar"
       t.timestamps
     end
-    add_index :visibility_permissions, [:user_id, :viewer_id, :setting_type], unique: true, name: "index_visibility_permissions_uniqueness"
+    add_index :visibility_permissions, [ :user_id, :viewer_id, :setting_type ], unique: true, name: "index_visibility_permissions_uniqueness"
   end
 end

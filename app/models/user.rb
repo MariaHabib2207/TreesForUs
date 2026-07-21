@@ -53,32 +53,32 @@
 #  index_users_on_unlock_token          (unlock_token) UNIQUE
 #
 class User < ApplicationRecord
-# Remove: include Noticed::Model
-# Remove: has_noticed_notifications
+  # Remove: include Noticed::Model
+  # Remove: has_noticed_notifications
   acts_as_paranoid
 
   VISIBILITY_MODES = %w[everyone nobody custom].freeze
   PROFILE_VISIBILITY_MODES = %w[public private].freeze
 
-# Add this instead:
+  # Add this instead:
   has_many :noticed_notifications, as: :recipient, dependent: :destroy, class_name: "Noticed::Notification"
   # ===================================================
   # Activity feed
   include PublicActivity::Model
   tracked owner: :itself
-  # ===================================================
-  # DEVISE
+ # ===================================================
+ # DEVISE
  devise :database_authenticatable,
        :registerable,
        :recoverable,
        :rememberable,
        :validatable
-       
+
   with_options if: :login_enabled? do
     validates :email, presence: true
     validates :password, presence: true
   end
-  devise :omniauthable, omniauth_providers: [:google_oauth2]
+  devise :omniauthable, omniauth_providers: [ :google_oauth2 ]
   # ===================================================
   # CALLBACKS
   # ===================================================
@@ -213,7 +213,7 @@ class User < ApplicationRecord
   validates :profile_visibility, inclusion: { in: PROFILE_VISIBILITY_MODES }
 
   validate :cannot_have_more_than_two_families
-  # validate :identification_number_format
+   # validate :identification_number_format
 
    def identification_number_format
     return if identification_type.blank? || identification_number.blank?
@@ -265,9 +265,9 @@ end
     new_record? || password.present? || password_confirmation.present?
   end
 
-  # ===================================================
-  # BUSINESS RULES
-  # ===================================================
+ # ===================================================
+ # BUSINESS RULES
+ # ===================================================
  def cannot_have_more_than_two_families
   birth_families = families.select { |f| f.family_membership_type == "birth" }
   marriage_families = families.select { |f| f.family_membership_type == "marriage" }
@@ -279,7 +279,6 @@ end
   if marriage_families.size > 1
     errors.add(:families, "can only have one marriage family")
   end
-
 end
 
   # ===================================================
@@ -317,18 +316,18 @@ end
   # CLASS HELPERS
   # ===================================================
   def self.status_options
-    statuses.keys.map { |status| [status.humanize, status] }
+    statuses.keys.map { |status| [ status.humanize, status ] }
   end
   def self.identification_type_options
     identification_types.keys.map do |type|
-    [type.humanize, type]
-    end 
+    [ type.humanize, type ]
+    end
   end
   # ===================================================
   # INSTANCE HELPERS
   # ===================================================
   def full_name
-    [first_name, last_name].compact.join(" ")
+    [ first_name, last_name ].compact.join(" ")
   end
 
   def initials
@@ -449,7 +448,7 @@ rescue ActiveRecord::RecordInvalid => e
 end
 
 def active_game_sessions
-  GameSession.where(status: ["pending", "active"])
+  GameSession.where(status: [ "pending", "active" ])
              .where("player_x_id = :id OR player_o_id = :id", id: id)
 end
 

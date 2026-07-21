@@ -38,7 +38,7 @@ class Call < ApplicationRecord
 
   enum :call_type, { audio: "audio", video: "video" }
   enum :status, { missed: "missed", declined: "declined", answered: "answered", busy: "busy" }
-  
+
   acts_as_paranoid
 
   validates :duration_in_seconds, numericality: { greater_than_or_equal_to: 0 }
@@ -61,8 +61,8 @@ class Call < ApplicationRecord
     call_hidings.exists?(user_id: user.id)
   end
 
-  # "Delete" for the call log feature — hides the row for this user only.
-  # Never destroys the underlying Call or its chat message.
+# "Delete" for the call log feature — hides the row for this user only.
+# Never destroys the underlying Call or its chat message.
 def hide_for(user)
   call_hidings.find_or_create_by(user: user)
 end

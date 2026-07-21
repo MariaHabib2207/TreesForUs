@@ -1,7 +1,7 @@
 class MessagesController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_chatroom, only: [:index, :create, :poll]
-  before_action :set_message, only: [:destroy]
+  before_action :set_chatroom, only: [ :index, :create, :poll ]
+  before_action :set_message, only: [ :destroy ]
 
   def index
     @messages = @chatroom.messages.order(:created_at).visible_for(current_user)
@@ -13,7 +13,7 @@ class MessagesController < ApplicationController
         collection: @messages,
         as: :message,
         locals: { current_user_id: current_user.id },
-        formats: [:html],
+        formats: [ :html ],
         layout: false
       )
     }
@@ -33,7 +33,7 @@ class MessagesController < ApplicationController
         message_html: render_to_string(
           partial: "messages/message",
           locals: { message: @message, current_user_id: current_user.id },
-          formats: [:html],
+          formats: [ :html ],
           layout: false
         )
       }, status: :ok
@@ -53,7 +53,7 @@ class MessagesController < ApplicationController
         collection: messages,
         as: :message,
         locals: { current_user_id: current_user.id },
-        formats: [:html],
+        formats: [ :html ],
         layout: false
       )
     }
@@ -112,7 +112,7 @@ class MessagesController < ApplicationController
     html = ApplicationController.render(
       partial: "messages/message",
       locals: { message: @message, current_user_id: nil },
-      formats: [:html],
+      formats: [ :html ],
       layout: false
     )
     ChatroomChannel.broadcast_to(@chatroom, { message_html: html, sender_id: @message.user_id })
@@ -120,7 +120,7 @@ class MessagesController < ApplicationController
     return unless other_member&.online?
 
     @message.update_column(:delivered_at, Time.current)
-    ChatroomChannel.broadcast_to(@chatroom, { delivered_message_ids: [@message.id] })
+    ChatroomChannel.broadcast_to(@chatroom, { delivered_message_ids: [ @message.id ] })
   end
 
   def broadcast_deletion(message)

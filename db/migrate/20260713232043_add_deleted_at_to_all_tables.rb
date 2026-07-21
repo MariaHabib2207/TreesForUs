@@ -16,7 +16,7 @@ class AddDeletedAtToAllTables < ActiveRecord::Migration[8.0]
       :friendships,
       :life_activities,
       :family_codes,
-      :messages   
+      :messages
     ]
 
     tables.each do |table|

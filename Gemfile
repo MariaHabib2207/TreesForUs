@@ -1,5 +1,5 @@
 source "https://rubygems.org"
-gem 'dotenv-rails', groups: [:development, :test]
+gem "dotenv-rails", groups: [ :development, :test ]
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 8.0.5"
 # The modern asset pipeline for Rails [https://github.com/rails/propshaft]
@@ -50,8 +50,7 @@ group :development, :test do
   gem "rubocop-rails-omakase", require: false
 
 
-  gem 'byebug'
-
+  gem "byebug"
 end
 
 group :development do
@@ -67,43 +66,40 @@ end
 
 gem "devise", "~> 5.0"
 gem "tailwindcss-rails", "~> 3.3"
-gem "tailwindcss-ruby", "~> 3.4" 
-gem 'slim', '~> 3.0', '>= 3.0.6'
+gem "tailwindcss-ruby", "~> 3.4"
+gem "slim", "~> 3.0", ">= 3.0.6"
 gem "resend"
 gem "cssbundling-rails"
 gem "annotaterb"
 gem "activeadmin"
 gem "sassc-rails"
 gem "sprockets-rails"
-gem 'mailjet'
-gem 'public_activity'
-gem 'kaminari'
-gem 'browser'       
-gem 'geocoder'
-gem 'user_agent_parser'
-gem 'httparty'
-gem 'device_detector'
+gem "mailjet"
+gem "public_activity"
+gem "kaminari"
+gem "browser"
+gem "geocoder"
+gem "user_agent_parser"
+gem "httparty"
+gem "device_detector"
 gem "acts_as_paranoid", "~> 0.11.0"
 gem "noticed", "~> 3.0"
 
 
 
 group :development, :test do
-  gem 'sqlite3', '~> 2.0'
+  gem "sqlite3", "~> 2.0"
   gem "letter_opener", group: :development
-  gem 'rspec-rails'
-  gem 'factory_bot_rails'
-  gem 'faker'
-  gem 'shoulda-matchers'
- 
-  
+  gem "rspec-rails"
+  gem "factory_bot_rails"
+  gem "faker"
+  gem "simplecov", require: false
+  gem "shoulda-matchers"
 end
 
 group :production do
-  gem 'pg', '~> 1.5'
+  gem "pg", "~> 1.5"
 end
 
-gem 'omniauth-google-oauth2'
-gem 'omniauth-rails_csrf_protection'
-
-
+gem "omniauth-google-oauth2"
+gem "omniauth-rails_csrf_protection"

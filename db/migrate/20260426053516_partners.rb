@@ -5,6 +5,6 @@ class Partners < ActiveRecord::Migration[8.0]
       t.references :partner, null: false, foreign_key: { to_table: :users }
       t.timestamps
     end
-    add_index :user_partners, [:user_id, :partner_id], unique: true
+    add_index :user_partners, [ :user_id, :partner_id ], unique: true
   end
 end

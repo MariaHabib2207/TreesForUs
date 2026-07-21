@@ -7,7 +7,7 @@ class ParentRelationshipToUsers < ActiveRecord::Migration[8.0]
     end
 
     add_index :user_parent_child_relationships,
-              [:parent_id, :child_id],
+              [ :parent_id, :child_id ],
               unique: true
   end
 end

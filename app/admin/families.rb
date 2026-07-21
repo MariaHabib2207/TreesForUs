@@ -59,5 +59,4 @@ ActiveAdmin.register Family do
     end
   end
 end
-  
 end

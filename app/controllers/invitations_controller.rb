@@ -6,10 +6,10 @@ class InvitationsController < ApplicationController
   def new
     # Derive membership_type and related_user from URL params set by the tree
     @membership_type = case params[:type]
-                        when "partner" then "marriage"
-                        when "friend"   then "friend"
-                        else "birth"
-                        end
+    when "partner" then "marriage"
+    when "friend"   then "friend"
+    else "birth"
+    end
     @related_user    = User.find_by(id: params[:related_user_id])
   end
 
@@ -78,7 +78,4 @@ end
   def respond_with_error(msg)
     redirect_back fallback_location: root_path, alert: msg
   end
-
-
-
 end

@@ -13,7 +13,7 @@ ActiveAdmin.register UserSession do
   filter :last_active_at
 
   scope :all, default: true
-  scope(:online) { |s| s.where('last_active_at > ?', 5.minutes.ago) }
+  scope(:online) { |s| s.where("last_active_at > ?", 5.minutes.ago) }
 
   index do
     column("User") do |s|
@@ -23,7 +23,7 @@ ActiveAdmin.register UserSession do
     end
 
     column("IP Address") do |s|
-      if ['::1', '127.0.0.1'].include?(s.ip_address)
+      if [ "::1", "127.0.0.1" ].include?(s.ip_address)
         span style: "color:#999; font-style:italic; font-size:12px;" do
           "localhost (dev)"
         end
@@ -35,7 +35,7 @@ ActiveAdmin.register UserSession do
     end
 
     column("Location") do |s|
-      location = [s.city, s.region, s.country].compact.join(', ')
+      location = [ s.city, s.region, s.country ].compact.join(", ")
       if location.present?
         div do
           span "📍 ", style: "font-size:12px;"
@@ -47,16 +47,16 @@ ActiveAdmin.register UserSession do
     end
 
     column("Device") do |s|
-      parts = [s.device_brand, s.device_name].compact.join(' ')
+      parts = [ s.device_brand, s.device_name ].compact.join(" ")
       type  = s.device_type
 
       icon = case type&.downcase
-             when 'smartphone' then '📱'
-             when 'tablet'     then '📟'
-             when 'desktop'    then '🖥️'
-             when 'bot'        then '🤖'
-             else '💻'
-             end
+      when "smartphone" then "📱"
+      when "tablet"     then "📟"
+      when "desktop"    then "🖥️"
+      when "bot"        then "🤖"
+      else "💻"
+      end
 
       div do
         div style: "font-size:13px; font-weight:500;" do
@@ -71,7 +71,7 @@ ActiveAdmin.register UserSession do
     column("OS") do |s|
       div do
         div style: "font-size:13px;" do
-          s.os.presence || '—'
+          s.os.presence || "—"
         end
         div style: "font-size:11px; color:#999;" do
           s.os_version.presence
@@ -82,7 +82,7 @@ ActiveAdmin.register UserSession do
     column("Browser") do |s|
       div do
         div style: "font-size:13px;" do
-          s.browser.presence || '—'
+          s.browser.presence || "—"
         end
         div style: "font-size:11px; color:#999;" do
           s.browser_version.presence
@@ -135,7 +135,7 @@ ActiveAdmin.register UserSession do
           s.ip_address
         end
       end
-      row("Location")  { |s| "📍 #{[s.city, s.region, s.country].compact.join(', ')}" }
+      row("Location")  { |s| "📍 #{[ s.city, s.region, s.country ].compact.join(', ')}" }
       row("Device")    { |s| "#{s.device_brand} #{s.device_name} (#{s.device_type})".strip }
       row("OS")        { |s| "#{s.os} #{s.os_version}".strip }
       row("Browser")   { |s| "#{s.browser} #{s.browser_version}".strip }

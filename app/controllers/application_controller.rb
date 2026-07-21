@@ -1,5 +1,5 @@
 class ApplicationController < ActionController::Base
-  protect_from_forgery with: :exception 
+  protect_from_forgery with: :exception
   allow_browser versions: :modern
   include PublicActivity::StoreController
 
@@ -45,26 +45,26 @@ class ApplicationController < ActionController::Base
     country:         location[:country],
     latitude:        location[:latitude],
     longitude:       location[:longitude],
-    zip:             location[:zip],
+    zip:             location[:zip]
   }
   record = current_user.user_sessions.find_or_initialize_by(ip_address: ip)
   record.update!(session_data)
 end
 
   def device_type(ua)
-    return 'Mobile' if ua.device.mobile?
-    return 'Tablet' if ua.device.tablet?
-    return 'Bot'    if ua.bot?
-    'Desktop'
+    return "Mobile" if ua.device.mobile?
+    return "Tablet" if ua.device.tablet?
+    return "Bot"    if ua.bot?
+    "Desktop"
   end
 
   def real_ip
   if Rails.env.development?
     "8.8.8.8"  # simulates real IP for testing
   else
-    request.env['HTTP_X_FORWARDED_FOR']&.split(',')&.first&.strip ||
-    request.env['HTTP_X_REAL_IP'] ||
-    request.env['HTTP_CLIENT_IP'] ||
+    request.env["HTTP_X_FORWARDED_FOR"]&.split(",")&.first&.strip ||
+    request.env["HTTP_X_REAL_IP"] ||
+    request.env["HTTP_CLIENT_IP"] ||
     request.remote_ip
   end
 end

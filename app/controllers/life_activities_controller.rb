@@ -58,9 +58,9 @@ class LifeActivitiesController < ApplicationController
   def set_owner
     @owner = if params[:user_id].present?
                User.find(params[:user_id])
-             else
+    else
                @activity.user
-             end
+    end
   end
 
   def authorize_owner!

@@ -13,7 +13,6 @@
 #  index_families_on_deleted_at  (deleted_at)
 #
 class Family < ApplicationRecord
-
   has_many :family_memberships, dependent: :destroy
   has_many :users, through: :family_memberships
   acts_as_paranoid
@@ -31,4 +30,3 @@ class Family < ApplicationRecord
     %w[users family_memberships]
   end
 end
-  

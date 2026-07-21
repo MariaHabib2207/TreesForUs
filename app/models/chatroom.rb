@@ -46,7 +46,7 @@ end
     message
   end
 
-  # Friends not already in this chatroom -> candidates for "Add people"
+ # Friends not already in this chatroom -> candidates for "Add people"
  def available_friends_for(user)
     friend_ids = Friendship.where(user_id: user.id).pluck(:friend_id) +
                  Friendship.where(friend_id: user.id).pluck(:user_id)

@@ -1,5 +1,4 @@
 ActiveAdmin.register UserProfile do
-
   permit_params :user_id,
                 :birth_date,
                 :death_date,

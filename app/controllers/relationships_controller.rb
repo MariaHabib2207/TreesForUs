@@ -1,7 +1,6 @@
 class RelationshipsController < ApplicationController
   before_action :authenticate_user!
 def new
-
   @user = User.new
   @user.build_user_profile
   parent_id = params[:parent_id].presence || params[:user_id]
@@ -10,7 +9,7 @@ def new
   @active_family =
     current_user.families.find_by(id: @family_id)
 end
- 
+
 def create
   @user = User.new(user_params)
   @user.login_enabled = ActiveModel::Type::Boolean.new.cast(
@@ -51,7 +50,7 @@ def create
   end
 end
   private
- 
+
 def user_params
   params.require(:user).permit(
     :id,
@@ -60,7 +59,7 @@ def user_params
     :status, :login_enabled,
     :role,
     :email, :password, :password_confirmation,
-    user_profile_attributes: [:birth_date, :gender, :phone, :occupation, :address, :avatar]
+    user_profile_attributes: [ :birth_date, :gender, :phone, :occupation, :address, :avatar ]
   )
   end
 

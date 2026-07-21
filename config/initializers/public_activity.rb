@@ -1,3 +1,3 @@
 PublicActivity::Config.set do
-  enabled true  
+  enabled true
 end

@@ -1,6 +1,6 @@
 class NotificationsController < ApplicationController
   before_action :authenticate_user!
-   
+
   def index
     @notifications = current_user.noticed_notifications
                                  .includes(:event)
@@ -15,9 +15,9 @@ class NotificationsController < ApplicationController
 
   def mark_all_read
     current_user.noticed_notifications.where(read_at: nil).update_all(read_at: Time.current)
-    redirect_back fallback_location: root_path 
+    redirect_back fallback_location: root_path
   end
-  
+
 def invite_to_chat
   recipient = User.find(params[:recipient_id])
 
@@ -88,7 +88,6 @@ def accept_chatroom_invite
   chatroom = Chatroom.between(current_user, inviter) || Chatroom.create!(created_by: current_user).tap do |c|
     c.chatroom_members.create!(user: current_user)
     c.chatroom_members.create!(user: inviter)
-
   end
 
   redirect_to chatroom_path(chatroom)

@@ -62,7 +62,7 @@ class ChatroomsController < ApplicationController
         format.html { redirect_back fallback_location: chatroom_path(@chatroom), notice: "Invite already sent to #{recipient.first_name}." }
       end
     else
-      other_names = @chatroom.members.where.not(id: [current_user.id, recipient.id]).pluck(:first_name)
+      other_names = @chatroom.members.where.not(id: [ current_user.id, recipient.id ]).pluck(:first_name)
       with_names  = other_names.any? ? " with #{other_names.join(', ')}" : ""
 
       ::ChatroomInviteNotifier.with(

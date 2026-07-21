@@ -45,5 +45,3 @@ class UserSession < ApplicationRecord
     %w[user]
   end
 end
-
-

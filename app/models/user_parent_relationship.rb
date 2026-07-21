@@ -63,7 +63,7 @@ class UserParentRelationship < ApplicationRecord
     visited << user.id
 
     user.parents.flat_map do |p|
-      [p.id] + ancestor_ids(p, visited)
+      [ p.id ] + ancestor_ids(p, visited)
     end
   end
 

@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class Users::RegistrationsController < Devise::RegistrationsController
-
   before_action :configure_permitted_parameters, if: :devise_controller?
 
   def new
@@ -10,7 +9,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
     respond_with resource
   end
 
-  def create    
+  def create
     build_resource(sign_up_params)
 
     ActiveRecord::Base.transaction do
@@ -52,7 +51,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
             user:            resource,
             family:          family,
             membership_type: params[:membership_type],
-       
+
           )
         end
       end
@@ -94,7 +93,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
       :family_id,
       :new_family_name,
       :membership_type,
-      :family_code,          
+      :family_code,
       user_profile_attributes: [
         :birth_date,
         :marital_status
@@ -112,5 +111,4 @@ class Users::RegistrationsController < Devise::RegistrationsController
       ]
     ])
   end
-
 end

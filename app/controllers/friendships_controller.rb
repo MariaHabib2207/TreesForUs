@@ -69,7 +69,7 @@ class FriendshipsController < ApplicationController
       :status, :login_enabled,
       :role,
       :email, :password, :password_confirmation,
-      user_profile_attributes: [:birth_date, :gender, :phone, :occupation, :address, :avatar]
+      user_profile_attributes: [ :birth_date, :gender, :phone, :occupation, :address, :avatar ]
     )
   end
 end

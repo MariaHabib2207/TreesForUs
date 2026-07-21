@@ -46,7 +46,7 @@ class UserProfile < ApplicationRecord
   }
 
   def self.marital_status_options
-    marital_statuses.keys.map { |status| [status.humanize, status] }
+    marital_statuses.keys.map { |status| [ status.humanize, status ] }
   end
 
   def self.ransackable_attributes(auth_object = nil)

@@ -12,6 +12,6 @@ class CreateUsers < ActiveRecord::Migration[8.0]
       t.integer :updated_by
     end
 
-    add_index :users, [:identification_type, :identification_number], unique: true, name: "index_users_on_id_type_and_number"
+    add_index :users, [ :identification_type, :identification_number ], unique: true, name: "index_users_on_id_type_and_number"
   end
 end
