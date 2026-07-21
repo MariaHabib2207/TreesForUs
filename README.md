@@ -31,6 +31,18 @@ https://docs.google.com/document/d/1FRlTcXSPeLLuZU8SQGo2VLqj871elEDubcBH2bjOLlk/
 
 <img width="1449" height="740" alt="Family Tree" src="https://github.com/user-attachments/assets/79afba43-18ef-4103-be9b-fee5f8c9b30e" />
 
+### Messaging
+
+<img width="848" height="921" alt="Screenshot 2026-07-21 at 8 18 14 AM" src="https://github.com/user-attachments/assets/afe1ef0c-1c7d-47aa-8bbd-25f2ec6aba01" />
+
+### Calls 
+
+<img width="823" height="876" alt="Screenshot 2026-07-21 at 8 18 34 AM" src="https://github.com/user-attachments/assets/2dc8ff8b-f6e2-4b66-ab18-e332665d5ecf" />
+
+### Gameroom 
+
+<img width="717" height="504" alt="Screenshot 2026-07-21 at 8 21 35 AM" src="https://github.com/user-attachments/assets/f7ce6a93-fb61-45d2-badc-29504d139125" />
+
 ---
 
 # 📚 Table of Contents
