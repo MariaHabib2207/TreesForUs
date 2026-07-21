@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_19_044118) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_19_233907) do
   create_table "active_admin_comments", force: :cascade do |t|
     t.string "namespace"
     t.text "body"
@@ -188,6 +188,21 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_19_044118) do
     t.index ["friend_id"], name: "index_friendships_on_friend_id"
     t.index ["user_id", "friend_id"], name: "index_friendships_on_user_id_and_friend_id", unique: true
     t.index ["user_id"], name: "index_friendships_on_user_id"
+  end
+
+  create_table "game_sessions", force: :cascade do |t|
+    t.integer "player_x_id", null: false
+    t.integer "player_o_id", null: false
+    t.string "status", default: "pending", null: false
+    t.string "board", default: "---------", null: false
+    t.string "turn", default: "x", null: false
+    t.integer "winner_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["player_o_id"], name: "index_game_sessions_on_player_o_id"
+    t.index ["player_x_id"], name: "index_game_sessions_on_player_x_id"
+    t.index ["status"], name: "index_game_sessions_on_status"
+    t.index ["winner_id"], name: "index_game_sessions_on_winner_id"
   end
 
   create_table "life_activities", force: :cascade do |t|
@@ -383,6 +398,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_19_044118) do
     t.string "last_seen_visibility", default: "everyone", null: false
     t.string "online_visibility", default: "everyone", null: false
     t.string "avatar_visibility", default: "everyone", null: false
+    t.string "profile_visibility", default: "public", null: false
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
     t.index ["identification_type", "identification_number"], name: "index_users_on_id_type_and_number", unique: true
     t.index ["parent_id"], name: "index_users_on_parent_id"
@@ -416,6 +432,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_19_044118) do
   add_foreign_key "family_memberships", "users"
   add_foreign_key "friendships", "users"
   add_foreign_key "friendships", "users", column: "friend_id"
+  add_foreign_key "game_sessions", "users", column: "player_o_id"
+  add_foreign_key "game_sessions", "users", column: "player_x_id"
+  add_foreign_key "game_sessions", "users", column: "winner_id"
   add_foreign_key "life_activities", "users"
   add_foreign_key "message_deletions", "messages"
   add_foreign_key "message_deletions", "users"

@@ -39,6 +39,31 @@ nav class="bg-white shadow-md px-5 py-4"
             i class="ti ti-messages" style="font-size: 16px;"
           span class="ml-1" Messages
 
+      / GAMEROOM BUTTON (desktop)
+      div class="relative" id="gameroom_wrapper_desktop"
+        button type="button" id="gameroom-btn-desktop" class="text-sm font-medium text-white primary-btn hover:bg-green-700 px-4 py-2 rounded-lg transition flex items-center gap-1"
+          i class="ti ti-device-gamepad-2" style="font-size: 16px;"
+          | Gameroom
+
+        div id="gameroom-backdrop-desktop" class="fixed inset-0 bg-black/40 z-40 sm:hidden" style="display:none;"
+
+        div id="gameroom-panel-desktop" class="fixed inset-0 z-50 items-center justify-center p-4 sm:absolute sm:inset-auto sm:right-0 sm:left-auto sm:top-full sm:bottom-auto sm:mt-2 sm:p-0" style="display:none;"
+          div class="w-full max-w-sm sm:w-80 max-h-[80vh] sm:max-h-96 bg-white rounded-lg shadow-xl border border-gray-100 flex flex-col overflow-hidden mx-auto"
+            div class="flex items-center justify-between px-4 py-3 border-b border-gray-100 shrink-0"
+              span class="font-semibold text-gray-800 text-sm" Gameroom
+              div class="flex items-center gap-3"
+                = link_to "View all", game_sessions_path, class: "text-xs text-green-700 hover:underline"
+                button type="button" id="gameroom-close-btn-desktop" class="text-gray-400 hover:text-gray-600 p-1 -mr-1"
+                  svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"
+
+            div class="px-4 py-3 border-b border-gray-100 shrink-0"
+              input type="text" id="gameroom-search-input-desktop" placeholder="Search people to invite..." class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-green-700" autocomplete="off"
+
+            div id="gameroom-search-results-desktop" class="overflow-y-auto flex-1 px-2 py-2"
+              div class="px-2 py-6 text-center text-sm text-gray-400"
+                | Search for someone to invite
+
       - unless current_page?(privacy_settings_path)
         = link_to privacy_settings_path, title: "Settings", class: "p-2 rounded-full text-green-900 hover:bg-gray-100 transition" do
           svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -103,6 +128,31 @@ nav class="bg-white shadow-md px-5 py-4"
             span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center leading-none font-bold"
               = unread_count > 9 ? "9+" : unread_count.to_s
         span class="ml-1" Messages
+
+    / GAMEROOM BUTTON (mobile)
+    div class="relative" id="gameroom_wrapper_mobile"
+      button type="button" id="gameroom-btn-mobile" class="w-full text-sm font-medium text-white primary-btn hover:bg-green-700 px-4 py-2 rounded-lg transition flex items-center justify-center gap-1"
+        i class="ti ti-device-gamepad-2" style="font-size: 16px;"
+        | Gameroom
+
+      div id="gameroom-backdrop-mobile" class="fixed inset-0 bg-black/40 z-40" style="display:none;"
+
+      div id="gameroom-panel-mobile" class="fixed inset-0 z-50 items-center justify-center p-4" style="display:none;"
+        div class="w-full max-w-sm max-h-[80vh] bg-white rounded-lg shadow-xl border border-gray-100 flex flex-col overflow-hidden mx-auto"
+          div class="flex items-center justify-between px-4 py-3 border-b border-gray-100 shrink-0"
+            span class="font-semibold text-gray-800 text-sm" Gameroom
+            div class="flex items-center gap-3"
+              = link_to "View all", game_sessions_path, class: "text-xs text-green-700 hover:underline"
+              button type="button" id="gameroom-close-btn-mobile" class="text-gray-400 hover:text-gray-600 p-1 -mr-1"
+                svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"
+
+          div class="px-4 py-3 border-b border-gray-100 shrink-0"
+            input type="text" id="gameroom-search-input-mobile" placeholder="Search people to invite..." class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-green-700" autocomplete="off"
+
+          div id="gameroom-search-results-mobile" class="overflow-y-auto flex-1 px-2 py-2"
+            div class="px-2 py-6 text-center text-sm text-gray-400"
+              | Search for someone to invite
 
     - unless current_page?(privacy_settings_path)
       = link_to privacy_settings_path, class: "text-sm font-medium text-white primary-btn hover:bg-green-700 px-4 py-2 rounded-lg transition flex items-center justify-center gap-1" do

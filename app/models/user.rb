@@ -4,6 +4,7 @@
 #
 #  id                       :integer          not null, primary key
 #  active_connections_count :integer          default(0), not null
+#  avatar_visibility        :string           default("everyone"), not null
 #  confirmation_sent_at     :datetime
 #  confirmed_at             :datetime
 #  created_by               :integer
@@ -20,10 +21,13 @@
 #  invitation_sent_at       :datetime
 #  invitation_token         :string
 #  last_name                :string           not null
+#  last_seen_visibility     :string           default("everyone"), not null
 #  last_sign_in_at          :datetime
 #  last_sign_in_ip          :string
 #  locked_at                :datetime
 #  login_enabled            :boolean          default(FALSE), not null
+#  online_visibility        :string           default("everyone"), not null
+#  profile_visibility       :string           default("public"), not null
 #  provider                 :string
 #  remember_created_at      :datetime
 #  remember_token           :string
@@ -39,9 +43,6 @@
 #  created_at               :datetime         not null
 #  updated_at               :datetime         not null
 #  parent_id                :integer
-#  last_seen_visibility     :string           default("everyone"), not null
-#  online_visibility        :string           default("everyone"), not null
-#  avatar_visibility        :string           default("everyone"), not null
 #
 # Indexes
 #
@@ -57,6 +58,7 @@ class User < ApplicationRecord
   acts_as_paranoid
 
   VISIBILITY_MODES = %w[everyone nobody custom].freeze
+  PROFILE_VISIBILITY_MODES = %w[public private].freeze
 
 # Add this instead:
   has_many :noticed_notifications, as: :recipient, dependent: :destroy, class_name: "Noticed::Notification"
@@ -88,6 +90,8 @@ class User < ApplicationRecord
   has_many :friendships, dependent: :destroy
   has_many :friends, through: :friendships
   has_many :life_activities, dependent: :destroy
+  has_many :game_sessions_as_x, class_name: "GameSession", foreign_key: :player_x_id
+  has_many :game_sessions_as_o, class_name: "GameSession", foreign_key: :player_o_id
   # -------------------------
   # PROFILE
   # -------------------------
@@ -185,6 +189,7 @@ class User < ApplicationRecord
   # ===================================================
   scope :with_login, -> { where(login_enabled: true) }
   scope :tree_only,  -> { where(login_enabled: false) }
+  scope :profile_public, -> { where(profile_visibility: "public") }
 
   # ===================================================
   # VIRTUAL ATTRIBUTES
@@ -205,6 +210,7 @@ class User < ApplicationRecord
             }
 
   validates :last_seen_visibility, :online_visibility, :avatar_visibility, inclusion: { in: VISIBILITY_MODES }
+  validates :profile_visibility, inclusion: { in: PROFILE_VISIBILITY_MODES }
 
   validate :cannot_have_more_than_two_families
   # validate :identification_number_format
@@ -362,6 +368,15 @@ end
   # -------------------------
   # PRIVACY / VISIBILITY
   # -------------------------
+
+  # Gates whether this user appears in dashboard search results at all
+  # (see UserSearchController). Distinct from last_seen/online/avatar
+  # visibility, which only apply once someone has already found the user
+  # (e.g. via the family tree or an existing chat).
+  def profile_public?
+    profile_visibility == "public"
+  end
+
   def family_members
     family_ids = FamilyMembership.where(user_id: id).pluck(:family_id)
     member_ids = FamilyMembership.where(family_id: family_ids).where.not(user_id: id).pluck(:user_id)
@@ -431,6 +446,11 @@ def accept_invitation!(email:, password:, password_confirmation:, family_code: n
 rescue ActiveRecord::RecordInvalid => e
   errors.add(:base, e.message)
   false
+end
+
+def active_game_sessions
+  GameSession.where(status: ["pending", "active"])
+             .where("player_x_id = :id OR player_o_id = :id", id: id)
 end
 
 private

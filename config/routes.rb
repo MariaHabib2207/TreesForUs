@@ -30,6 +30,7 @@ Rails.application.routes.draw do
 
   get   "identification", to: "identification#edit",   as: :edit_identification
   patch "identification", to: "identification#update", as: :update_identification
+ get "search/users", to: "user_search#index"
 
   resources :relationships, only: [:create, :destroy, :new]
 
@@ -72,6 +73,18 @@ Rails.application.routes.draw do
 
   get   "settings/privacy", to: "settings#privacy",        as: :privacy_settings
   patch "settings/privacy", to: "settings#update_privacy", as: :update_privacy_settings
+
+ resources :game_sessions, only: [:index, :create, :show, :destroy] do
+  member do
+    post :accept
+    post :decline
+    post :move
+  end
+end
+
+get "search/gameroom_users", to: "user_search#gameroom_index"
+
+get "search/gameroom_users", to: "user_search#gameroom_index"
 
   authenticated :user do
     root to: "dashboard#index", as: :authenticated_root

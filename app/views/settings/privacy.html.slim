@@ -1,28 +1,53 @@
-div class="max-w-xl mx-auto py-8 px-4"
-  h1 class="text-xl font-semibold mb-6" Privacy settings
+div class="min-h-[calc(100vh-80px)] bg-[#efeae2] py-8 px-4"
+  div class="max-w-xl mx-auto"
 
-  = form_with url: update_privacy_settings_path, method: :patch, local: true, html: { id: "privacy-settings-form" } do |f|
-    - [["last_seen", "Last seen"], ["online", "Online status"], ["avatar", "Profile photo"]].each do |key, label|
-      div class="mb-6 border-b border-gray-200 pb-6"
-        h2 class="text-sm font-semibold text-gray-800 mb-2" = label
-        - current_mode = current_user.public_send("#{key}_visibility")
-        - ["everyone", "nobody", "custom"].each do |mode|
-          label class="flex items-center gap-2 text-sm text-gray-700 mb-1"
-            input type="radio" name="visibility[#{key}]" value=mode checked=(current_mode == mode) class="visibility-mode-radio" data-setting-key=key
-            = mode.capitalize
+    div class="flex items-center gap-3 mb-6"
+      = link_to authenticated_root_path, class: "shrink-0 p-2 rounded-full bg-white shadow-sm hover:bg-gray-50 transition-colors text-[#1D4D3A]"
+        svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"
+      div
+        h1 class="text-xl font-semibold text-gray-900" Privacy settings
+        p class="text-sm text-gray-500" Control who can see your activity
 
-        div class="mt-2 pl-6 #{'hidden' unless current_mode == 'custom'}" data-custom-panel=key
-          - allowed_ids = current_user.allowed_viewer_ids_for(key)
-          - members = current_user.family_members
-          - if members.blank?
-            p class="text-xs text-gray-400" No other family members yet.
-          - else
-            - members.each do |member|
-              label class="flex items-center gap-2 text-xs text-gray-600 mb-1"
-                input type="checkbox" name="custom_viewers[#{key}][]" value=member.id checked=allowed_ids.include?(member.id)
-                = member.full_name
+    div class="bg-white rounded-2xl shadow-xl overflow-hidden"
+      = form_with url: update_privacy_settings_path, method: :patch, local: true, html: { id: "privacy-settings-form" } do |f|
 
-    button type="submit" class="px-4 py-2 rounded-full bg-[#1D4D3A] text-white text-sm font-medium hover:bg-[#183f2f]" Save settings
+        div class="px-5 py-5 border-b border-gray-100"
+          h2 class="text-sm font-semibold text-gray-900" Profile visibility
+          p class="text-xs text-gray-500 mt-0.5 mb-3" Only public profiles appear in search results
+
+          div class="flex flex-col gap-2"
+            - [["public", "Public — anyone can find me in search"], ["private", "Private — hidden from search"]].each do |mode, mode_label|
+              label class="flex items-center gap-2.5 px-3 py-2 rounded-xl border border-gray-200 has-[:checked]:border-[#1D4D3A] has-[:checked]:bg-[#1D4D3A]/5 cursor-pointer transition-colors"
+                input type="radio" name="profile_visibility" value=mode checked=(current_user.profile_visibility == mode) class="accent-[#1D4D3A] w-4 h-4"
+                span class="text-sm text-gray-700" = mode_label
+
+        - [["last_seen", "Last seen", "Show others when you were last active"], ["online", "Online status", "Show others when you're currently active"], ["avatar", "Profile photo", "Show others your profile picture"]].each do |key, label, description|
+          div class="px-5 py-5 border-b border-gray-100"
+            h2 class="text-sm font-semibold text-gray-900" = label
+            p class="text-xs text-gray-500 mt-0.5 mb-3" = description
+
+            - current_mode = current_user.public_send("#{key}_visibility")
+            div class="flex flex-col gap-2"
+              - [["everyone", "Everyone"], ["nobody", "Nobody"], ["custom", "Select family members"]].each do |mode, mode_label|
+                label class="flex items-center gap-2.5 px-3 py-2 rounded-xl border border-gray-200 has-[:checked]:border-[#1D4D3A] has-[:checked]:bg-[#1D4D3A]/5 cursor-pointer transition-colors"
+                  input type="radio" name="visibility[#{key}]" value=mode checked=(current_mode == mode) class="visibility-mode-radio accent-[#1D4D3A] w-4 h-4" data-setting-key=key
+                  span class="text-sm text-gray-700" = mode_label
+
+            div class="mt-3 ml-1 pl-3 border-l-2 border-[#1D4D3A]/20 #{'hidden' unless current_mode == 'custom'}" data-custom-panel=key
+              - allowed_ids = current_user.allowed_viewer_ids_for(key)
+              - members = current_user.family_members
+              - if members.blank?
+                p class="text-xs text-gray-400 py-1" No other family members yet.
+              - else
+                div class="flex flex-col gap-1 max-h-48 overflow-y-auto pr-1"
+                  - members.each do |member|
+                    label class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                      input type="checkbox" name="custom_viewers[#{key}][]" value=member.id checked=allowed_ids.include?(member.id) class="accent-[#1D4D3A] w-3.5 h-3.5"
+                      span class="text-xs text-gray-600" = member.full_name
+
+        div class="px-5 py-4 bg-gray-50 flex justify-end"
+          button type="submit" class="px-5 py-2 rounded-full bg-[#1D4D3A] text-white text-sm font-medium hover:bg-[#183f2f] active:bg-[#132f24] shadow-sm transition-colors" Save settings
 
 javascript:
   (function() {

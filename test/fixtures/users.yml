@@ -10,6 +10,7 @@
 #
 #  id                       :integer          not null, primary key
 #  active_connections_count :integer          default(0), not null
+#  avatar_visibility        :string           default("everyone"), not null
 #  confirmation_sent_at     :datetime
 #  confirmed_at             :datetime
 #  created_by               :integer
@@ -26,10 +27,13 @@
 #  invitation_sent_at       :datetime
 #  invitation_token         :string
 #  last_name                :string           not null
+#  last_seen_visibility     :string           default("everyone"), not null
 #  last_sign_in_at          :datetime
 #  last_sign_in_ip          :string
 #  locked_at                :datetime
 #  login_enabled            :boolean          default(FALSE), not null
+#  online_visibility        :string           default("everyone"), not null
+#  profile_visibility       :string           default("public"), not null
 #  provider                 :string
 #  remember_created_at      :datetime
 #  remember_token           :string

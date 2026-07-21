@@ -1,6 +1,7 @@
 // app/javascript/application.js
 
 import "./chat/chatroom"; // chatroom-page-specific init (self-contained, see above)
+import "./chat/tic_tac_toe";
 
 import { initCallControls, teardownCall, currentCallState } from "./chat/call_session";
 import { initIncomingCall } from "./chat/incoming_call";
@@ -35,3 +36,10 @@ document.addEventListener("DOMContentLoaded", () => {
   initGlobalCallUI();
   initGlobalPresenceUI();
 });
+
+import { initAllGameroomPanels, initGameChannel } from "./chat/gameroom";
+
+document.addEventListener("turbo:load", initAllGameroomPanels);
+document.addEventListener("DOMContentLoaded", initAllGameroomPanels);
+document.addEventListener("turbo:load", initGameChannel);
+document.addEventListener("DOMContentLoaded", initGameChannel);

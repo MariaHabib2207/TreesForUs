@@ -3,15 +3,18 @@
 - is_chat_accepted = notification.event.type == "ChatInviteAcceptedNotifier"
 - is_family_notification = notification.event.type == "NewFamilyMemberNotifier"
 - is_missed_call = notification.event.type == "MissedCallNotifier"
+- is_game_invite = notification.event.type == "GameInviteNotifier"
 - is_invite = (is_chat_invite || is_chatroom_invite) && !notification.read_at?
+- is_respondable = is_invite || (is_game_invite && !notification.read_at?)
 
 - display_message = notification.event.params[:message].presence || (notification.event.respond_to?(:message) ? notification.event.message : nil)
 - url = notification.event.params[:url].presence || (notification.event.respond_to?(:url) ? notification.event.url : nil)
 - chatroom_id = notification.event.params[:chatroom_id] || notification.event.params[:chatroom]&.id
 - inviter_id = notification.event.params[:inviter_id] if is_invite
+- game_session = notification.event.params[:game_session] if is_game_invite
 
-div class="px-4 py-3 hover:bg-gray-50 border-b border-gray-50 #{'bg-green-50' unless notification.read_at?}" data-modal-target=("respond-modal-#{notification.id}" if is_invite)
-  div class="flex items-start justify-between gap-2 #{'cursor-pointer sm:cursor-default' if is_invite}"
+div class="px-4 py-3 hover:bg-gray-50 border-b border-gray-50 #{'bg-green-50' unless notification.read_at?}" data-modal-target=("respond-modal-#{notification.id}" if is_respondable)
+  div class="flex items-start justify-between gap-2 #{'cursor-pointer sm:cursor-default' if is_respondable}"
     - if is_chat_accepted && chatroom_id.present?
       a href=chatroom_path(chatroom_id) class="flex-1 min-w-0 flex items-start gap-2"
         p class="text-sm text-gray-800 leading-snug break-words"
@@ -23,6 +26,15 @@ div class="px-4 py-3 hover:bg-gray-50 border-b border-gray-50 #{'bg-green-50' un
         div class="shrink-0 mt-0.5 w-6 h-6 rounded-full bg-red-50 flex items-center justify-center"
           svg class="w-3.5 h-3.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"
             path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 3h4l2 7-2.5 1.5a11 11 0 006 6L13 15l7 2v4a2 2 0 01-2 2A16 16 0 012 5a2 2 0 012-2z"
+        div class="min-w-0"
+          p class="text-sm text-gray-800 leading-snug break-words"
+            = display_message
+          p class="text-xs text-gray-400 mt-0.5"
+            = notification.created_at.strftime("%b %d, %H:%M")
+    - elsif is_game_invite
+      div class="flex-1 min-w-0 flex items-start gap-2"
+        div class="shrink-0 mt-0.5 w-6 h-6 rounded-full bg-green-50 flex items-center justify-center"
+          span class="text-sm" 🎮
         div class="min-w-0"
           p class="text-sm text-gray-800 leading-snug break-words"
             = display_message
@@ -65,6 +77,13 @@ div class="px-4 py-3 hover:bg-gray-50 border-b border-gray-50 #{'bg-green-50' un
         = button_to reject_chatroom_invite_notifications_path(notification_id: notification.id, inviter_id: inviter_id, chatroom_id: chatroom_id), method: :post, class: "flex-1 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 px-3 py-2 rounded-lg transition text-center", form: { data: { turbo: false } } do
           | ✗ Decline
 
+  - if is_game_invite && !notification.read_at?
+    div class="hidden sm:flex gap-2 mt-2"
+      = button_to accept_game_session_path(game_session), method: :post, class: "flex-1 text-xs font-semibold text-white bg-green-600 hover:bg-green-700 px-3 py-2 rounded-lg transition text-center js-game-accept", form: { data: { turbo: false } } do
+        | ✓ Accept
+      = button_to decline_game_session_path(game_session), method: :post, class: "flex-1 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 px-3 py-2 rounded-lg transition text-center js-game-decline", form: { data: { turbo: false } } do
+        | ✗ Decline
+
   - if is_invite
     div id="respond-modal-#{notification.id}" class="fixed inset-0 z-50 items-center justify-center bg-black/40 p-4" style="display:none;"
       div class="w-full max-w-xs bg-white rounded-lg shadow-xl overflow-hidden"
@@ -88,3 +107,20 @@ div class="px-4 py-3 hover:bg-gray-50 border-b border-gray-50 #{'bg-green-50' un
                 | ✓ Accept
               = button_to reject_chatroom_invite_notifications_path(notification_id: notification.id, inviter_id: inviter_id, chatroom_id: chatroom_id), method: :post, class: "flex-1 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 px-3 py-2 rounded-lg transition text-center", form: { data: { turbo: false } } do
                 | ✗ Decline
+
+  - if is_game_invite && !notification.read_at?
+    div id="respond-modal-#{notification.id}" class="fixed inset-0 z-50 items-center justify-center bg-black/40 p-4" style="display:none;"
+      div class="w-full max-w-xs bg-white rounded-lg shadow-xl overflow-hidden"
+        div class="flex items-center justify-between px-4 py-3 border-b border-gray-100"
+          span class="font-semibold text-gray-800 text-sm" Game invite
+          button type="button" data-close-respond-modal="respond-modal-#{notification.id}" class="text-gray-400 hover:text-gray-600 p-1 -mr-1"
+            svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"
+        div class="px-4 py-3"
+          p class="text-sm text-gray-700 leading-snug break-words mb-3"
+            = display_message
+          div class="flex gap-2"
+            = button_to accept_game_session_path(game_session), method: :post, class: "flex-1 text-xs font-semibold text-white bg-green-600 hover:bg-green-700 px-3 py-2 rounded-lg transition text-center js-game-accept", form: { data: { turbo: false } } do
+              | ✓ Accept
+            = button_to decline_game_session_path(game_session), method: :post, class: "flex-1 text-xs font-semibold text-white bg-red-500 hover:bg-red-600 px-3 py-2 rounded-lg transition text-center js-game-decline", form: { data: { turbo: false } } do
+              | ✗ Decline

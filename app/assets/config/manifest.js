@@ -1,6 +1,7 @@
 //= link_tree ../images
 //= link application.css
 //= link life_activities.css
+//= link gameroom.scss
 //= link chatroom.scss
 //= link family_tree.scss
 //= link application.js
@@ -24,3 +25,7 @@
 //= link chat/message_deletion.js
 //= link chat/read_receipts.js
 //= link chat/privacy.js
+//= link dashboard/user_search.js
+//= link chat/gameroom.js
+//= link gameroom.css
+//= link chat/tic_tac_toe.js

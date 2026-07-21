@@ -1,0 +1,22 @@
+
+- symbol = @game_session.player_for(current_user)
+- opponent = @game_session.opponent_for(current_user)
+
+.tic-tac-toe-wrap class="max-w-md mx-auto mt-10 text-center" data-game-id=@game_session.id data-symbol=symbol data-user-id=current_user.id data-opponent-name=opponent.full_name
+  - if @game_session.status == "pending"
+    p class="text-green-900" Waiting for #{opponent.full_name} to accept the invite...
+  - else
+    h2 class="text-lg font-semibold text-green-900 mb-6" id="ttt-status"
+      - if @game_session.status == "active"
+        = @game_session.my_turn?(current_user) ? "Your turn" : "#{opponent.full_name}'s turn"
+      - elsif @game_session.status == "finished" && @game_session.winner
+        = @game_session.winner_id == current_user.id ? "You won! 🎉" : "You lost"
+      - elsif @game_session.status == "finished"
+        | It's a draw
+      - else
+        = @game_session.status.capitalize
+
+    .tic-tac-toe-board id="ttt-board" class="grid grid-cols-3 gap-2 w-72 mx-auto #{'pointer-events-none opacity-70' unless @game_session.my_turn?(current_user)}"
+      - @game_session.board_array.each_with_index do |cell, i|
+        button.ttt-cell type="button" data-index=i disabled=(cell != "-" || !@game_session.my_turn?(current_user)) class="aspect-square bg-white border-2 border-green-900 rounded-lg text-4xl font-bold text-green-900 hover:bg-green-50 disabled:opacity-60 disabled:cursor-not-allowed transition flex items-center justify-center"
+          = cell == "-" ? "" : cell
