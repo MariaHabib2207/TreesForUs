@@ -1,8 +1,4 @@
 // app/javascript/chat/gameroom.js
-// Gameroom panel: search-to-invite UI (mirrors _notification_bell.html.slim's
-// open/close pattern via inline style.display, not Tailwind class toggling),
-// plus the global GameChannel subscription for game_started / game_declined
-// signals. Initialized once per full page load; safe to call multiple times.
 
 import { csrfToken } from "./dom_utils";
 import { createConsumer } from "@rails/actioncable";
@@ -69,33 +65,34 @@ function initGameroomSearch(input, results) {
   input.dataset.searchInit = "true";
 
   let debounceTimer = null;
-function renderResults(users) {
-  if (users.length === 0) {
-    results.innerHTML = '<div class="px-2 py-6 text-center text-sm text-gray-400">No users found.</div>';
-    return;
+
+  function renderResults(users) {
+    if (users.length === 0) {
+      results.innerHTML = '<div class="px-2 py-6 text-center text-sm text-gray-400">No users found.</div>';
+      return;
+    }
+
+    results.innerHTML = users
+      .map((user) => {
+        const avatarHtml = user.avatar_url
+          ? `<img src="${escapeHtml(user.avatar_url)}" class="w-8 h-8 rounded-full object-cover" />`
+          : `<div class="w-8 h-8 rounded-full bg-green-800 text-white text-xs flex items-center justify-center font-semibold">${escapeHtml(user.initials || "")}</div>`;
+
+        const actionHtml = user.existing_game_session_id
+          ? `<a href="/game_sessions/${user.existing_game_session_id}" class="text-xs font-medium text-green-800 bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-lg transition">Go to Game</a>`
+          : `<button type="button" class="js-gameroom-invite-btn text-xs font-medium text-white bg-green-800 hover:bg-green-700 px-3 py-1.5 rounded-lg transition" data-user-id="${user.id}">Invite</button>`;
+
+        return `
+          <div class="flex items-center justify-between gap-2 px-2 py-2 rounded-lg hover:bg-gray-50">
+            <div class="flex items-center gap-2 min-w-0">
+              ${avatarHtml}
+              <span class="text-sm text-gray-800 truncate">${escapeHtml(user.name)}</span>
+            </div>
+            ${actionHtml}
+          </div>`;
+      })
+      .join("");
   }
-
-  results.innerHTML = users
-    .map((user) => {
-      const avatarHtml = user.avatar_url
-        ? `<img src="${escapeHtml(user.avatar_url)}" class="w-8 h-8 rounded-full object-cover" />`
-        : `<div class="w-8 h-8 rounded-full bg-green-800 text-white text-xs flex items-center justify-center font-semibold">${escapeHtml(user.initials || "")}</div>`;
-
-      const actionHtml = user.existing_game_session_id
-        ? `<a href="/game_sessions/${user.existing_game_session_id}" class="text-xs font-medium text-green-800 bg-green-50 hover:bg-green-100 px-3 py-1.5 rounded-lg transition">Go to Game</a>`
-        : `<button type="button" class="js-gameroom-invite-btn text-xs font-medium text-white bg-green-800 hover:bg-green-700 px-3 py-1.5 rounded-lg transition" data-user-id="${user.id}">Invite</button>`;
-
-      return `
-        <div class="flex items-center justify-between gap-2 px-2 py-2 rounded-lg hover:bg-gray-50">
-          <div class="flex items-center gap-2 min-w-0">
-            ${avatarHtml}
-            <span class="text-sm text-gray-800 truncate">${escapeHtml(user.name)}</span>
-          </div>
-          ${actionHtml}
-        </div>`;
-    })
-    .join("");
-}
 
   function performSearch(query) {
     fetch("/search/gameroom_users?q=" + encodeURIComponent(query), { headers: { Accept: "application/json" } })
@@ -144,8 +141,6 @@ export function initAllGameroomPanels() {
   });
 }
 
-// Global GameChannel subscription — same "subscribe once per user, not per
-// page" pattern as CallChannel in call_session.js.
 export function initGameChannel() {
   const currentUserId = document.body.dataset.currentUserId;
   if (!currentUserId) return;

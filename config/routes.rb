@@ -79,6 +79,7 @@ Rails.application.routes.draw do
     post :accept
     post :decline
     post :move
+    post :cancel
   end
 end
 

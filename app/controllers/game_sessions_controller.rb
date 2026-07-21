@@ -1,6 +1,6 @@
 class GameSessionsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_game_session, only: [:show, :accept, :decline, :move, :destroy]
+  before_action :set_game_session, only: [:show, :accept, :decline, :cancel, :move, :destroy]
 
   def index
     @game_sessions = GameSession.for_user(current_user).order(updated_at: :desc)
@@ -27,6 +27,7 @@ class GameSessionsController < ApplicationController
 
     @game_session.update!(status: "active")
     GameChannel.broadcast_to(@game_session, { type: "game_started", game_session_id: @game_session.id })
+    GameChannel.broadcast_to(@game_session.player_x, { type: "game_started", game_session_id: @game_session.id })
 
     respond_to do |format|
       format.html { redirect_to game_session_path(@game_session) }
@@ -43,6 +44,16 @@ class GameSessionsController < ApplicationController
     respond_to do |format|
       format.html { redirect_to notifications_path }
       format.json { render json: { status: "declined" } }
+    end
+  end
+
+  def cancel
+    return head :forbidden unless @game_session.cancellable_by?(current_user)
+
+    @game_session.destroy!
+    respond_to do |format|
+      format.html { redirect_to game_sessions_path, notice: "Invite cancelled." }
+      format.json { render json: { status: "cancelled" } }
     end
   end
 

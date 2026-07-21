@@ -7,6 +7,7 @@
     .flex.flex-col.gap-3
       - @game_sessions.each do |game|
         - opponent = game.opponent_for(current_user)
+        - can_cancel = game.cancellable_by?(current_user)
         div class="flex items-center justify-between gap-3 bg-white border border-gray-100 rounded-lg px-4 py-3 shadow-sm"
           a href=game_session_path(game) class="flex items-center gap-3 min-w-0 flex-1"
             div class="w-10 h-10 rounded-full bg-green-800 text-white flex items-center justify-center font-semibold text-sm shrink-0"
@@ -17,7 +18,7 @@
               p class="text-xs text-gray-400"
                 - case game.status
                 - when "pending"
-                  | Pending
+                  = can_cancel ? "Pending" : "Awaiting your response"
                 - when "active"
                   = game.my_turn?(current_user) ? "Your turn" : "#{opponent.full_name}'s turn"
                 - when "finished"
@@ -30,6 +31,11 @@
                 - else
                   = game.status.capitalize
 
-          = button_to game_session_path(game), method: :delete, class: "text-gray-300 hover:text-red-500 transition shrink-0 bg-transparent border-none p-1.5 cursor-pointer", form: { data: { turbo_confirm: "Delete this game room?" } } do
-            svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-              path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"
+          - if can_cancel
+            = button_to cancel_game_session_path(game), method: :post, class: "text-gray-300 hover:text-red-500 transition shrink-0 bg-transparent border-none p-1.5 cursor-pointer", form: { data: { turbo_confirm: "Cancel this invite?" } } do
+              svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"
+          - else
+            = button_to game_session_path(game), method: :delete, class: "text-gray-300 hover:text-red-500 transition shrink-0 bg-transparent border-none p-1.5 cursor-pointer", form: { data: { turbo_confirm: "Delete this game room?" } } do
+              svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"

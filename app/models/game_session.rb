@@ -67,6 +67,10 @@ class GameSession < ApplicationRecord
     save!
   end
 
+def cancellable_by?(user)
+  status == "pending" && player_x_id == user.id
+end
+
   def winning_line?
     WIN_LINES.any? do |line|
       values = line.map { |i| board[i] }

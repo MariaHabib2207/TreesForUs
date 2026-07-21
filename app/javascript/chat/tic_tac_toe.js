@@ -1,6 +1,11 @@
 // app/javascript/chat/tic_tac_toe.js
 // Tic-Tac-Toe board page: click-to-move + live board sync via GameChannel,
 // scoped to this specific game session.
+//
+// NOTE: redirecting the inviter into the game once it goes active is handled
+// globally in gameroom.js's initGameChannel() (subscribed on every page, not
+// just this one) — so this file only needs to react to move updates, not
+// game_started, to avoid two separate handlers racing on the same event.
 
 import { createConsumer } from "@rails/actioncable";
 import { csrfToken } from "./dom_utils";
@@ -38,11 +43,6 @@ function init() {
     { channel: "GameChannel", game_session_id: gameId },
     {
       received(data) {
-        if (data.type === "game_started") {
-          window.location.reload();
-          return;
-        }
-
         if (data.type !== "move_made") return;
 
         const isMyTurn = data.status === "active" && data.turn === mySymbol;

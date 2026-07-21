@@ -1,10 +1,12 @@
-
 - symbol = @game_session.player_for(current_user)
 - opponent = @game_session.opponent_for(current_user)
 
 .tic-tac-toe-wrap class="max-w-md mx-auto mt-10 text-center" data-game-id=@game_session.id data-symbol=symbol data-user-id=current_user.id data-opponent-name=opponent.full_name
   - if @game_session.status == "pending"
-    p class="text-green-900" Waiting for #{opponent.full_name} to accept the invite...
+    p class="text-green-900 mb-4" Waiting for #{opponent.full_name} to accept the invite...
+
+    - if @game_session.cancellable_by?(current_user)
+      = button_to "Cancel Invite", cancel_game_session_path(@game_session), method: :post, class: "text-sm font-medium text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition", form: { data: { turbo_confirm: "Cancel this invite?", turbo: false } }
   - else
     h2 class="text-lg font-semibold text-green-900 mb-6" id="ttt-status"
       - if @game_session.status == "active"
