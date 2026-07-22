@@ -29,3 +29,4 @@
 //= link chat/gameroom.js
 //= link gameroom.css
 //= link chat/tic_tac_toe.js
+//= link chat/presence.js
